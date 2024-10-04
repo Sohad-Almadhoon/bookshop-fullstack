@@ -8,7 +8,11 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   return (
-    <button type={type} disabled={disabled} {...props} className="">
+    <button
+      type={type}
+      disabled={disabled}
+      {...props}
+      className="bg-black w-full text-white uppercase px-8 py-3">
       {children}
     </button>
   );
