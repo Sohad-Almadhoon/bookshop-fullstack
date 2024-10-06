@@ -3,7 +3,7 @@ import Heading from "./Heading";
 
 const Header = () => {
   return (
-    <div className="flex items-center border border-black py-1 px-12 mx-4 mt-1">
+    <div className="flex items-center  border-black border-b py-1 px-12">
       <span className="flex-1">
         <img src="/assets/logo-dark.svg" alt="logo"  className="w-14"/>
       </span>

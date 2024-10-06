@@ -6,6 +6,7 @@ import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import {BrowserRouter } from 'react-router-dom';
 import Register from "./pages/Register";
+import Conversation from "./pages/Conversation";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
@@ -14,6 +15,7 @@ root.render(
     {/* <Profile />
      */}
     {/* <Login /> */}
-    <Register/>
+    {/* <Register/> */}
+    <Conversation/>
   </BrowserRouter>
 );
