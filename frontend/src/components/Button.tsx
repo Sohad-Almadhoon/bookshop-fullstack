@@ -1,4 +1,4 @@
-import React from "react";
+import { twMerge } from "tailwind-merge";
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
 const Button: React.FC<ButtonProps> = ({
   className,
@@ -12,7 +12,10 @@ const Button: React.FC<ButtonProps> = ({
       type={type}
       disabled={disabled}
       {...props}
-      className="bg-black w-full text-white uppercase px-8 py-3">
+      className={twMerge(
+        `bg-black w-full text-white uppercase px-8 py-3 rounded-md`,
+        className
+      )}>
       {children}
     </button>
   );

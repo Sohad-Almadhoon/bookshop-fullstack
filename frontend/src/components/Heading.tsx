@@ -1,12 +1,16 @@
 import React from "react";
+import { twMerge } from "tailwind-merge";
 interface HeadingProps {
   size: "sm" | "lg";
-  className: string;
+  className?: string;
 }
-const Heading: React.FC<HeadingProps> = ({ size , className}) => {
+const Heading: React.FC<HeadingProps> = ({ size, className }) => {
   return (
-    <div className="">
-      <span>the</span>home <span>of</span>collaborative writing
+    <div
+      className={twMerge("flex uppercase justify-start text-3xl", className)}>
+      <sub className="text-xl mr-2 mt-1 font-light">the</sub>home{" "}
+      <sub className="text-xl mx-2 mt-1 font-light">of</sub>collaborative
+      writing
     </div>
   );
 };

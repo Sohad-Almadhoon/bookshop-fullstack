@@ -1,4 +1,18 @@
-/* index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* @import url('https://fonts.googleapis.com/css2?family=Baskervville:ital@0;1&display=swap'); */
+
+
+:root {
+  --primary-color: #000;
+  --secondary-color: #dfd4bf;
+}
+
+ul {
+  list-style: none;
+}
+a {
+  text-decoration: none;
+}

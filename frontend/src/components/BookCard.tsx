@@ -2,7 +2,7 @@ import React from "react";
 
 const BookCard = () => {
   return (
-    <div className="border rounded-md p-8">
+    <div className="border rounded-md p-5">
       <div className="relative">
         <img src="/assets/book-1.png" alt="" />
         <div className="absolute bottom-0 left-0">
