@@ -1,7 +1,8 @@
 import React, { ReactNode } from "react";
-import Button from "./Button";
-import SocialMedia from "./SocialMedia";
+
 import { Link } from "react-router-dom";
+import Button from "../shared/Button";
+import SocialMedia from "./SocialMedia";
 
 interface SignFormProps {
   title: string;
@@ -19,8 +20,8 @@ const SignForm: React.FC<SignFormProps> = ({
   const isLogin = type === "login";
   const buttonText = isLogin ? "LOGIN" : "register";
   const linkText = isLogin
-    ? "Don't have an account? Sign Up"
-    : "Already have an account? Sign In";
+    ? "Don't have an account?"
+    : "Already have an account?";
 
   return (
     <div className="text-center flex flex-col border border-black flex-1">

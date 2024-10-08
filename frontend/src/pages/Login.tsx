@@ -1,6 +1,7 @@
-import CustomInput from "../components/CustomInput";
-import SignLayout from "../components/SignLayout";
-import SignForm from "../components/SignForm";
+import { Link } from "react-router-dom";
+import CustomInput from "../components/shared/CustomInput";
+import SignForm from "../components/auth/SignForm";
+import SignLayout from "../components/auth/SignLayout";
 
 const Login = () => {
   return (
@@ -18,7 +19,7 @@ const Login = () => {
               Remeber Me
             </label>
           </div>
-          <span>Forget Password?</span>
+          <Link to="#">Forget Password?</Link>
         </div>
       </SignForm>
     </SignLayout>

@@ -3,18 +3,15 @@ import { Link } from "react-router-dom";
 const SocialMedia = () => {
   const socialLogIn = [
     {
-      label: "connect with discord",
+      icon: "/assets/Discord.png",
+      link: "#",
+    },
+    {
       icon: "/assets/Google.png",
       link: "#",
     },
     {
-      label: "connect with discord",
-      icon: "/assets/Google.png",
-      link: "#",
-    },
-    {
-      label: "connect with discord",
-      icon: "/assets/Google.png",
+      icon: "/assets/Meta.png",
       link: "#",
     },
     // {
@@ -32,9 +29,9 @@ const SocialMedia = () => {
     <ul className="flex gap-3 w-[300px] items-center justify-center mx-auto mb-5 flex-1">
       {socialLogIn.map((social) => {
         return (
-          <li key={social.label} className="text-center">
+          <li key={social.icon} className="text-center">
             <Link to={social.link}>
-              <img src={social.icon} alt={social.label} />
+              <img src={social.icon} alt={social.icon} />
             </Link>
           </li>
         );

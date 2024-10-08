@@ -7,7 +7,7 @@ interface HeadingProps {
 const Heading: React.FC<HeadingProps> = ({ size, className }) => {
   return (
     <div
-      className={twMerge("flex uppercase justify-start text-3xl", className)}>
+      className={twMerge("flex uppercase justify-start text-lg md:text-3xl", className)}>
       <sub className="text-xl mr-2 mt-1 font-light">the</sub>home{" "}
       <sub className="text-xl mx-2 mt-1 font-light">of</sub>collaborative
       writing
