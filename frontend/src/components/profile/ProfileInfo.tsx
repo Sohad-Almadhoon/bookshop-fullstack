@@ -22,8 +22,25 @@ const ProfileInfo: React.FC = () => (
       </div>
     </div>
     <div className="flex flex-col">
-      <div className="border rounded-sm text-center w-fit text-2xl p-2">
-        TOTAL IP: $8400
+      <div className="relative">
+        {" "}
+        <div className="border rounded-md text-center text-2xl p-2 relative bg-[#DDD1BB] text-black">
+          <div className="absolute left-0 top-[-38px] -z-10">
+            <img
+              className="horn-left "
+              src="/assets/horn-left.png"
+              alt="Horn Left"
+            />
+          </div>
+          TOTAL IP: $8400
+          <div className="absolute right-0 top-[-38px] -z-10">
+            <img
+              className="horn-right"
+              src="/assets/horn-right.png"
+              alt="Horn Right"
+            />
+          </div>
+        </div>
       </div>
       <GenreTags tags={["#HORROR", "#SCL-F1", "#EROTIC"]} />
     </div>

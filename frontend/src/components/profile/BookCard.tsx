@@ -1,17 +1,17 @@
 
-const BookCard = () => {
+const BookCard = ({url}:{url:string}) => {
   return (
     <div className="border rounded-md p-5">
       <div className="relative">
-        <img src="/assets/book-1.png" alt="" />
-        <div className="absolute bottom-0 left-0">
-          <span className="rounded-xl border-2 border-black">
+        <img src={url} alt="" />
+        <div className="absolute bottom-6 left-4 flex flex-col gap-1">
+          <span className="rounded-xl border-2 border-black bg-white flex px-1">
             +1 <img src="/assets/music-note.svg" alt="music-note" />
           </span>
-          <span className="rounded-xl border-2 border-black">
+          <span className="rounded-xl border-2 border-black bg-white flex px-1">
             +2 <img src="/assets/photos.svg" alt="photos" />
           </span>
-          <span className="rounded-xl border-2 border-black">
+          <span className="rounded-xl border-2 border-black bg-white flex px-1">
             +1 <img src="/assets/pencil.svg" alt="pencil" />
           </span>
         </div>
