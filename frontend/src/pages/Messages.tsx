@@ -1,60 +1,55 @@
 import React from "react";
 import Header from "../components/shared/Header";
+import { Link } from "react-router-dom";
+import Conversation from "../components/messages/Conversation";
 
-const MessageItem = () => {
-  return (
-    <div className="bg-white flex-1 p-2">
-      <div className="flex gap-2">
-        <img
-          src="/assets/book-1.png"
-          alt="book"
-          className="w-12 h-16 object-cover"
-        />
-        <div className="flex-1">
-          <div className="flex gap-10">
-            <h3 className="text-xl font-bold">The Watering Hole</h3>
-            <div className="flex relative">
-              <div className="w-9 h-9 border-black border rounded-full absolute right-5 z-30">
-                <img src="/assets/profile.png" alt="" />
-              </div>
-              <div className="w-9 h-9 border-black border rounded-full absolute right-7 z-10"></div>
-              <div className="w-9 h-9 text-lg border-black border rounded-full flex justify-center items-center z-50 bg-[#dfd4bf]">
-                65+
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <img src="/assets/sender-1.png" alt="" />
-            <span className="font-medium">~Emily89</span>
-            <p className="text-gray-500">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            </p>
-          </div>
-        </div>
-        <div className="flex gap-2 items-center">
-          <span className="text-gray-400 text-sm">1408</span>
-          <span className="rounded-full text-white bg-black flex items-center justify-center w-6 h-6">
-            1
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-};
+const messages = [
+  {
+    id: 1,
+    sender: {
+      name: "John Doe",
+      avatar: "/assets/sender-1.png",
+    },
+    book: {
+      title: "The Art of War",
+      image: "/assets/book-1.png",
+    },
+    lastMessage:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    unread: 2,
+    time: "14:08",
+  },
+  {
+    id: 2,
+    sender: {
+      name: "Emily89",
+      avatar: "/assets/sender-2.png",
+    },
+    book: {
+      title: "The Art of War",
+      image: "/assets/book-2.png",
+    },
+    lastMessage: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    unread: 1,
+    time: "15:23",
+  },
+];
 
 const Messages = () => {
   return (
-    <div className="bg-[#dfd4bf] min-h-screen border border-black m-2">
-      <Header />
+    <div className=" min-h-screen border border-black m-2">
+      <Header profile />
       <div className="border-black border mx-16 mt-8 h-screen">
-        <div className="flex justify-between px-2 my-4">
-          <span>Messages</span> <span>List</span>
+        <div className="flex justify-between items-center p-4">
+          <p className="text-2xl">Messages</p>
+          <img src="/assets/file-check.svg" alt="file-check" />
         </div>
-        <div className="flex gap-10 border-black">
-          <MessageItem />
-        </div>
-        <div className="flex gap-10 border-t border-black">
-          <MessageItem />
+        <div>
+          {messages.map((message) => (
+            <Link to="/messages/2" className="flex gap-10 border-black mt-2">
+              <Conversation {...message} key={message.id} />
+            </Link>
+          ))}
         </div>
       </div>
     </div>

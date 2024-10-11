@@ -12,11 +12,11 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <BrowserRouter>
-    <Profile />
+    {/* <Profile /> */}
     
     {/* <Login /> */}
     {/* <Register/> */}
     {/* <Messages/> */}
-    {/* <Message /> */}
+    <Message />
   </BrowserRouter>
 );
