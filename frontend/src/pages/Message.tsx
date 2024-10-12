@@ -40,7 +40,7 @@ const Message: React.FC = () => {
     }
   };
   return (
-    <div className="bg-[#dfd4bf] flex flex-col min-h-screen border border-black m-2">
+    <div className="flex flex-col min-h-screen border border-black m-2">
       <Header profile />
       <div className="border-black  flex-1 flex flex-col border mx-16 mt-8">
         <MessageHeader />

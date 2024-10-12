@@ -1,9 +1,12 @@
 import { twMerge } from "tailwind-merge";
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: string;
+}
 const Button: React.FC<ButtonProps> = ({
   className,
   children,
   disabled,
+  variant,
   type = "button",
   ...props
 }) => {
@@ -14,7 +17,8 @@ const Button: React.FC<ButtonProps> = ({
       {...props}
       className={twMerge(
         `bg-black w-full text-white uppercase px-8 py-3 rounded-md`,
-        className
+        className,
+        variant === "outline" && "bg-transparent border-black border text-black"
       )}>
       {children}
     </button>

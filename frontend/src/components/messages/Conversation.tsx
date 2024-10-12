@@ -16,7 +16,7 @@ interface ConversationProps {
 }
 const Conversation: React.FC<ConversationProps> = (props) => {
   return (
-    <div className="bg-[#D2C8B5] bg-opacity-30 flex-1 p-2">
+    <div className="flex-1 p-2">
       <div className="flex gap-2">
         <img
           src={props.book.image}

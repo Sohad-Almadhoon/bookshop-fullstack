@@ -5,7 +5,6 @@ import SignLayout from "../components/auth/SignLayout";
 
 const Login = () => {
   return (
-    <SignLayout>
       <SignForm
         title="welcome back"
         description="Login to make the most of the platform"
@@ -22,7 +21,6 @@ const Login = () => {
           <Link to="#">Forget Password?</Link>
         </div>
       </SignForm>
-    </SignLayout>
   );
 };
 

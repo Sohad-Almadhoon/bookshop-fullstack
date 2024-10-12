@@ -4,7 +4,6 @@ import SignLayout from "../components/auth/SignLayout";
 
 const Register = () => {
   return (
-    <SignLayout>
       <SignForm
         title="Create Account"
         description="Create an account to make the most of the platform"
@@ -13,7 +12,6 @@ const Register = () => {
         <CustomInput placeholder="Enter Your Email" aria-label="Email" />
         <CustomInput placeholder="Create A Password" aria-label="Password" />
       </SignForm>
-    </SignLayout>
   );
 };
 

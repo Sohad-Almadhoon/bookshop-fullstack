@@ -3,7 +3,7 @@ import Heading from "./Heading";
 
 const Header = ({ profile }: { profile?: boolean; }) => {
   return (
-    <div className="flex items-center  border-black border-b py-1 px-12">
+    <div className="flex items-center  border-black border py-1 px-12">
       <Link to="/" className="flex-1">
         <img src="/assets/logo-dark.svg" alt="logo" className="w-14" />
       </Link>
