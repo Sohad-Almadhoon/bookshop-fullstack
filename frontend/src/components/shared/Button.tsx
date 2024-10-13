@@ -1,6 +1,6 @@
 import { twMerge } from "tailwind-merge";
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: string;
+  variant?: 'outline' | ""
 }
 const Button: React.FC<ButtonProps> = ({
   className,
