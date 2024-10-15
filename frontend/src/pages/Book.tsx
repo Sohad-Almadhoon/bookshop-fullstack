@@ -51,21 +51,23 @@ const Book: FC = () => {
 
 // Sidebar Component
 const Sidebar: FC = () => (
-  <div className="border-r border-black flex-1 p-4 flex flex-col px-28">
+  <div className="border-r border-black justify-end flex-1 p-4 flex flex-col px-28">
     <h1 className="uppercase text-5xl font-light mb-4 w-96">
       worldview ethics
     </h1>
     <Button>
       invest as little as <sup>$</sup>10
     </Button>
-    <ImageSection />
-    <ActionButtons />
+    <div className="self-end">
+      <ImageSection />
+      <ActionButtons />
+    </div>
   </div>
 );
 
 // Image Section Component
 const ImageSection: FC = () => (
-  <div className="mt-4 flex-1">
+  <div className="mt-4">
     <img src="/assets/book-2.png" alt="book cover" className="h-full w-full" />
   </div>
 );
@@ -73,13 +75,15 @@ const ImageSection: FC = () => (
 // Action Buttons Component
 const ActionButtons: FC = () => (
   <div className="flex gap-3 mt-2 items-center">
-    <Button variant="outline" className="flex gap-1 p-1 text-xs">
+    <Button variant="outline" className="flex gap-1 p-1 text-xs justify-center">
       <BsChatFill className="text-black text-sm" /> comments
     </Button>
-    <Button variant="outline" className="flex gap-1 p-1 text-xs">
+    <Button variant="outline" className="flex gap-1 p-1 text-xs justify-center">
       <BsPeopleFill className="text-black text-sm" /> follow
     </Button>
-    <Button variant="outline" className="flex gap-1 p-1 px-2 text-xs">
+    <Button
+      variant="outline"
+      className="flex gap-1 p-1 px-2 text-xs justify-center">
       <BsHeartFill className="text-black text-sm" /> like
     </Button>
   </div>
@@ -135,7 +139,7 @@ interface InfoBlockProps {
 }
 
 const InfoBlock: FC<InfoBlockProps> = ({ icon, text }) => (
-  <div className="flex items-center text-2xl gap-1">
+  <div className="flex items-center flex-1 text-2xl gap-1 justify-center">
     {icon} {text}
   </div>
 );

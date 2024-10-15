@@ -16,7 +16,7 @@ const Button: React.FC<ButtonProps> = ({
       disabled={disabled}
       {...props}
       className={twMerge(
-        `bg-black w-full text-white uppercase px-8 py-3 rounded-md`,
+        `bg-black w-full text-[#DFD5BF] uppercase px-8 py-3 rounded-md`,
         className,
         variant === "outline" && "bg-transparent border-black border text-black"
       )}>

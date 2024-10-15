@@ -7,13 +7,13 @@ import Messages from './Messages';
 import Message from './Message';
 import Profile from './Profile';
 import SignLayout from '../components/auth/SignLayout';
-import WorldView from './Book';
 import Book from './Book';
+import Example from './Example';
 
 const App = () => {
 const Layout = () => {
     return (
-      <div className="bg-[#DDD1BB] min-h-screen p-2">
+      <div className="bg-[#DDD1BB] min-h-screen p-2 relative">
         <Outlet />
       </div>
     );
@@ -42,6 +42,10 @@ const Layout = () => {
             {
               path: "/books/:id",
               element: <Book />,
+            },
+            {
+              path: "/example",
+              element: <Example />,
             },
           ],
         },
