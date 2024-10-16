@@ -8,7 +8,8 @@ import Message from './Message';
 import Profile from './Profile';
 import SignLayout from '../components/auth/SignLayout';
 import Book from './Book';
-import Example from './Example';
+import Example from './Novel';
+import Novel from './Novel';
 
 const App = () => {
 const Layout = () => {
@@ -44,8 +45,8 @@ const Layout = () => {
               element: <Book />,
             },
             {
-              path: "/example",
-              element: <Example />,
+              path: "/novel",
+              element: <Novel />,
             },
           ],
         },

@@ -6,7 +6,6 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import Button from "../components/shared/Button";
 
 interface ModalProps {
   open: boolean;
@@ -48,7 +47,7 @@ const Modal: React.FC<ModalProps> = ({
                   {title}
                 </DialogTitle>
                 <img src={image} alt="" />
-                <span className="my-4 capitalize text-opacity-70 text-black text-lg leading-loose p-3">
+                <span className="capitalize text-opacity-70 text-black text-lg leading-loose p-3">
                   {description}
                 </span>
                 {children}
