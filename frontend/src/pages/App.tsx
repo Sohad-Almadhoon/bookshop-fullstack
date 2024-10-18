@@ -8,8 +8,9 @@ import Message from './Message';
 import Profile from './Profile';
 import SignLayout from '../components/auth/SignLayout';
 import Book from './Book';
-import Example from './Novel';
 import Novel from './Novel';
+import Welcome from './Welcome';
+import Questionare from './Questionare';
 
 const App = () => {
 const Layout = () => {
@@ -48,6 +49,10 @@ const Layout = () => {
               path: "/novel",
               element: <Novel />,
             },
+            {
+              path: "/welcome",
+              element: <Welcome />,
+            },
           ],
         },
         {
@@ -61,6 +66,10 @@ const Layout = () => {
             {
               path: "/login",
               element: <Login />,
+            },
+            {
+              path: "/questionare",
+              element: <Questionare />,
             },
           ],
         },

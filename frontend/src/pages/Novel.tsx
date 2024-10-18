@@ -1,4 +1,6 @@
+import BookModal from "../components/modals/BookModal";
 import FinalModal from "../components/modals/FinalModal";
+import InvestAmountModal from "../components/modals/InvestAmountModal";
 import InvestModal from "../components/modals/InvestModal";
 import NovelModal from "../components/modals/NovelModal";
 import Button from "../components/shared/Button";
@@ -18,10 +20,10 @@ const Novel = () => {
         omnis.
       </p>
       {/* <NovelModal /> */}
-      <InvestModal />
+      {/* <InvestModal /> */}
+      {/* <BookModal /> */}
       {/* <FinalModal /> */}
-      
-
+      {/* <InvestAmountModal /> */}
     </div>
   );
 };

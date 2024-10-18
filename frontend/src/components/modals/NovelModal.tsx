@@ -130,7 +130,7 @@ const NovelModal = () => {
       open={isOpen}
       onClose={closeModal}
       image="/assets/modal1.png"
-      title="MINT BLOCK"
+      title={<h3 className="text-5xl">mint block</h3>}
       modalLogo="/assets/modal-icon.svg"
       description="Select your contribution type">
       <div>

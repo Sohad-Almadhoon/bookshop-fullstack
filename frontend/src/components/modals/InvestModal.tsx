@@ -12,7 +12,7 @@ const InvestModal = () => {
       open={isOpen}
       onClose={closeModal}
       image="/assets/modal2.png"
-      title="INVETS BLOCK"
+      title={<h3 className="text-5xl">invest block</h3>}
       modalLogo="/assets/modal-icon.svg"
       description="Secure Payment Info">
       <img src="/assets/payments.png" alt="payments" />
@@ -32,7 +32,7 @@ const InvestModal = () => {
             type="text"
             placeholder="MM/YY"
             onFocus={() => {
-              if (dateRef.current) dateRef.current.type = 'month';
+              if (dateRef.current) dateRef.current.type = "month";
             }}
             onBlur={() => {
               if (dateRef.current) dateRef.current.type = "month";

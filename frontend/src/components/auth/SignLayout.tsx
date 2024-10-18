@@ -4,9 +4,9 @@ import SideImage from "./SideImage";
 
 const SignLayout: React.FC = () => {
   return (
-    <div className=" bg-[#DDD1BB]  h-[calc(100vh - 400px)]">
+    <div className=" bg-[#DDD1BB] p-3 min-h-screen">
       <Header />
-      <div className="flex gap-2 border border-black mx-4 mt-5 mb-2 p-5">
+      <div className="flex gap-2 border border-black  mb-2 p-5">
         <SideImage />
         <main className="flex-1 grow flex flex-col">
           <Outlet />
