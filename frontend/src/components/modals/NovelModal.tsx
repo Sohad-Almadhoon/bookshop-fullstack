@@ -1,9 +1,13 @@
-import { FC, useState } from "react";
+import { useState } from "react";
 import Button from "../shared/Button";
 import Modal from "./Modal";
-import { useModalStore } from "../../store";
 import { BsFileTextFill, BsImageFill, BsMusicNote } from "react-icons/bs";
 import { twMerge } from "tailwind-merge";
+import upload from "../../utils/upload";
+import { useNovelModal } from "../../hooks/useNovelModal";
+import FileUploader from "./components/FileUploader";
+import TabButton from "./components/TabButton";
+import Loader from "../Loader";
 
 // Define tab configurations in a reusable format
 const tabs = [
@@ -11,83 +15,33 @@ const tabs = [
   { title: "AUDIO", icon: BsMusicNote },
   { title: "TEXT", icon: BsFileTextFill },
 ];
-// Define types for props
-interface TabButtonProps {
-  title: string;
-  Icon: React.ComponentType<{ className?: string }>;
-  active: boolean;
-  onClick: () => void;
-  index?: number;
-}
-
-interface FileUploadProps {
-  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  label: string;
-  accept: string;
-  description: string;
-}
-// Reusable Tab Component
-const TabButton: FC<TabButtonProps> = ({
-  index,
-  title,
-  Icon,
-  active,
-  onClick,
-}) => (
-  <Button
-    onClick={onClick}
-    className={twMerge(
-      "flex items-center py-3 px-6 text-xl gap-2",
-      index === 0
-        ? "rounded-r-none"
-        : index === 1
-        ? "rounded-r-none rounded-l-none"
-        : "rounded-l-none"
-    )}
-    variant={active ? "" : "outline"}>
-    <Icon className="w-6 h-6" />
-    {title}
-  </Button>
-);
-
-// Reusable File Upload Input
-const FileUpload: FC<FileUploadProps> = ({
-  onFileChange,
-  label,
-  accept,
-  description,
-}) => (
-  <div className="h-[180px] w-full mt-5 p-6 border border-dashed border-black rounded-lg flex flex-col justify-center items-center cursor-pointer">
-    <label className="cursor-pointer text-sm">
-      <span className="border-b border-black">{label}</span> or drag and drop
-      <p className="text-xs mt-1">{description}</p>
-      <input
-        type="file"
-        className="hidden"
-        accept={accept}
-        onChange={onFileChange}
-      />
-    </label>
-  </div>
-);
 
 const NovelModal = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [textInput, setTextInput] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const { isOpen, closeModal } = useModalStore();
+  const [file, setFile] = useState<string>("");
+  const [fileType, setFileType] = useState<string>(""); // Keep track of the file type (image or audio)
+  const [isLoading, setIsLoading] = useState(false);
+  const { isOpen, closeModal } = useNovelModal();
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
+    setIsLoading(true);
     if (uploadedFile) {
-      setFile(uploadedFile);
-      console.log("Uploaded File:", uploadedFile);
+      try {
+        const imageUrl = await upload(uploadedFile);
+        setFile(imageUrl);
+        setFileType(uploadedFile.type); // Set the file type based on the uploaded file
+      } catch (error) {
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 0: // Text Input
+      case 2: // Text Input
         return (
           <div className="mt-5">
             <textarea
@@ -102,18 +56,24 @@ const NovelModal = () => {
             </p>
           </div>
         );
-      case 1: // Image Upload
+      case 0: // Image Upload
+        if (isLoading) return <Loader />;
         return (
-          <FileUpload
+          <FileUploader
+            // file={fileType.startsWith("image/") || file ? file : ""} // Show image file if it's an image
+           file="/assets/dog.png"
             onFileChange={handleFileUpload}
             label="Click to upload"
             accept="image/*"
             description="SVG, PNG, JPG, or GIF (max 800x400px, 20MB)"
           />
         );
-      case 2: // Audio Upload
+      case 1: // Audio Upload
+        if (isLoading) return <Loader />;
         return (
-          <FileUpload
+          <FileUploader
+            // file={fileType.startsWith("audio/") || file ? file : ""} // Show audio file if it's audio
+           file="/assets/voice.mp3"
             onFileChange={handleFileUpload}
             label="Click to upload"
             accept="audio/*"
@@ -150,11 +110,15 @@ const NovelModal = () => {
         {renderTabContent()}
 
         <Button
+          disabled={isLoading}
           className={twMerge(
             "w-[250px] mt-12",
-            !textInput.length && "text-black text-opacity-30"
+            !textInput.length || !file
+              ? "text-white bg-black border border-white"
+              : "" // outline when no input or file
           )}
-          variant={textInput.length ? "" : "outline"}>
+          variant={!textInput.length || !file ? "outline" : ""} // outline variant condition
+        >
           MINT FOR{" "}
           <strong className="ml-3">
             <sup>$</sup>10

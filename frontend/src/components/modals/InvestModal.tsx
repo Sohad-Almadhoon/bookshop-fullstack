@@ -1,11 +1,11 @@
 import Modal from "./Modal";
-import { useModalStore } from "../../store";
 import CustomInput from "../shared/CustomInput";
 import Button from "../shared/Button";
 import { useRef } from "react";
+import { useInvestModal } from "../../hooks/useInvestModal";
 
 const InvestModal = () => {
-  const { isOpen, closeModal } = useModalStore();
+  const { isOpen, closeModal } = useInvestModal();
   const dateRef = useRef<HTMLInputElement>(null);
   return (
     <Modal

@@ -1,11 +1,11 @@
 import React from "react";
 import Modal from "./Modal";
-import { useModalStore } from "../../store";
 import Button from "../shared/Button";
 import { BsCheck2} from "react-icons/bs";
+import { useInvestAmountModal } from "../../hooks/useInvestAmountModal";
 
 const InvestAmountModal = () => {
-  const { isOpen, closeModal } = useModalStore();
+  const { isOpen, closeModal } = useInvestAmountModal();
   return (
     <Modal
       open={isOpen}

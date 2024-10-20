@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import Modal from "./Modal";
-import { useModalStore } from "../../store";
 import Button from "../shared/Button";
 import { BsArrowsAngleContract } from "react-icons/bs";
+import { useBookModal } from "../../hooks/useBookModal";
 
 const BookModal = () => {
-  const { isOpen, closeModal } = useModalStore();
+  const { isOpen, closeModal } = useBookModal();
   const [textInput, setTextInput] = useState("");
   return (
     <Modal

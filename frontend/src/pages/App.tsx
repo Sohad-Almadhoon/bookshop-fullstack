@@ -1,4 +1,3 @@
-import React from 'react'
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
 import Register from './Register';
 import Login from './Login';
@@ -10,12 +9,17 @@ import SignLayout from '../components/auth/SignLayout';
 import Book from './Book';
 import Novel from './Novel';
 import Welcome from './Welcome';
-import Questionare from './Questionare';
+import Tree from './Tree';
+import Reedem from './Reedem';
+import NovelDetails from './NovelDetails';
+import ModalProvider from './ModalProvider';
+import Questionnaire from './Questionnaire';
 
 const App = () => {
 const Layout = () => {
     return (
       <div className="bg-[#DDD1BB] min-h-screen p-2 relative">
+        <ModalProvider/>
         <Outlet />
       </div>
     );
@@ -53,6 +57,18 @@ const Layout = () => {
               path: "/welcome",
               element: <Welcome />,
             },
+            {
+              path: "/tree",
+              element: <Tree />,
+            },
+            {
+              path: "/reedem",
+              element: <Reedem />,
+            },
+            {
+              path: "/novel/:id",
+              element: <NovelDetails />,
+            },
           ],
         },
         {
@@ -68,8 +84,8 @@ const Layout = () => {
               element: <Login />,
             },
             {
-              path: "/questionare",
-              element: <Questionare />,
+              path: "/questionnaire",
+              element: <Questionnaire />,
             },
           ],
         },

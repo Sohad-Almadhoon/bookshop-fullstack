@@ -1,10 +1,10 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 
 interface HeaderProps {
   profile?: boolean;
-  title?: string;
+  title?: ReactNode;
   className?: string;
 }
 
@@ -47,14 +47,14 @@ const Header: React.FC<HeaderProps> = ({ profile, title, className }) => {
 
 interface HeadingProps {
   className?: string;
-  title?: string;
+  title?: ReactNode;
 }
 
 export const Heading: React.FC<HeadingProps> = ({ className, title }) => {
   return (
     <div>
       {title ? (
-        <h1 className={className}>{title}</h1>
+        title
       ) : (
         <div
           className={twMerge(

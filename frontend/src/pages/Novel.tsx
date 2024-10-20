@@ -1,13 +1,8 @@
-import BookModal from "../components/modals/BookModal";
-import FinalModal from "../components/modals/FinalModal";
-import InvestAmountModal from "../components/modals/InvestAmountModal";
-import InvestModal from "../components/modals/InvestModal";
-import NovelModal from "../components/modals/NovelModal";
 import Button from "../components/shared/Button";
-import { useModalStore } from "../store";
+import { useNovelModal } from "../hooks/useNovelModal";
 
 const Novel = () => {
-  const { openModal } = useModalStore();
+  const { openModal } = useNovelModal();
   return (
     <div>
       <Button onClick={openModal} variant="outline">
@@ -19,11 +14,6 @@ const Novel = () => {
         itaque porro. Aut, blanditiis corrupti dolorem qui totam amet animi
         omnis.
       </p>
-      {/* <NovelModal /> */}
-      {/* <InvestModal /> */}
-      {/* <BookModal /> */}
-      {/* <FinalModal /> */}
-      {/* <InvestAmountModal /> */}
     </div>
   );
 };

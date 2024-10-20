@@ -1,9 +1,9 @@
-import { useModalStore } from "../../store";
+import { useFinalModal } from "../../hooks/useFinalModal";
 import Button from "../shared/Button";
 import Modal from "./Modal";
 
 const FinalModal = () => {
-  const { isOpen, closeModal } = useModalStore();
+  const { isOpen, closeModal } = useFinalModal();
   return (
     <Modal
       open={isOpen}
