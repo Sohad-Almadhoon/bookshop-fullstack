@@ -25,11 +25,13 @@ const SignForm: React.FC<SignFormProps> = ({
 
   return (
     <div className="text-center flex flex-col border border-black flex-1">
-      <img
-        src="/assets/mask-dark.svg"
-        alt="Login or Register Icon"
-        className="border rounded-full border-black m-auto mt-5"
-      />
+      <div className="border border-black w-fit h-fit mx-auto rounded-full p-1 mt-5">
+        <img
+          src="/assets/mask-dark.svg"
+          alt="Login or Register Icon"
+          className="border rounded-full border-black"
+        />
+      </div>
       <h3 className="text-5xl uppercase mt-2">{title}</h3>
       <p className="text-sm mt-3">{description}</p>
 

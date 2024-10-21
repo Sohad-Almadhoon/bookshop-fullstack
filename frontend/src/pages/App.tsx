@@ -18,7 +18,7 @@ import Questionnaire from './Questionnaire';
 const App = () => {
 const Layout = () => {
     return (
-      <div className="bg-[#DDD1BB] min-h-screen p-2 relative">
+      <div className="bg-[#DDD1BB] min-h-screen p-2 relative font-romie">
         <ModalProvider/>
         <Outlet />
       </div>

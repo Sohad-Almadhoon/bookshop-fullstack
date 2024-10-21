@@ -58,7 +58,7 @@ export const Heading: React.FC<HeadingProps> = ({ className, title }) => {
       ) : (
         <div
           className={twMerge(
-            "flex uppercase justify-start text-lg md:text-3xl"
+            "flex uppercase justify-start text-lg md:text-3xl font-light"
           )}>
           <sub className="text-xl mr-2 mt-1 font-light">the</sub>
           home

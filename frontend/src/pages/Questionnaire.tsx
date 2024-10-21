@@ -28,7 +28,7 @@ const Questionnaire: React.FC = () => {
           <div className="flex flex-col items-center px-12 max-w-xl mx-auto min-h-screen">
             {/* Occupations Section */}
             <div className="flex-1 mt-5 p-5 w-full bg-[#CFC5B0] border-[#868073] rounded-md shadow-md">
-              <p className="capitalize font-semibold">
+              <p className="capitalize font-semibold text-sm">
                 Are you a writer, reader, musician, visual artist, or other?
               </p>
               <div className="mt-4 space-y-4">
@@ -36,9 +36,9 @@ const Questionnaire: React.FC = () => {
                   <div key={occupation} className="flex items-center gap-2">
                     <CustomInput
                       type="checkbox"
-                      className="h-5 w-5 text-black border-[#868073] cursor-pointer rounded shadow-md checked:bg-white"
+                      className="h-5 w-5 appearance-none border-2 border-black bg-transparent cursor-pointer rounded focus:ring-0 checked:border-black relative"
                     />
-                    <label>{occupation}</label>
+                    <label className="text-xs">{occupation}</label>
                   </div>
                 ))}
               </div>
@@ -50,7 +50,7 @@ const Questionnaire: React.FC = () => {
 
             {/* Genres Section */}
             <div className="flex-1 mt-5 p-5 w-full bg-[#CFC5B0] border-[#868073] rounded-md shadow-md">
-              <p className="capitalize font-semibold">
+              <p className="capitalize font-semibold text-sm">
                 What genre are you interested in?
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
@@ -61,7 +61,7 @@ const Questionnaire: React.FC = () => {
                       className="h-5 w-5 appearance-none border-2 border-black bg-transparent cursor-pointer rounded focus:ring-0 checked:border-black relative"
                     />
 
-                    <label>{genre}</label>
+                    <label className="text-xs">{genre}</label>
                   </div>
                 ))}
               </div>

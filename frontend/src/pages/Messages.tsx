@@ -39,7 +39,7 @@ const Messages = () => {
   return (
     <div className=" min-h-screen border border-black m-2">
       <Header profile />
-      <div className="border-black border mx-16 mt-8 h-screen">
+      <div className="border-black border mx-16 my-8 h-screen">
         <div className="flex justify-between items-center p-4">
           <p className="text-2xl">Messages</p>
           <img src="/assets/file-check.svg" alt="file-check" />
