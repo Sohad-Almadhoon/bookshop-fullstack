@@ -4,12 +4,29 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Baskervville:ital@0;1&display=swap');
 
+@font-face {
+  font-family: 'Cardinal';
+  src: url('../public/assets/fonts/Cardinal.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Romie';
+  src: url('../public/assets/fonts/Romie-Black.woff') format('woff'),
+  url("../public/assets/fonts/Romie-Bold.woff") format('woff'),
+    url("../public/assets/fonts/Romie-Medium.woff") format('woff'),
+      url("../public/assets/fonts/Romie-Regular.woff") format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'voyage';
+  src: url('../public/assets/fonts/voyage-regular.otf') format('opentype');
+  font-display: swap;
+}
 
 :root {
   --primary-color: #000;
   --secondary-color: #dfd4bf;
 }
-
 ul {
   list-style: none;
 }
@@ -39,3 +56,11 @@ a {
     left: 50%;
     transform: translate(-50%, -50%);
   }
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 3px;
+  height: 30px;
+  background: black;
+  cursor: pointer;
+}
+

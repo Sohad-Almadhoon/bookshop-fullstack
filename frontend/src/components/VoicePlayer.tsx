@@ -1,6 +1,5 @@
 import React, {
   ChangeEvent,
-  ChangeEventHandler,
   useEffect,
   useRef,
   useState,
@@ -67,12 +66,10 @@ const VoicePlayer = () => {
         max={duration}
         step="1"
         value={currentTime}
-              onChange={handleSliderChange}
-              
+        onChange={handleSliderChange}
         className="flex-1 appearance-none bg-black h-1"
       />
-          <span>{formatTime(duration)}</span>
-          
+      <span>{formatTime(duration)}</span>
     </div>
   );
 };

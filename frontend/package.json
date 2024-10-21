@@ -12,7 +12,6 @@
     "axios": "^1.7.7",
     "formik": "^2.4.6",
     "react": "^18.3.1",
-    "react-audio-player": "^0.17.0",
     "react-curved-text": "^3.0.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.0",
@@ -25,9 +24,7 @@
     "swiper": "^11.1.14",
     "tailwind-merge": "^2.5.3",
     "typescript": "^5.6.2",
-    "use-sound": "^4.0.3",
     "web-vitals": "^2.1.4",
-    "zod": "^3.23.8",
     "zustand": "^5.0.0-rc.2"
   },
   "scripts": {
