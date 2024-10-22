@@ -48,7 +48,7 @@ const Tree = () => {
               />
             }
             text="About&nbsp;&nbsp;About&nbsp;&nbsp;About&nbsp;&nbsp;About"
-            href="/about"
+            href="/coming-soon"
           />
         </div>
         <div className="absolute right-[22%] top-20">
@@ -61,7 +61,7 @@ const Tree = () => {
               />
             }
             text="How it works&nbsp;&nbsp;How it works"
-            href="/how-it-works"
+            href="/coming-soon"
           />
         </div>
         <div className="absolute right-[22%] bottom-[20%]">
@@ -74,7 +74,7 @@ const Tree = () => {
               />
             }
             text="Redeem&nbsp;Redeem&nbsp;Redeem&nbsp;Redeem"
-            href="/redeem"
+            href="/coming-soon"
           />
         </div>
       </div>

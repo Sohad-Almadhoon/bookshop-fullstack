@@ -1,6 +1,5 @@
 import CustomInput from "../components/shared/CustomInput";
 import SignForm from "../components/auth/SignForm";
-import SignLayout from "../components/auth/SignLayout";
 
 const Register = () => {
   return (

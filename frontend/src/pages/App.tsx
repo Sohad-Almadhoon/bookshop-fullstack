@@ -10,10 +10,10 @@ import Book from './Book';
 import Novel from './Novel';
 import Welcome from './Welcome';
 import Tree from './Tree';
-import Reedem from './Reedem';
 import NovelDetails from './NovelDetails';
 import ModalProvider from './ModalProvider';
 import Questionnaire from './Questionnaire';
+import ComingSoon from './ComingSoon';
 
 const App = () => {
 const Layout = () => {
@@ -62,11 +62,11 @@ const Layout = () => {
               element: <Tree />,
             },
             {
-              path: "/reedem",
-              element: <Reedem />,
+              path: "/coming-soon",
+              element: <ComingSoon />,
             },
             {
-              path: "/novel/:id",
+              path: "/discover",
               element: <NovelDetails />,
             },
           ],

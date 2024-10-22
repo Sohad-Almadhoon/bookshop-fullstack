@@ -1,7 +1,8 @@
+import { Link } from "react-router-dom";
 
 const BookCard = ({url}:{url:string}) => {
   return (
-    <div className="border rounded-md p-5">
+    <Link to="/books/2" className="border border-black border-opacity-30 rounded-md p-5">
       <div className="relative">
         <img src={url} alt="" />
         <div className="absolute bottom-6 left-4 flex flex-col gap-1">
@@ -21,7 +22,7 @@ const BookCard = ({url}:{url:string}) => {
         <p className="mt-1 font-medium truncate">IP INPUT 800</p>
         <p className="font-light">FUND: $4,000</p>
       </div>
-    </div>
+    </Link>
   );
 };
 

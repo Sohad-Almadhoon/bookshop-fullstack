@@ -3,7 +3,7 @@ import GenreTags from "./GenreTags";
 import ProfileStats from "./ProfileStats";
 
 const ProfileInfo: React.FC = () => (
-  <div className="border border-gray-400 rounded-md text-gray-500 p-5 mt-5 flex gap-4">
+  <div className="border border-opacity-30 border-black rounded-xl p-8 mt-5 flex gap-4">
     <div>
       <img src="/assets/collection-thumbnail.png" alt="profile-img" />
     </div>
@@ -22,18 +22,18 @@ const ProfileInfo: React.FC = () => (
       </div>
     </div>
     <div className="flex flex-col">
-      <div className="relative">
+      <div className=" relative">
         {" "}
-        <div className="border rounded-md text-center text-2xl p-2 relative bg-transparent  text-black">
-          <div className="absolute left-12 top-[-48px] -z-10">
+        <div className="border border-black border-opacity-30 rounded-md text-center text-2xl p-2 z-10 text-black">
+          <div className="absolute -left-10 top-[-38px]">
             <img
               className="horn-left "
               src="/assets/horn-left.png"
               alt="Horn Left"
             />
           </div>
-          TOTAL IP: $8400
-          <div className="absolute right-0 top-[-38px] -z-10">
+          <p className=" text-opacity-70 text-black">TOTAL IP: $8400</p>
+          <div className="absolute -right-10 top-[-38px]">
             <img
               className="horn-right"
               src="/assets/horn-right.png"

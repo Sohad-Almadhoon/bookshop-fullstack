@@ -22,8 +22,9 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({
         <Button
           key={index}
           className={twMerge(
-            "bg-white text-black border flex items-center justify-center gap-2",
-            (tab === index) && "bg-black text-white"
+            " bg-transparent text-black border border-black border-opacity-30  flex items-center justify-center gap-2",
+            (tab === index) && "bg-black text-white",
+            index === 0 ?"rounded-r-none" : "rounded-l-none"
           )}
           onClick={() => setTab(index)}>
           <span>

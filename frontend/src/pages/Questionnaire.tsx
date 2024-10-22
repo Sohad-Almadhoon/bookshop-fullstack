@@ -1,6 +1,7 @@
 import React from "react";
 import CustomInput from "../components/shared/CustomInput";
 import Button from "../components/shared/Button";
+import { useNavigate } from "react-router-dom";
 
 const occupations = ["Writer", "Reader", "Musician", "Visual Artist", "Other"];
 const genres = [
@@ -21,6 +22,7 @@ const genres = [
 ];
 
 const Questionnaire: React.FC = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen">
       <div className="border border-black p-2 min-h-screen">
@@ -72,7 +74,12 @@ const Questionnaire: React.FC = () => {
             </div>
 
             {/* Register Button */}
-            <Button className="w-full max-w-[300px] mt-5">REGISTER</Button>
+            <Button
+              type="submit"
+              className="w-full max-w-[300px] mt-5"
+              onClick={() => navigate("/register")}>
+              REGISTER
+            </Button>
           </div>
         </div>
       </div>

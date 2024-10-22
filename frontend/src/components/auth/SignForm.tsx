@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "../shared/Button";
 import SocialMedia from "./SocialMedia";
 
@@ -22,7 +22,7 @@ const SignForm: React.FC<SignFormProps> = ({
   const linkText = isLogin
     ? "Don't have an account?"
     : "Already have an account?";
-
+  const navigate = useNavigate()
   return (
     <div className="text-center flex flex-col border border-black flex-1">
       <div className="border border-black w-fit h-fit mx-auto rounded-full p-1 mt-5">
@@ -37,7 +37,9 @@ const SignForm: React.FC<SignFormProps> = ({
 
       <form className="flex flex-col gap-5 mx-auto mt-5 flex-1 w-full max-w-sm">
         {children}
-        <Button>{buttonText}</Button>
+        {/* <Button onClick={() => navigate(isLogin ? "/register" : "/questionnaire")}>
+          {buttonText}
+        </Button> */}
       </form>
 
       <span className="my-4">OR</span>

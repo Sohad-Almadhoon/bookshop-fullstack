@@ -23,7 +23,7 @@ const Profile: React.FC = () => {
   return (
     <div className="p-2">
       <Header profile />
-      <div className="px-12 border-black border">
+      <div className="px-24 border-black border">
         <ProfileInfo />
         <div>
           <ProfileActions tabs={tabs} tab={tab} setTab={setTab} />
