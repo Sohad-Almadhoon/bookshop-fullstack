@@ -1,11 +1,10 @@
 import Button from "../components/shared/Button";
-import { BsArrowDownShort} from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { Heading } from "../components/shared/Header";
 
 const Home = () => {
   return (
-    <div className="w-full flex flex-col items-center min-h-screen">
+    <div className="w-full flex flex-col items-center min-h-screen bg-[#ddd1bb]">
       <div className="max-w-3xl py-5 flex justify-center items-center md:flex-1 w-full">
         <div className="relative">
           <img src="/assets/home-circle.svg" alt="" />
@@ -27,12 +26,7 @@ const Home = () => {
           </div>
         </div>
       </div>
-      <Link className="flex flex-col mt-3 items-center cursor-pointer" to="">
-        <span className="text-black text-opacity-70 uppercase underline tracking-widest ">
-          discover
-        </span>
-        <BsArrowDownShort className="text-black text-4xl" />
-      </Link>
+     
     </div>
   );
 };

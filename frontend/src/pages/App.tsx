@@ -26,13 +26,8 @@ const Layout = () => {
   };
       const router = createBrowserRouter([
         {
-          path: "/",
           element: <Layout />,
           children: [
-            {
-              path: "/",
-              element: <Home />,
-            },
             {
               path: "/messages",
               element: <Messages />,
@@ -49,10 +44,10 @@ const Layout = () => {
               path: "/books/:id",
               element: <Book />,
             },
-            {
-              path: "/novel",
-              element: <Novel />,
-            },
+            // {
+            //   path: "/novel",
+            //   element: <Novel />,
+            // },
             {
               path: "/welcome",
               element: <Welcome />,
@@ -72,7 +67,6 @@ const Layout = () => {
           ],
         },
         {
-          path: "/",
           element: <SignLayout />,
           children: [
             {
@@ -88,6 +82,10 @@ const Layout = () => {
               element: <Questionnaire />,
             },
           ],
+        },
+        {
+          path: "/",
+          element: <Home />,
         },
       ]);
   return <RouterProvider router={router} />;

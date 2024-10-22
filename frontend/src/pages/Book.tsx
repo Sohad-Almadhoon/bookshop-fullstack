@@ -120,7 +120,7 @@ const ContentArea: FC<ContentAreaProps> = ({
 
 // Project Stats Component
 const ProjectStats: FC = () => (
-  <div className="flex flex-wrap items-center gap-3 w-3/4">
+  <div className="flex  items-center flex-wrap gap-5">
     <InfoBlock
       icon={
         <img src="/assets/coins-stacked.svg" alt="coins" className="w-9 h-9" />
@@ -139,7 +139,7 @@ interface InfoBlockProps {
 }
 
 const InfoBlock: FC<InfoBlockProps> = ({ icon, text }) => (
-  <div className="flex items-center flex-1 text-2xl gap-1 justify-center">
+  <div className="flex items-center text-2xl gap-1 justify-center">
     {icon} {text}
   </div>
 );
