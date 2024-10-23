@@ -11,12 +11,32 @@
 }
 @font-face {
   font-family: 'Romie';
-  src: url('../public/assets/fonts/Romie-Black.woff') format('woff'),
-  url("../public/assets/fonts/Romie-Bold.woff") format('woff'),
-    url("../public/assets/fonts/Romie-Medium.woff") format('woff'),
-      url("../public/assets/fonts/Romie-Regular.woff") format('woff');
+  src: url('../public/assets/fonts/Romie-Black.woff') format('woff');
+  font-weight: 300;
   font-display: swap;
 }
+
+@font-face {
+  font-family: 'Romie';
+  src: url('../public/assets/fonts/Romie-Regular.woff') format('woff');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Romie';
+  src: url('../public/assets/fonts/Romie-Medium.woff') format('woff');
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Romie';
+  src: url('../public/assets/fonts/Romie-Bold.woff') format('woff');
+  font-weight: 700;
+  font-display: swap;
+}
+
 @font-face {
   font-family: 'voyage';
   src: url('../public/assets/fonts/voyage-regular.otf') format('opentype');

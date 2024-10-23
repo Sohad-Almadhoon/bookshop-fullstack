@@ -10,7 +10,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ profile, title, className }) => {
   return (
-    <header className="flex items-center border-black border py-1 px-20">
+    <header className="flex items-center border-black border py-1 px-20 ">
       {/* Logo Section */}
       <Link to="/" className="flex-1">
         <img src="/assets/logo-dark.svg" alt="logo" className="w-14" />
@@ -58,7 +58,7 @@ export const Heading: React.FC<HeadingProps> = ({ className, title }) => {
       ) : (
         <div
           className={twMerge(
-            "flex uppercase justify-start text-lg md:text-3xl font-light"
+            "flex uppercase justify-start text-lg md:text-3xl font-romieMedium"
           )}>
           <sub className="text-xl mr-2 mt-1 font-light">the</sub>
           home

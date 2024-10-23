@@ -9,8 +9,12 @@ const Home = () => {
         <div className="relative">
           <img src="/assets/home-circle.svg" alt="" />
           <div className="absolute flex flex-col items-center gap-3 top-16  md:top-1/4  inset-0">
-            <h1 className="text-9xl font-voyage mb-2">
-              Block <span className="tracking-tighter">B<span className="ml-1">o</span><span className="-ml-7">o</span>k</span>
+            <h1 className="text-9xl  mb-2 font-voyage">
+              Block{" "}
+              <span className="tracking-tighter ">
+                B<span className="ml-1 ">o</span>
+                <span className="-ml-7">o</span>k
+              </span>
             </h1>
             <Heading />
           </div>
@@ -26,7 +30,6 @@ const Home = () => {
           </div>
         </div>
       </div>
-     
     </div>
   );
 };
