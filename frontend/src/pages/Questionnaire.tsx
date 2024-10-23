@@ -38,7 +38,7 @@ const Questionnaire: React.FC = () => {
                   <div key={occupation} className="flex items-center gap-2">
                     <CustomInput
                       type="checkbox"
-                      className="h-5 w-5 appearance-none border-2 border-black bg-transparent cursor-pointer rounded focus:ring-0 checked:border-black relative"
+                      className="h-4 w-4 p-0 custom-checkbox appearance-none border-2 border-black bg-transparent cursor-pointer rounded focus:ring-0 checked:border-black relative"
                     />
                     <label className="text-xs">{occupation}</label>
                   </div>
@@ -60,7 +60,7 @@ const Questionnaire: React.FC = () => {
                   <div key={genre} className="flex items-center gap-2">
                     <CustomInput
                       type="checkbox"
-                      className="h-5 w-5 appearance-none border-2 border-black bg-transparent cursor-pointer rounded focus:ring-0 checked:border-black relative"
+                      className="h-4 w-4 p-0 custom-checkbox appearance-none border-2 border-black bg-transparent cursor-pointer rounded focus:ring-0 checked:border-black relative"
                     />
 
                     <label className="text-xs">{genre}</label>

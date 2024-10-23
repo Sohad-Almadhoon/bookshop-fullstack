@@ -35,12 +35,7 @@ const SignForm: React.FC<SignFormProps> = ({
       <h3 className="text-5xl uppercase mt-2">{title}</h3>
       <p className="text-sm mt-3">{description}</p>
 
-      <form className="flex flex-col gap-5 mx-auto mt-5 flex-1 w-full max-w-sm">
-        {children}
-        {/* <Button onClick={() => navigate(isLogin ? "/register" : "/questionnaire")}>
-          {buttonText}
-        </Button> */}
-      </form>
+      {children}
 
       <span className="my-4">OR</span>
       <SocialMedia />
