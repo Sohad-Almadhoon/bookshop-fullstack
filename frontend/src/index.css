@@ -53,6 +53,9 @@ ul {
 a {
   text-decoration: none;
 }
+.custom-checkbox{
+  @apply h-4 w-4 p-0 appearance-none border-2 border-black bg-transparent cursor-pointer rounded focus:ring-0 checked:border-black relative;
+}
 .custom-checkbox::before {
   content: "";
   display: block;

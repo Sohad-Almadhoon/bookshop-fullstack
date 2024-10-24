@@ -36,10 +36,7 @@ const Questionnaire: React.FC = () => {
               <div className="mt-4 space-y-4">
                 {occupations.map((occupation) => (
                   <div key={occupation} className="flex items-center gap-2">
-                    <CustomInput
-                      type="checkbox"
-                      className="h-4 w-4 p-0 custom-checkbox appearance-none border-2 border-black bg-transparent cursor-pointer rounded focus:ring-0 checked:border-black relative"
-                    />
+                    <CustomInput type="checkbox" className="custom-checkbox" />
                     <label className="text-xs">{occupation}</label>
                   </div>
                 ))}
@@ -58,10 +55,7 @@ const Questionnaire: React.FC = () => {
               <div className="mt-5 flex flex-wrap gap-3">
                 {genres.map((genre) => (
                   <div key={genre} className="flex items-center gap-2">
-                    <CustomInput
-                      type="checkbox"
-                      className="h-4 w-4 p-0 custom-checkbox appearance-none border-2 border-black bg-transparent cursor-pointer rounded focus:ring-0 checked:border-black relative"
-                    />
+                    <CustomInput type="checkbox" className="custom-checkbox" />
 
                     <label className="text-xs">{genre}</label>
                   </div>

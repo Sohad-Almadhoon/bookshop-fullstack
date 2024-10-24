@@ -60,7 +60,7 @@ const Login = () => {
             <CustomInput
               type="checkbox"
               {...register("rememberMe")}
-              className="h-4 w-4 appearance-none border-2 p-0 border-black bg-transparent cursor-pointer rounded focus:ring-0 checked:border-black relative custom-checkbox"
+              className="custom-checkbox"
             />
             <span className="ml-1">Remember Me</span>
           </label>
