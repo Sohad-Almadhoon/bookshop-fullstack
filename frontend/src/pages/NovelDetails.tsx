@@ -1,7 +1,7 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow } from "swiper/modules";
 import { Swiper as SwiperType } from "swiper/types";
-import { useRef } from "react";
+import { ButtonHTMLAttributes, useRef } from "react";
 import {
   BsChevronLeft,
   BsChevronRight,
@@ -19,16 +19,40 @@ import VoicePlayer from "../components/VoicePlayer";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
 
-const IconButton = ({ icon: Icon, onClick, label }) => (
+interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  icon: React.ElementType<{ className?: string }>;
+  label: string;
+}
+
+interface NavigationButtonProps {
+  onClick: () => void;
+  position: "left" | "right";
+  icon: React.ElementType<{ className?: string }>;
+}
+
+interface CardSectionProps {
+  title: string;
+  content: string;
+}
+
+const IconButton: React.FC<IconButtonProps> = ({
+  icon: Icon,
+  onClick,
+  label,
+}) => (
   <Button
     onClick={onClick}
     className="flex items-center justify-center gap-x-3 my-5">
-    <Icon />
+    <Icon className="text-sm" />
     {label}
   </Button>
 );
 
-const NavigationButton = ({ onClick, position, icon: Icon }) => (
+const NavigationButton: React.FC<NavigationButtonProps> = ({
+  onClick,
+  position,
+  icon: Icon,
+}) => (
   <button
     onClick={onClick}
     className={`absolute top-1/2 ${position}-10 rounded-full w-10 h-10 flex justify-center items-center z-10 border border-black`}>
@@ -36,7 +60,7 @@ const NavigationButton = ({ onClick, position, icon: Icon }) => (
   </button>
 );
 
-const CardSection = ({ title, content }) => (
+const CardSection: React.FC<CardSectionProps> = ({ title, content }) => (
   <div className="border border-black border-opacity-30 flex-1 rounded-2xl p-4 mt-5">
     <div className="flex justify-between">
       <div className="flex gap-2">
@@ -52,7 +76,7 @@ const CardSection = ({ title, content }) => (
   </div>
 );
 
-const NovelDetails = () => {
+const NovelDetails: React.FC = () => {
   const { openModal } = useNovelModal();
   const swiperRef = useRef<SwiperType | null>(null);
 
@@ -93,12 +117,12 @@ const NovelDetails = () => {
 
             <NavigationButton
               onClick={() => swiperRef.current?.slidePrev()}
-              position="-left"
+              position="left"
               icon={BsChevronLeft}
             />
             <NavigationButton
               onClick={() => swiperRef.current?.slideNext()}
-              position="-right"
+              position="right"
               icon={BsChevronRight}
             />
 
