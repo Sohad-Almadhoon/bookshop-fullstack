@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "../shared/Button";
 import Modal from "./Modal";
 import { BsFileTextFill, BsImageFill, BsMusicNote } from "react-icons/bs";
@@ -8,22 +8,24 @@ import { useNovelModal } from "../../hooks/useNovelModal";
 import FileUploader from "./components/FileUploader";
 import TabButton from "./components/TabButton";
 import Loader from "../Loader";
+type ContentType = "visual" | "audio" | "text";
 
-// Define tab configurations in a reusable format
-const tabs = [
-  { title: "VISUAL", icon: BsImageFill },
-  { title: "AUDIO", icon: BsMusicNote },
-  { title: "TEXT", icon: BsFileTextFill },
+const tabs:{ title: ContentType; icon: React.ComponentType }[] = [
+  { title: "visual", icon: BsImageFill },
+  { title: "audio", icon: BsMusicNote },
+  { title: "text", icon: BsFileTextFill },
 ];
 
 const NovelModal = () => {
-  const [activeTab, setActiveTab] = useState(0);
   const [textInput, setTextInput] = useState("");
   const [file, setFile] = useState<string>("");
   const [fileType, setFileType] = useState<string>(""); // Keep track of the file type (image or audio)
   const [isLoading, setIsLoading] = useState(false);
-  const { isOpen, closeModal } = useNovelModal();
-
+  const { isOpen, closeModal, contentType } = useNovelModal();
+  const [activeTab, setActiveTab] = useState<typeof contentType>("audio");
+  useEffect(() => {
+    setActiveTab(contentType);
+  }, [contentType]);
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
     setIsLoading(true);
@@ -41,7 +43,7 @@ const NovelModal = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 2: // Text Input
+      case "text": // Text Input
         return (
           <div className="mt-5">
             <textarea
@@ -56,24 +58,22 @@ const NovelModal = () => {
             </p>
           </div>
         );
-      case 0: // Image Upload
+      case "visual": // Image Upload
         if (isLoading) return <Loader />;
         return (
           <FileUploader
-            // file={fileType.startsWith("image/") || file ? file : ""} // Show image file if it's an image
-           file="/assets/dog.png"
+            file={fileType.startsWith("image/") ? file : ""} 
             onFileChange={handleFileUpload}
             label="Click to upload"
             accept="image/*"
             description="SVG, PNG, JPG, or GIF (max 800x400px, 20MB)"
           />
         );
-      case 1: // Audio Upload
+      case "audio": // Audio Upload
         if (isLoading) return <Loader />;
         return (
           <FileUploader
-            // file={fileType.startsWith("audio/") || file ? file : ""} // Show audio file if it's audio
-           file="/assets/voice.mp3"
+            file={fileType.startsWith("audio/") ? file : ""} // Show audio file if it's audio
             onFileChange={handleFileUpload}
             label="Click to upload"
             accept="audio/*"
@@ -100,9 +100,9 @@ const NovelModal = () => {
               key={index}
               title={tab.title}
               Icon={tab.icon}
-              active={index === activeTab}
+              active={tab.title === activeTab}
               index={index}
-              onClick={() => setActiveTab(index)}
+              onClick={() => setActiveTab(tab.title)}
             />
           ))}
         </div>

@@ -1,1 +1,37 @@
- 
+ import { create } from "zustand";
+
+// Define the types of content
+type ContentType = 'audio' | 'text' | 'visual';
+
+// Define a more structured type for the content
+interface AudioContent {
+  src: string; // URL or path to the audio file
+}
+
+interface TextContent {
+  text: string; // The text content
+}
+
+interface VisualContent {
+  src: string; // URL or path to the image/video
+  alt?: string; // Optional alt text for the image
+}
+
+// Union type for content
+type Content = AudioContent | TextContent | VisualContent;
+
+interface ModalState {
+  isOpen: boolean;
+  contentType: ContentType | null;  // Type of the content
+  content: Content | null;           // Content based on the type
+  openModal: (type: ContentType, content: Content) => void; // Open modal with type and content
+  closeModal: () => void;
+}
+
+export const useNovelModal = create<ModalState>((set) => ({
+  isOpen: false,
+  contentType: null,
+  content: null,
+  openModal: (type, content) => set({ isOpen: true, contentType: type, content }),
+  closeModal: () => set({ isOpen: false, contentType: null, content: null }),
+}));

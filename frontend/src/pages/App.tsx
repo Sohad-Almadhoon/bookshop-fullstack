@@ -7,13 +7,12 @@ import Message from './Message';
 import Profile from './Profile';
 import SignLayout from '../components/auth/SignLayout';
 import Book from './Book';
-import Novel from './Novel';
 import Welcome from './Welcome';
 import Tree from './Tree';
-import NovelDetails from './NovelDetails';
 import ModalProvider from './ModalProvider';
 import Questionnaire from './Questionnaire';
 import ComingSoon from './ComingSoon';
+import Discover from './Discover';
 
 const App = () => {
 const Layout = () => {
@@ -44,10 +43,6 @@ const Layout = () => {
               path: "/books/:id",
               element: <Book />,
             },
-            // {
-            //   path: "/novel",
-            //   element: <Novel />,
-            // },
             {
               path: "/welcome",
               element: <Welcome />,
@@ -62,7 +57,7 @@ const Layout = () => {
             },
             {
               path: "/discover",
-              element: <NovelDetails />,
+              element: <Discover />,
             },
           ],
         },

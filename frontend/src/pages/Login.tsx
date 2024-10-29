@@ -21,8 +21,7 @@ const Login = () => {
 
   // onSubmit handler type-safe for LoginFormInputs
   const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
-    console.log(data); // You can handle login logic here
-    navigate("/book");
+    navigate("/discover");
   };
 
   return (

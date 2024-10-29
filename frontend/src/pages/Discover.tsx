@@ -18,16 +18,11 @@ import VoicePlayer from "../components/VoicePlayer";
 
 import "swiper/css";
 import "swiper/css/effect-coverflow";
+import NovelModal from "../components/modals/NovelModal";
 
 interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon: React.ElementType<{ className?: string }>;
   label: string;
-}
-
-interface NavigationButtonProps {
-  onClick: () => void;
-  position: "left" | "right";
-  icon: React.ElementType<{ className?: string }>;
 }
 
 interface CardSectionProps {
@@ -42,22 +37,10 @@ const IconButton: React.FC<IconButtonProps> = ({
 }) => (
   <Button
     onClick={onClick}
-    className="flex items-center justify-center gap-x-3 my-5">
+    className="flex items-center justify-center gap-x-3 my-5 max-w-sm w-full mx-auto">
     <Icon className="text-sm" />
     {label}
   </Button>
-);
-
-const NavigationButton: React.FC<NavigationButtonProps> = ({
-  onClick,
-  position,
-  icon: Icon,
-}) => (
-  <button
-    onClick={onClick}
-    className={`absolute top-1/2 ${position}-10 rounded-full w-10 h-10 flex justify-center items-center z-10 border border-black`}>
-    <Icon className="text-sm" />
-  </button>
 );
 
 const CardSection: React.FC<CardSectionProps> = ({ title, content }) => (
@@ -76,7 +59,7 @@ const CardSection: React.FC<CardSectionProps> = ({ title, content }) => (
   </div>
 );
 
-const NovelDetails: React.FC = () => {
+const Discover: React.FC = () => {
   const { openModal } = useNovelModal();
   const swiperRef = useRef<SwiperType | null>(null);
 
@@ -84,10 +67,10 @@ const NovelDetails: React.FC = () => {
     <div className="min-h-screen border border-black">
       <Header />
       <div className="flex">
-        <div className="flex-1 flex flex-col items-center border-r border-black">
-          <div className="max-w-md w-full relative">
+        <div className="flex-1 border-r border-black">
+          <div className=" flex flex-col items-center relative">
             <IconButton
-              onClick={openModal}
+              onClick={() => openModal("visual")}
               icon={BsImageFill}
               label="BUY VISUAL BLOCK $10"
             />
@@ -105,30 +88,47 @@ const NovelDetails: React.FC = () => {
                 slideShadows: true,
               }}
               modules={[EffectCoverflow]}
-              className="my-5 bg-black rounded-2xl"
+              className="my-5 h-fit flex justify-center mx-auto"
               initialSlide={1}
               onSwiper={(swiper) => (swiperRef.current = swiper)}>
               {["book-1.png", "book-2.png", "book-3.png"].map((img, index) => (
                 <SwiperSlide key={index}>
-                  <img src={`/assets/${img}`} alt={`Book ${index + 1}`} />
+                  <img
+                    src={`/assets/${img}`}
+                    alt={`Book ${index + 1}`}
+                    className="h-[420px] w-full object-contain"
+                  />
                 </SwiperSlide>
               ))}
             </Swiper>
-
-            <NavigationButton
+            <button
               onClick={() => swiperRef.current?.slidePrev()}
-              position="left"
-              icon={BsChevronLeft}
-            />
-            <NavigationButton
+              className={`absolute top-1/2 left-14 rounded-full w-10 h-10 flex justify-center items-center z-10 border border-black`}>
+              <BsChevronLeft className="text-sm" />
+            </button>
+            <button
               onClick={() => swiperRef.current?.slideNext()}
-              position="right"
-              icon={BsChevronRight}
-            />
+              className={`absolute top-1/2 right-14 rounded-full w-10 h-10 flex justify-center items-center z-10 border border-black`}>
+              <BsChevronRight className="text-sm" />
+            </button>
 
-            <VoicePlayer />
+            <div className="flex p-2 gap-3 border-black border border-opacity-30 rounded-lg items-center">
+              <BsChevronLeft className="w-10 h-10 border border-opacity-30 rounded-full p-1 border-black cursor-pointer" />
+
+              <BsLightningCharge className="w-10 h-10 border-2 bg-black text-white rounded-full p-2 cursor-pointer" />
+              <BsHeart className="w-10 h-10 border-2 border-black rounded-full p-2 cursor-pointer" />
+
+              <VoicePlayer />
+              <img
+                src="/assets/collection-thumbnail.png"
+                alt="thumbnail"
+                width={40}
+              />
+
+              <BsChevronRight className="w-10 h-10 border border-opacity-30 rounded-full p-1 border-black cursor-pointer" />
+            </div>
             <IconButton
-              onClick={openModal}
+              onClick={() => openModal("audio")}
               icon={BsMusicNoteBeamed}
               label="BUY AUDIO BLOCK $8"
             />
@@ -145,7 +145,7 @@ const NovelDetails: React.FC = () => {
               content="hat is it about artificial intelligence that has the world in such an uproar? An open letter is being circulated (Future of Life, 2023) after being signed by heads of industry and famous thinkers including Max Tegmark and other respectable minds..."
             />
             <IconButton
-              onClick={openModal}
+              onClick={() => openModal("text")}
               icon={BsFileText}
               label="BUY AUDIO BLOCK $8"
             />
@@ -156,4 +156,4 @@ const NovelDetails: React.FC = () => {
   );
 };
 
-export default NovelDetails;
+export default Discover;

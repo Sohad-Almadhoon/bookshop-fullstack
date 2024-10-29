@@ -1,4 +1,4 @@
-import React, {
+import {
   ChangeEvent,
   useEffect,
   useRef,
@@ -48,7 +48,7 @@ const VoicePlayer = () => {
     audioRef.current.currentTime = currentTime;
   };
   return (
-    <div className="flex items-center justify-center w-full rounded-lg border-black border border-opacity-30 px-1 py-0.5 gap-1">
+    <div className="flex items-center justify-center  flex-1 px-1 py-0.5 gap-1">
       <audio ref={audioRef} src="/assets/voice.mp3" />
       <button
         onClick={togglePlay}

@@ -19,13 +19,13 @@ const FileUploader: FC<FileUploadProps> = ({
 }) => {
   // Check if the file is an image or audio by examining its extension
   const isImage =
-    file &&
+    typeof file === "string" &&
     (file.endsWith(".jpg") ||
       file.endsWith(".jpeg") ||
       file.endsWith(".png") ||
       file.endsWith(".gif"));
   const isAudio =
-    file &&
+    typeof file === "string" &&
     (file.endsWith(".mp3") || file.endsWith(".wav") || file.endsWith(".ogg"));
 
   return (
