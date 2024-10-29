@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
-import NovelModal from "../components/modals/NovelModal";
-import BookModal from "../components/modals/BookModal";
-import InvestAmountModal from "../components/modals/InvestAmountModal";
-import InvestModal from "../components/modals/PaymentModal";
-import FinalModal from "../components/modals/FinalModal";
+import { useEffect, useState } from "react";
+import NovelModal from "./NovelModal";
+import BookModal from "./BookModal";
+import InvestModal from "./PaymentModal";
+import FinalModal from "./FinalModal";
 
 const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -22,7 +21,6 @@ const ModalProvider = () => {
     <>
       <NovelModal />
       <BookModal />
-      <InvestAmountModal />
       <InvestModal />
       <FinalModal />
     </>

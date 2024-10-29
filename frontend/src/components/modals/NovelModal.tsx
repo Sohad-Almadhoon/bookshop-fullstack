@@ -8,9 +8,11 @@ import { useNovelModal } from "../../hooks/useNovelModal";
 import FileUploader from "./components/FileUploader";
 import TabButton from "./components/TabButton";
 import Loader from "../Loader";
+import toast from "react-hot-toast";
+
 type ContentType = "visual" | "audio" | "text";
 
-const tabs:{ title: ContentType; icon: React.ComponentType }[] = [
+const tabs: { title: ContentType; icon: React.ComponentType }[] = [
   { title: "visual", icon: BsImageFill },
   { title: "audio", icon: BsMusicNote },
   { title: "text", icon: BsFileTextFill },
@@ -23,9 +25,15 @@ const NovelModal = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { isOpen, closeModal, contentType } = useNovelModal();
   const [activeTab, setActiveTab] = useState<typeof contentType>("audio");
+
   useEffect(() => {
     setActiveTab(contentType);
   }, [contentType]);
+  useEffect(() => {
+    setFile("");
+    setTextInput("");
+    setFileType("");
+  }, [activeTab]);
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
     setIsLoading(true);
@@ -33,8 +41,10 @@ const NovelModal = () => {
       try {
         const imageUrl = await upload(uploadedFile);
         setFile(imageUrl);
-        setFileType(uploadedFile.type); // Set the file type based on the uploaded file
+        setFileType(uploadedFile.type);
+        toast.success("Uploaded Successfully");
       } catch (error) {
+        toast.error("Error!!");
       } finally {
         setIsLoading(false);
       }
@@ -62,7 +72,7 @@ const NovelModal = () => {
         if (isLoading) return <Loader />;
         return (
           <FileUploader
-            file={fileType.startsWith("image/") ? file : ""} 
+            file={fileType.startsWith("image/") ? file : ""}
             onFileChange={handleFileUpload}
             label="Click to upload"
             accept="image/*"
@@ -106,18 +116,13 @@ const NovelModal = () => {
             />
           ))}
         </div>
-
         {renderTabContent()}
 
         <Button
+          onClick={()=>{}}
           disabled={isLoading}
-          className={twMerge(
-            "w-[250px] mt-12",
-            !textInput.length || !file
-              ? "text-white bg-black border border-white"
-              : "" // outline when no input or file
-          )}
-          variant={!textInput.length || !file ? "outline" : ""} // outline variant condition
+          className={twMerge("w-[250px] mt-12", !textInput.length && "")}
+          variant={!file ? "outline" : ""} // outline variant condition
         >
           MINT FOR{" "}
           <strong className="ml-3">
