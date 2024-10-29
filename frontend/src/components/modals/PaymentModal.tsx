@@ -2,10 +2,10 @@ import Modal from "./Modal";
 import CustomInput from "../shared/CustomInput";
 import Button from "../shared/Button";
 import { useRef } from "react";
-import { useInvestModal } from "../../hooks/useInvestModal";
+import { usePaymentModal } from "../../hooks/usePaymentModal";
 
-const InvestModal = () => {
-  const { isOpen, closeModal } = useInvestModal();
+const PaymentModal = () => {
+  const { isOpen, closeModal } = usePaymentModal();
   const dateRef = useRef<HTMLInputElement>(null);
   return (
     <Modal
@@ -51,4 +51,4 @@ const InvestModal = () => {
   );
 };
 
-export default InvestModal;
+export default PaymentModal;

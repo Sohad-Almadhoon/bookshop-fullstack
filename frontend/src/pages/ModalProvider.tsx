@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import NovelModal from "../components/modals/NovelModal";
 import BookModal from "../components/modals/BookModal";
 import InvestAmountModal from "../components/modals/InvestAmountModal";
-import InvestModal from "../components/modals/InvestModal";
+import InvestModal from "../components/modals/PaymentModal";
 import FinalModal from "../components/modals/FinalModal";
 
 const ModalProvider = () => {

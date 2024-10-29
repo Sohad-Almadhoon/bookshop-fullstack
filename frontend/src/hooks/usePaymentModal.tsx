@@ -7,7 +7,7 @@ interface ModalState {
   closeModal: () => void;
 }
 
-export const useInvestModal = create<ModalState>((set) => ({
+export const usePaymentModal = create<ModalState>((set) => ({
   isOpen: false,
   openModal: () => set({ isOpen: true }),
   closeModal: () => set({ isOpen: false }),
