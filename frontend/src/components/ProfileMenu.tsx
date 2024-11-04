@@ -1,39 +1,48 @@
-import { Menu } from "@headlessui/react";
+import {
+  Menu,
+  MenuButton,
+  MenuItems,
+  MenuItem,
+  Transition,
+} from "@headlessui/react";
+import {  BsPersonFill } from "react-icons/bs";
+import { Link } from "react-router-dom";
 import { Fragment } from "react";
 
 const ProfileMenu = () => {
   return (
-    <Menu as="div" className="relative inline-block text-left">
+    <Menu as="div" className="relative">
       <div>
-        <Menu.Button className="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-md hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
-          Profile
-        </Menu.Button>
+        <MenuButton>
+          <img src="/assets/menu-black.svg" alt="" />
+        </MenuButton>
       </div>
-
-      <Menu.Items className="absolute right-0 w-56 mt-2 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-        <div className="px-1 py-1 ">
-          <Menu.Item>
-            {({ active }) => (
-              <button
-                className={`${
-                  active ? "bg-blue-500 text-white" : "text-gray-900"
-                } group flex rounded-md items-center w-full px-2 py-2 text-sm`}>
-                Settings
-              </button>
-            )}
-          </Menu.Item>
-          <Menu.Item>
-            {({ active }) => (
-              <button
-                className={`${
-                  active ? "bg-blue-500 text-white" : "text-gray-900"
-                } group flex rounded-md items-center w-full px-2 py-2 text-sm`}>
-                Logout
-              </button>
-            )}
-          </Menu.Item>
-        </div>
-      </Menu.Items>
+      <Transition
+        as={Fragment}
+        enter="transition ease-out duration-100"
+        enterFrom="transform opacity-0 scale-95"
+        enterTo="transform opacity-100 scale-100"
+        leave="transition ease-in duration-75"
+        leaveFrom="transform opacity-100 scale-100"
+        leaveTo="transform opacity-0 scale-95">
+        <MenuItems
+          anchor="bottom"
+          className="absolute bg-[#dfd4bf] -translate-x-[100px] mt-2 w-56 h-40 rounded-md  shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none drop-shadow bg-[#] p-6 z-50">
+          <img
+            src="/assets/dropdown-bgpattern.svg"
+            alt=""
+            className="absolute top-0 left-0 w-full h-full object-cover"
+          />
+          <MenuItem as={Fragment}>
+            <Link
+              to="/profile"
+              className={"flex gap-4 text-xl font-medium cursor-pointer"}>
+              <BsPersonFill className="text-2xl" />
+              Profile
+            </Link>
+          </MenuItem>
+        </MenuItems>
+      </Transition>
     </Menu>
   );
 };

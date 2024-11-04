@@ -1,9 +1,8 @@
 import React, { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
-import { useNotificationModal } from "../../hooks/useNotificationModal";
-import Notifications from "../Notifications";
 import ProfileMenu from "../ProfileMenu";
+import Notifications from "../Notifications";
 
 interface HeaderProps {
   profile?: boolean;
@@ -12,7 +11,6 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ profile, title, className }) => {
-  const { openModal, isOpen } = useNotificationModal();
   return (
     <header className="flex items-center border-black border py-1 px-20 ">
       {/* Logo Section */}
@@ -28,24 +26,16 @@ const Header: React.FC<HeaderProps> = ({ profile, title, className }) => {
         {profile && (
           <div className="flex gap-3">
             {/* Notifications */}
-            <div className="relative cursor-pointer" onClick={openModal}>
-              {!isOpen && <Notifications />}
-              {isOpen && <ProfileMenu />}
-              <img src="/assets/bell.svg" alt="Notifications" />
-              <div className="absolute top-0 right-0 w-6 h-6 bg-black rounded-full flex justify-center items-center">
-                <p className="text-xs text-white">2</p>
-              </div>
-            </div>
+           <Notifications/>
 
             {/* Messages */}
             <Link to="/messages">
               <img src="/assets/messages.svg" alt="Messages" />
             </Link>
+            <ProfileMenu />
           </div>
         )}
 
-        {/* Menu Icon */}
-        <ProfileMenu />
       </div>
     </header>
   );
