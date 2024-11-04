@@ -18,11 +18,9 @@ const SignForm: React.FC<SignFormProps> = ({
   type,
 }) => {
   const isLogin = type === "login";
-  const buttonText = isLogin ? "LOGIN" : "register";
   const linkText = isLogin
     ? "Don't have an account?"
     : "Already have an account?";
-  const navigate = useNavigate()
   return (
     <div className="text-center flex flex-col border border-black flex-1">
       <div className="border border-black w-fit h-fit mx-auto rounded-full p-1 mt-5">
@@ -33,7 +31,7 @@ const SignForm: React.FC<SignFormProps> = ({
         />
       </div>
       <h3 className="text-5xl uppercase mt-2">{title}</h3>
-      <p className="text-sm mt-3">{description}</p>
+      <p className="text-xs mt-3 font-bold font-baskervville">{description}</p>
 
       {children}
 

@@ -4,7 +4,7 @@ import { Heading } from "../components/shared/Header";
 
 const Home = () => {
   return (
-    <div className="w-full flex flex-col items-center min-h-screen bg-[#ddd1bb]">
+    <div className="w-full flex flex-col items-center min-h-screen bg-[#ddd1bb] font-romie">
       <div className="max-w-3xl py-5 flex justify-center items-center md:flex-1 w-full">
         <div className="relative">
           <img src="/assets/home-circle.svg" alt="" />
@@ -18,7 +18,7 @@ const Home = () => {
             </h1>
             <Heading />
           </div>
-          <div className="absolute top-3/4 left-1/2 md:w-[200px]   w-[120px] -ml-[60px]  -mt-3 md:-ml-[95px] md:mt-[25px]">
+          <div className="absolute top-3/4 left-1/2 md:w-[200px]    w-[120px] -ml-[60px]  -mt-3 md:-ml-[95px] md:mt-[25px]">
             <Link to="/login">
               <Button className="p-1 ">login</Button>
             </Link>

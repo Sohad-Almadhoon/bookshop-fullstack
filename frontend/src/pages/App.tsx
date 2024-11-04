@@ -14,6 +14,7 @@ import ModalProvider from "../components/modals/ModalProvider";
 import Questionnaire from "./Questionnaire";
 import ComingSoon from "./ComingSoon";
 import Discover from "./Discover";
+import Notifications from "../components/Notifications";
 
 const App = () => {
   const Layout = () => {

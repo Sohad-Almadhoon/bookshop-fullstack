@@ -18,32 +18,33 @@ import VoicePlayer from "../components/VoicePlayer";
 
 import "swiper/css";
 import "swiper/css/effect-coverflow";
-import NovelModal from "../components/modals/NovelModal";
 
 interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon: React.ElementType<{ className?: string }>;
   label: string;
+  price: number;
 }
 
 interface CardSectionProps {
-  title: string;
   content: string;
+ 
 }
 
 const IconButton: React.FC<IconButtonProps> = ({
   icon: Icon,
   onClick,
   label,
+  price,
 }) => (
   <Button
     onClick={onClick}
     className="flex items-center justify-center gap-x-3 my-5 max-w-sm w-full mx-auto">
-    <Icon className="text-sm" />
-    {label}
+    <Icon className="text-lg" />
+    {label} <b className="text-lg"><sup>$</sup>{price}</b>
   </Button>
 );
 
-const CardSection: React.FC<CardSectionProps> = ({ title, content }) => (
+const CardSection: React.FC<CardSectionProps> = ({ content }) => (
   <div className="border border-black border-opacity-30 flex-1 rounded-2xl p-4 mt-5">
     <div className="flex justify-between">
       <div className="flex gap-2">
@@ -65,14 +66,22 @@ const Discover: React.FC = () => {
 
   return (
     <div className="min-h-screen border border-black">
-      <Header />
+      <Header
+        title={
+          <h3 className="text-3xl uppercase font-romieMedium">
+            Worldview Ethics{" "}
+            <span className="text-2xl cursor-pointer">Scroll to explore</span>
+          </h3>
+        }
+      />
       <div className="flex">
         <div className="flex-1 border-r border-black">
           <div className=" flex flex-col items-center relative">
             <IconButton
               onClick={() => openModal("visual")}
               icon={BsImageFill}
-              label="BUY VISUAL BLOCK $10"
+              label="BUY VISUAL BLOCK"
+              price={10}
             />
 
             <Swiper
@@ -130,7 +139,8 @@ const Discover: React.FC = () => {
             <IconButton
               onClick={() => openModal("audio")}
               icon={BsMusicNoteBeamed}
-              label="BUY AUDIO BLOCK $8"
+              label="BUY AUDIO BLOCK"
+              price={8}
             />
           </div>
         </div>
@@ -141,13 +151,16 @@ const Discover: React.FC = () => {
               MORAL PHILOSOPHY & <span className="text-xl">THE</span> AI PANIC
             </h2>
             <CardSection
-              title="AI Panic Letter"
+              content="hat is it about artificial intelligence that has the world in such an uproar? An open letter is being circulated (Future of Life, 2023) after being signed by heads of industry and famous thinkers including Max Tegmark and other respectable minds..."
+            />{" "}
+            <CardSection
               content="hat is it about artificial intelligence that has the world in such an uproar? An open letter is being circulated (Future of Life, 2023) after being signed by heads of industry and famous thinkers including Max Tegmark and other respectable minds..."
             />
             <IconButton
               onClick={() => openModal("text")}
               icon={BsFileText}
-              label="BUY AUDIO BLOCK $8"
+              label=" MINT TEXT BLOCK"
+              price={8}
             />
           </div>
         </div>

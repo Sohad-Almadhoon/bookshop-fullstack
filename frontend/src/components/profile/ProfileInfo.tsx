@@ -8,10 +8,10 @@ const ProfileInfo: React.FC = () => (
       <img src="/assets/collection-thumbnail.png" alt="profile-img" />
     </div>
     <div className="flex-1">
-      <h1 className="uppercase text-5xl text-black font-light mb-3">
-        andrew <sub className="text-3xl">nox</sub>
+      <h1 className="uppercase text-5xl text-black font-romieMedium mb-3">
+        andrew <sub className="text-2xl">nox</sub>
       </h1>
-      <p className="max-w-[640px] mb-3">
+      <p className="max-w-[640px] mb-3 text-sm font-baskervville">
         I am a dedicated writer that aspires to be the greatest of all time. One
         becomes part of the art we see and I want people to see the taste at its
         best.

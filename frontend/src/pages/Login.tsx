@@ -21,7 +21,7 @@ const Login = () => {
 
   // onSubmit handler type-safe for LoginFormInputs
   const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
-    navigate("/discover");
+    navigate("/welcome");
   };
 
   return (

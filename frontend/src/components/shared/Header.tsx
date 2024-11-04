@@ -1,6 +1,9 @@
 import React, { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
+import { useNotificationModal } from "../../hooks/useNotificationModal";
+import Notifications from "../Notifications";
+import ProfileMenu from "../ProfileMenu";
 
 interface HeaderProps {
   profile?: boolean;
@@ -9,6 +12,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ profile, title, className }) => {
+  const { openModal, isOpen } = useNotificationModal();
   return (
     <header className="flex items-center border-black border py-1 px-20 ">
       {/* Logo Section */}
@@ -24,12 +28,14 @@ const Header: React.FC<HeaderProps> = ({ profile, title, className }) => {
         {profile && (
           <div className="flex gap-3">
             {/* Notifications */}
-            <Link className="relative" to="/notifications">
+            <div className="relative cursor-pointer" onClick={openModal}>
+              {!isOpen && <Notifications />}
+              {isOpen && <ProfileMenu />}
               <img src="/assets/bell.svg" alt="Notifications" />
               <div className="absolute top-0 right-0 w-6 h-6 bg-black rounded-full flex justify-center items-center">
                 <p className="text-xs text-white">2</p>
               </div>
-            </Link>
+            </div>
 
             {/* Messages */}
             <Link to="/messages">
@@ -39,7 +45,7 @@ const Header: React.FC<HeaderProps> = ({ profile, title, className }) => {
         )}
 
         {/* Menu Icon */}
-        <img src="/assets/menu-black.svg" alt="Menu" />
+        <ProfileMenu />
       </div>
     </header>
   );
@@ -50,7 +56,7 @@ interface HeadingProps {
   title?: ReactNode;
 }
 
-export const Heading: React.FC<HeadingProps> = ({ className, title }) => {
+export const Heading: React.FC<HeadingProps> = ({ title }) => {
   return (
     <div>
       {title ? (
@@ -58,11 +64,11 @@ export const Heading: React.FC<HeadingProps> = ({ className, title }) => {
       ) : (
         <div
           className={twMerge(
-            "flex uppercase justify-start text-lg md:text-3xl font-romieMedium"
+            "flex uppercase justify-start text-lg md:text-3xl font-romieMedium tracking-wide"
           )}>
-          <sub className="text-xl mr-2 mt-1 font-light">the</sub>
+          <sub className="text-xl mr-2 mt-1">the</sub>
           home
-          <sub className="text-xl mx-2 mt-1 font-light">of</sub>
+          <sub className="text-xl mx-2 mt-1">of</sub>
           collaborative writing
         </div>
       )}
