@@ -6,7 +6,7 @@ import Messages from "./Messages";
 import Message from "./Message";
 import Profile from "./Profile";
 import SignLayout from "../components/auth/SignLayout";
-import ToasterProvider from '../components/ToasterProvider';
+import ToasterProvider from "../components/ToasterProvider";
 import Book from "./Book";
 import Welcome from "./Welcome";
 import Tree from "./Tree";
@@ -14,13 +14,13 @@ import ModalProvider from "../components/modals/ModalProvider";
 import Questionnaire from "./Questionnaire";
 import ComingSoon from "./ComingSoon";
 import Discover from "./Discover";
-import Notifications from "../components/Notifications";
+import Novel from "./Novel";
 
 const App = () => {
   const Layout = () => {
     return (
       <div className="bg-[#DDD1BB] min-h-screen p-2 relative font-romie">
-        <ToasterProvider/>
+        <ToasterProvider />
         <ModalProvider />
         <Outlet />
       </div>
@@ -61,6 +61,10 @@ const App = () => {
         {
           path: "/discover",
           element: <Discover />,
+        },
+        {
+          path: "/novel",
+          element: <Novel />,
         },
       ],
     },

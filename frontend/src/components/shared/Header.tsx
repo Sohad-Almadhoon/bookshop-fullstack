@@ -8,9 +8,10 @@ interface HeaderProps {
   profile?: boolean;
   title?: ReactNode;
   className?: string;
+  isDropDown?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ profile, title, className }) => {
+const Header: React.FC<HeaderProps> = ({ profile, title, className , isDropDown}) => {
   return (
     <header className="flex items-center border-black border py-1 px-20 ">
       {/* Logo Section */}
@@ -26,16 +27,15 @@ const Header: React.FC<HeaderProps> = ({ profile, title, className }) => {
         {profile && (
           <div className="flex gap-3">
             {/* Notifications */}
-           <Notifications/>
+            <Notifications />
 
             {/* Messages */}
             <Link to="/messages">
               <img src="/assets/messages.svg" alt="Messages" />
             </Link>
-            <ProfileMenu />
           </div>
         )}
-
+        {isDropDown && <ProfileMenu />}
       </div>
     </header>
   );
