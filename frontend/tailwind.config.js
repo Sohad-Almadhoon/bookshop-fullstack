@@ -3,11 +3,16 @@ module.exports = {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+  
       fontFamily: {
         cardinal: ["Cardinal", "sans-serif"],
         romie: ["Romie", "sans-serif"], // Already added "Romie" font
         voyage: ["voyage", "serif"],
         baskervville: ["Baskervville", "serif"],
+      },
+      rotate: {
+        "-15": "-15deg",
+        "15": "15deg",
       },
       fontWeight: {
         romieLight: 300,
