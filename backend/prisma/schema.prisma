@@ -12,3 +12,119 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model users {
+  id               Int      @id @default(autoincrement())
+  name             String
+  email            String   @unique
+  password         String
+  role             String
+  generes          String[]
+  created_at       DateTime @default(now())
+  following_users  users[] @relation("UserFollows")
+  followers        users[] @relation("UserFollows")
+  books            user_books[]
+  comments         book_comments[]
+  conversations    Participant[]
+  messages         messages[]
+  chapter_blocks   chapter_content[]
+}
+
+model user_books {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  book_id     Int
+  created_at  DateTime @default(now())
+  type        UserBookRelationType
+
+  user        users @relation(fields: [user_id], references: [id])
+  book        books @relation(fields: [book_id], references: [id])
+}
+
+model books {
+  id          Int      @id @default(autoincrement())
+  title       String
+  author      String
+  description String
+  generes     String[]
+  main_cover  String
+  created_at  DateTime @default(now())
+
+  comments    book_comments[]
+  chapters    chapters[]
+  users       user_books[]
+}
+
+model chapters {
+  id          Int      @id @default(autoincrement())
+  title       String
+  book_id     Int
+  created_at  DateTime @default(now())
+  chapter_content chapter_content[]
+
+  book        books @relation(fields: [book_id], references: [id])
+}
+
+model chapter_content {
+  id             Int      @id @default(autoincrement())
+  chapter_id     Int
+  author_id      Int
+  content        String
+  type           ContentType
+  created_at     DateTime @default(now())
+  transaction_id String
+  
+  author      users @relation(fields: [author_id], references: [id])
+  chapter     chapters @relation(fields: [chapter_id], references: [id])
+}
+
+model book_comments {
+  id          Int      @id @default(autoincrement())
+  book_id     Int
+  user_id     Int
+  content     String
+  created_at  DateTime @default(now())
+
+  user        users @relation(fields: [user_id], references: [id])
+  book        books @relation(fields: [book_id], references: [id])
+}
+
+model Conversation {
+  id            Int             @id @default(autoincrement())
+  participants  Participant[]
+  messages      messages[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model Participant {
+  id              Int           @id @default(autoincrement())
+  userId          Int
+  conversationId  Int
+  user            users          @relation(fields: [userId], references: [id])
+  conversation    Conversation  @relation(fields: [conversationId], references: [id])
+
+  @@unique([userId, conversationId])
+}
+model messages {
+  id              Int           @id @default(autoincrement())
+  conversationId  Int
+  senderId        Int
+  content         String
+  createdAt       DateTime      @default(now())
+
+  conversation    Conversation  @relation(fields: [conversationId], references: [id])
+  sender          users          @relation(fields: [senderId], references: [id])
+}
+
+enum ContentType {
+  TEXT
+  AUDIO
+  ILLUSTRATION
+}
+
+enum UserBookRelationType {
+  LIKE
+  FOLLOW
+  ALL
+}
