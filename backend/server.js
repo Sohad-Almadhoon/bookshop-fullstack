@@ -1,11 +1,11 @@
+//@ts-nocheck
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import userRoutes from "./routes/users.route.js";
 const app = express();
 dotenv.config();
 app.use(express.json());
@@ -17,13 +17,7 @@ cloudinary.config({
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
 });
-
-app.get("/users", async (req, res) => {
-  const users = await prisma.users.findMany();
-  res.status(200).json(users);
-
-});
-
+app.use("/api/users", userRoutes);
 // Middleware to handle file uploads
 const upload = multer({ dest: "uploads/" });
 
