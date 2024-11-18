@@ -1,4 +1,3 @@
-//@ts-nocheck
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -7,10 +6,20 @@ import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
+import bookRoutes from "./routes/book.route.js";
+import commentRoutes from "./routes/book_comment.route.js";
+import chapterRoutes from "./routes/book_chapter.route.js";
 const app = express();
 dotenv.config();
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+
+//Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/book", bookRoutes);
+app.use("/api/comment", commentRoutes);
+app.use("/api/chapter", chapterRoutes);
 
 // Configure Cloudinary
 cloudinary.config({
@@ -18,8 +27,7 @@ cloudinary.config({
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
 });
-app.use("/api/auth", authRoutes);
-app.use("/api/user", userRoutes);
+
 // Middleware to handle file uploads
 const upload = multer({ dest: "uploads/" });
 
