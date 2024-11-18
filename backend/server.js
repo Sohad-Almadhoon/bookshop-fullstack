@@ -5,7 +5,7 @@ import cors from "cors";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
-import userRoutes from "./routes/users.route.js";
+import userRoutes from "./routes/auth.route.js";
 const app = express();
 dotenv.config();
 app.use(express.json());
@@ -17,7 +17,7 @@ cloudinary.config({
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
 });
-app.use("/api/users", userRoutes);
+app.use("/api/auth", userRoutes);
 // Middleware to handle file uploads
 const upload = multer({ dest: "uploads/" });
 
