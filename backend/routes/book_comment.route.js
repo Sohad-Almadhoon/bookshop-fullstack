@@ -3,6 +3,6 @@ import verifyToken from "../middlewares/verifyToken.js";
 import { createComment } from "../controllers/book_comment.controller.js";
 
 const router = express.Router();
-router.post("/", verifyToken, createComment);
+router.post("/:bookId", verifyToken, createComment);
 
 export default router;

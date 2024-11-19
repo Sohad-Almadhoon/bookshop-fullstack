@@ -9,6 +9,8 @@ import userRoutes from "./routes/user.route.js";
 import bookRoutes from "./routes/book.route.js";
 import commentRoutes from "./routes/book_comment.route.js";
 import chapterRoutes from "./routes/book_chapter.route.js";
+import conversationRoutes from "./routes/conversation.route.js";
+import messageRoutes from "./routes/message.route.js";
 const app = express();
 dotenv.config();
 app.use(express.json());
@@ -20,6 +22,8 @@ app.use("/api/user", userRoutes);
 app.use("/api/book", bookRoutes);
 app.use("/api/comment", commentRoutes);
 app.use("/api/chapter", chapterRoutes);
+app.use("/api/conversations", conversationRoutes);
+app.use("/api/messages", messageRoutes);
 
 // Configure Cloudinary
 cloudinary.config({
