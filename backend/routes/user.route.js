@@ -1,9 +1,11 @@
-import express from 'express';
-import followUser from "../controllers/user.controller.js";
-import verifyToken from '../middlewares/verifyToken.js';
+import express from "express";
+import { connectUserWithBook, followUser , getUser } from "../controllers/user.controller.js";
+import verifyToken from "../middlewares/verifyToken.js";
 
 const router = express.Router();
-router.post("/follow", verifyToken, followUser);
 
+router.get("/:id", verifyToken, getUser);
+router.post("/follow", verifyToken, followUser);
+router.post("/:userId/books", verifyToken, connectUserWithBook);
 
 export default router;

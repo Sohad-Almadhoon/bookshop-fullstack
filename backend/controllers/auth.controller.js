@@ -80,12 +80,4 @@ const login = async (req, res) => {
     res.status(500).json({ error: "Error logging in" });
   }
 };
-const getUserByEmail = async (req, res) => {
-  try {
-    return res.status(200).send(users);
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    throw error;
-  }
-};
-export { register, getUserByEmail, login };
+export { register, login };
