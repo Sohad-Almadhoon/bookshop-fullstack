@@ -2,7 +2,7 @@ import prisma from "../utils/db.js";
 
 const followUser = async (req, res) => {
   const { userIdToFollow } = req.body; // The ID of the user to follow
-  const { id :userId } = req.user; // Assuming you have the current logged-in user's ID from auth middleware
+  const { id: userId } = req.user; // Assuming you have the current logged-in user's ID from auth middleware
   if (userId === userIdToFollow) {
     return res.status(400).json({ error: "You cannot follow yourself." });
   }
@@ -53,8 +53,8 @@ const followUser = async (req, res) => {
 };
 
 const connectUserWithBook = async (req, res) => {
-  const { userId } = req.params; 
-  const { bookId, type } = req.body; 
+  const { userId } = req.params;
+  const { bookId, type } = req.body;
 
   try {
     // Check if the user-book relation already exists
@@ -76,7 +76,7 @@ const connectUserWithBook = async (req, res) => {
       data: {
         user_id: parseInt(userId),
         book_id: parseInt(bookId),
-        type: type || "ALL", 
+        type: type || "ALL",
       },
     });
 
@@ -86,15 +86,13 @@ const connectUserWithBook = async (req, res) => {
     });
   } catch (error) {
     console.error("Error connecting user with book:", error);
-    res
-      .status(500)
-      .json({
-        error: "An error occurred while connecting the user with the book.",
-      });
+    res.status(500).json({
+      error: "An error occurred while connecting the user with the book.",
+    });
   }
 };
 const getUser = async (req, res) => {
-  const { id } = req.params; 
+  const { id } = req.params;
   try {
     const user = await prisma.users.findUnique({
       where: {
@@ -134,5 +132,26 @@ const getUser = async (req, res) => {
   }
 };
 
+const getBookUsers = async (req, res) => {
+  const bookId = parseInt(req.params.id);
 
-export { followUser, connectUserWithBook , getUser };
+  try {
+    const users = await prisma.user_books.findMany({
+      where: { book_id: bookId },
+      include: {
+        user: true,
+      },
+    });
+
+    if (!users.length) {
+      return res.status(404).json({ message: "No users found for this book" });
+    }
+
+    return res.json(users.map((userBook) => userBook.user)); 
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export { followUser, connectUserWithBook, getUser, getBookUsers };
