@@ -1,26 +1,31 @@
+// src/pages/Register.tsx
+import { useForm, SubmitHandler } from "react-hook-form";
+import { useNavigate } from "react-router-dom"
 import CustomInput from "../components/shared/CustomInput";
 import SignForm from "../components/auth/SignForm";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
 import Button from "../components/shared/Button";
+import { useFormStore } from "../hooks/useFormStore";
 
-interface LoginFormInputs {
+interface RegisterFormInputs {
   name: string;
   email: string;
-  rememberMe: boolean;
+  password: string;
 }
+
 const Register = () => {
   const {
-  register,
-  handleSubmit,
-  formState: { errors },
-} = useForm<LoginFormInputs>();
-const navigate = useNavigate();
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormInputs>();
+  const {updateFormData} = useFormStore();
+  const navigate = useNavigate();
 
-// onSubmit handler type-safe for LoginFormInputs
-const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
-  navigate("/questionnaire");
-};
+  const onSubmit: SubmitHandler<RegisterFormInputs> = (data) => {
+    updateFormData(data); // Save data to Zustand store
+    navigate("/questionnaire");
+  };
+
   return (
     <SignForm
       title="Create Account"
@@ -51,7 +56,11 @@ const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
           placeholder="Create A Password"
           aria-label="Password"
           type="password"
+          {...register("password", { required: "Password is required" })}
         />
+        {errors.password && (
+          <p className="text-red-500">{errors.password.message}</p>
+        )}
         <Button type="submit">Register</Button>
       </form>
     </SignForm>
