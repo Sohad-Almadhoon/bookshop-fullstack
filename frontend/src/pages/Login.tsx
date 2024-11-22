@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import CustomInput from "../components/shared/CustomInput";
 import SignForm from "../components/auth/SignForm";
 import Button from "../components/shared/Button";
+import newRequest from "../utils/newRequest";
 
-// Define the type for the form inputs
 interface LoginFormInputs {
   name: string;
   email: string;
-  rememberMe: boolean;
+  password: string;
 }
 
 const Login = () => {
@@ -20,7 +20,15 @@ const Login = () => {
   const navigate = useNavigate();
 
   // onSubmit handler type-safe for LoginFormInputs
-  const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
+  const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
+    try {
+      const res = await newRequest.post("/api/auth/login", data);
+      // Save the token to localStorage
+      localStorage.setItem("token", res.data.token);
+    } catch (error) {
+      console.error("Failed to submit data", error);
+    }
+
     navigate("/welcome");
   };
 
@@ -52,15 +60,26 @@ const Login = () => {
           })}
         />
         {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+        {/* Password Input */}
+        <CustomInput
+          type="password"
+          placeholder="Enter Your Password"
+          {...register("password", {
+            required: "Password is required",
+            minLength: {
+              value: 5,
+              message: "Password must be at least 6 characters long",
+            },
+          })}
+        />
+        {errors.password && (
+          <p className="text-red-500">{errors.password.message}</p>
+        )}
 
         {/* Remember Me Checkbox  */}
         <div className="flex justify-between text-sm">
           <label className="flex items-center">
-            <CustomInput
-              type="checkbox"
-              {...register("rememberMe")}
-              className="custom-checkbox"
-            />
+            <CustomInput type="checkbox" className="custom-checkbox" />
             <span className="ml-1">Remember Me</span>
           </label>
           <p>Forget Password?</p>

@@ -32,7 +32,7 @@ const Questionnaire: React.FC = () => {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
 
   const handleOccupationChange = (occupation: string) => {
-    setSelectedOccupation(occupation); // Update to allow only one occupation
+    setSelectedOccupation(occupation); 
   };
 
   const handleGenreChange = (genre: string) => {
@@ -55,7 +55,6 @@ const Questionnaire: React.FC = () => {
     };
 
     try {
-      console.log(finalData);
       await newRequest.post("/api/auth/register", finalData); // Replace with your API endpoint
       navigate("/success");
     } catch (error) {

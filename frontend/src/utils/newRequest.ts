@@ -1,4 +1,5 @@
 import axios from "axios";
+
 const baseURL =
   process.env.NODE_ENV === "production"
     ? "https://your-production-domain.com"
@@ -9,6 +10,11 @@ const newRequest = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+
 });
+const token = localStorage.getItem("token");
+if (token) {
+  newRequest.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+}
 
 export default newRequest;
