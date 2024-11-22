@@ -92,7 +92,7 @@ const connectUserWithBook = async (req, res) => {
   }
 };
 const getUser = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.user;
   try {
     const user = await prisma.users.findUnique({
       where: {

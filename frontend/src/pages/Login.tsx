@@ -6,7 +6,6 @@ import Button from "../components/shared/Button";
 import newRequest from "../utils/newRequest";
 
 interface LoginFormInputs {
-  name: string;
   email: string;
   password: string;
 }
@@ -22,14 +21,16 @@ const Login = () => {
   // onSubmit handler type-safe for LoginFormInputs
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     try {
+      console.log(data);
       const res = await newRequest.post("/api/auth/login", data);
       // Save the token to localStorage
+      console.log(res.data.token);
       localStorage.setItem("token", res.data.token);
+      navigate("/welcome");
     } catch (error) {
       console.error("Failed to submit data", error);
     }
 
-    navigate("/welcome");
   };
 
   return (
@@ -40,14 +41,7 @@ const Login = () => {
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-5 mx-auto mt-5 flex-1 w-full max-w-sm">
-        {/* Name Input */}
-        <CustomInput
-          placeholder="Enter Your Name"
-          {...register("name", { required: "Name is required" })}
-          className="mt-4"
-        />
-        {errors.name && <p className="text-red-500">{errors.name.message}</p>}
-
+    
         {/* Email Input */}
         <CustomInput
           placeholder="Enter Your Email"

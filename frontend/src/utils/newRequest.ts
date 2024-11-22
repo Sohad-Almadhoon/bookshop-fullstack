@@ -12,9 +12,18 @@ const newRequest = axios.create({
   },
 
 });
-const token = localStorage.getItem("token");
-if (token) {
-  newRequest.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-}
+// Intercept every request to add the Authorization header dynamically
+newRequest.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 export default newRequest;
