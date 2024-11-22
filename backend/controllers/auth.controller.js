@@ -3,20 +3,7 @@ import prisma from "../utils/db.js";
 import jwt from "jsonwebtoken";
 const register = async (req, res) => {
   const { name, email, password, role, generes } = req.body;
-
-  // Validate required fields
-  if (
-    ![name, email, password].every(
-      (field) => typeof field === "string" && field.trim() !== ""
-    )
-  ) {
-    return res
-      .status(400)
-      .json({
-        error:
-          "All fields (name, email, password, and role) are required and must be non-empty strings",
-      });
-  }
+  console.log(req.body);
   try {
     // Check if user already exists
     const existingUser = await prisma.users.findUnique({
