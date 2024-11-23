@@ -60,7 +60,7 @@ const CardSection: React.FC<CardSectionProps> = ({ content }) => (
   </div>
 );
 
-const Novel: React.FC = () => {
+const Chapter: React.FC = () => {
   const { openModal } = useNovelModal();
   const swiperRef = useRef<SwiperType | null>(null);
 
@@ -169,4 +169,4 @@ const Novel: React.FC = () => {
   );
 };
 
-export default Novel;
+export default Chapter;

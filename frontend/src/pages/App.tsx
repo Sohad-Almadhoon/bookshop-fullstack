@@ -14,16 +14,19 @@ import ModalProvider from "../components/modals/ModalProvider";
 import Questionnaire from "./Questionnaire";
 import ComingSoon from "./ComingSoon";
 import Discover from "./Discover";
-import Novel from "./Novel";
+import Chapter from "./Chapter";
+import ProtectedRoute from "./ProtectedRoute";
 
 const App = () => {
   const Layout = () => {
     return (
-      <div className="bg-[#DDD1BB] min-h-screen p-2 relative font-romie">
-        <ToasterProvider />
-        <ModalProvider />
-        <Outlet />
-      </div>
+      <ProtectedRoute>
+        <div className="bg-[#DDD1BB] min-h-screen p-2 relative font-romie">
+          <ToasterProvider />
+          <ModalProvider />
+          <Outlet />
+        </div>
+      </ProtectedRoute>
     );
   };
   const router = createBrowserRouter([
@@ -63,8 +66,8 @@ const App = () => {
           element: <Discover />,
         },
         {
-          path: "/novel",
-          element: <Novel />,
+          path: "/chapters/:id",
+          element: <Chapter />,
         },
       ],
     },

@@ -8,7 +8,7 @@ const Profile: React.FC = () => {
   const [tab, setTab] = useState(0);
   const tabs = [
     {
-      title: "BLOCKS",
+      title: "BOOKS",
       activeIcon: "/assets/blocks.svg",
       icon: "/assets/blocks-black.svg",
       total: 1,

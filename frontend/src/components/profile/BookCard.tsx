@@ -17,11 +17,6 @@ const BookCard = ({url}:{url:string}) => {
           </span>
         </div>
       </div>
-      <div className="flex flex-col text-center">
-        {" "}
-        <p className="mt-1 font-medium truncate">IP INPUT 800</p>
-        <p className="font-light">FUND: $4,000</p>
-      </div>
     </Link>
   );
 };
