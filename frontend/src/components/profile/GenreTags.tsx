@@ -7,8 +7,8 @@ const GenreTags: React.FC<GenreTagProps> = ({ tags }) => (
     {tags.map((tag, index) => (
       <p
         key={index}
-        className="border border-black rounded-md text-black text-opacity-60 py-1 px-2 text-sm">
-        {tag}
+        className="border border-black rounded-md text-black  py-1 px-2 text-sm">
+        #{tag}
       </p>
     ))}
   </div>
