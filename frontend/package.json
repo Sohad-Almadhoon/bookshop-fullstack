@@ -11,6 +11,7 @@
     "@types/react-router-dom": "^5.3.3",
     "axios": "^1.7.7",
     "formik": "^2.4.6",
+    "jwt-decode": "^4.0.0",
     "react": "^18.3.1",
     "react-curved-text": "^3.0.1",
     "react-dom": "^18.3.1",
@@ -52,6 +53,7 @@
     ]
   },
   "devDependencies": {
+    "@types/jwt-decode": "^3.1.0",
     "@types/react-curved-text": "^2.0.3",
     "ajv": "^7.2.4",
     "autoprefixer": "^10.4.20",

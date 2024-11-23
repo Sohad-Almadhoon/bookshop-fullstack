@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Heading } from "../components/shared/Header";
 import { useEffect } from "react";
 
-const Home = () => {
+const Main = () => {
    const navigate = useNavigate();
 
    useEffect(() => {
@@ -46,4 +46,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Main;

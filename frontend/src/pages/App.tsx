@@ -1,7 +1,6 @@
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import Register from "./Register";
 import Login from "./Login";
-import Home from "./Home";
 import Messages from "./Messages";
 import Message from "./Message";
 import Profile from "./Profile";
@@ -16,6 +15,7 @@ import ComingSoon from "./ComingSoon";
 import Discover from "./Discover";
 import Chapter from "./Chapter";
 import ProtectedRoute from "./ProtectedRoute";
+import Main from "./Main";
 
 const App = () => {
   const Layout = () => {
@@ -90,7 +90,7 @@ const App = () => {
     },
     {
       path: "/",
-      element: <Home />,
+      element: <Main />,
     },
   ]);
   return <RouterProvider router={router} />;

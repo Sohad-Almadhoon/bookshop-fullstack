@@ -4,37 +4,37 @@ import GenreTags from "./GenreTags";
 import ProfileStats from "./ProfileStats";
 import newRequest from "../../utils/newRequest";
 
-const ProfileInfo: React.FC = () => {
-const [user, setUser] = useState<any>(null); // State to store user info
-const [loading, setLoading] = useState(true); // Loading state
-const [error, setError] = useState<string | null>(null); // Error state
+const ProfileInfo = ({ id }: { id: string }) => {
+  const [user, setUser] = useState<any>(null); // State to store user info
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState<string | null>(null); // Error state
 
-useEffect(() => {
-  // Fetch user information from the server
-  const fetchUserInfo = async () => {
-    try {
-      const response = await newRequest.get("/api/users"); // Adjust the API route as needed
-      setUser(response.data); // Save user data to state
-      setLoading(false); // Set loading to false when data is fetched
-    } catch (err) {
-      setError("Failed to load user data");
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    // Fetch user information from the server
+    const fetchUserInfo = async () => {
+      try {
+        const response = await newRequest.get(`/api/users/${id}`);
+        setUser(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to load user data");
+        setLoading(false);
+      }
+    };
 
-  fetchUserInfo();
-}, []);
+    fetchUserInfo();
+  }, [id]);
   console.log(user);
 
-// If data is still loading, display a loading message
-if (loading) {
-  return <div>Loading...</div>;
-}
+  // If data is still loading, display a loading message
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-// If there was an error fetching data, display an error message
-if (error) {
-  return <div>{error}</div>;
-}
+  // If there was an error fetching data, display an error message
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
     <div className="border border-opacity-30 border-black rounded-xl p-8 mt-5 flex gap-4">
