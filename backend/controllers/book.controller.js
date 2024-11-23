@@ -1,16 +1,40 @@
 import prisma from "../utils/db.js";
 
 const createBook = async (req, res) => {
-    const { title, author, description, generes, main_cover } = req.body;
-    try {
-      const newBook = await prisma.books.create({
-        data: { title, author, description, generes, main_cover },
-      });
-      res.status(201).json(newBook);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
+  const { title, author, description, generes, main_cover } = req.body;
+  const { id: userId } = req.user;
+
+  if (!title || !author || !description || !generes || !main_cover) {
+    return res.status(400).json({ error: "All fields are required." });
+  }
+
+  try {
+    const newBook = await prisma.books.create({
+      data: {
+        title,
+        author,
+        description,
+        generes,
+        main_cover,
+      },
+    });
+
+    await prisma.user_books.create({
+      data: {
+        user_id: userId, 
+        book_id: newBook.id, 
+        type: "ALL", 
+      },
+    });
+
+    res.status(201).json(newBook);
+  } catch (error) {
+    console.error("Error creating book:", error);
+    res.status(500).json({ error: error.message });
+  }
 };
+
+
 const getBook = async (req, res) => {
   const { id } = req.params; 
 

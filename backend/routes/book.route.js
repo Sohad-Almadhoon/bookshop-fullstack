@@ -16,6 +16,7 @@ const router = express.Router();
 router.post("/", verifyToken, createBook);
 router.get("/:id", verifyToken, getBook);
 
+
 //Comments
 router.post("/:id/comments", verifyToken, createComment);
 router.get("/:id/comments", verifyToken, getComments);
