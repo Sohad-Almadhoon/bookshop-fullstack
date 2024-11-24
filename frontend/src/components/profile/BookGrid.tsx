@@ -1,21 +1,23 @@
 import BookCard from "./BookCard";
+
 interface BookGridProps {
   tab: number;
-  books:any[]
+  books: any[];
 }
-const BookGrid: React.FC<BookGridProps> = ({ tab , books}) => {
+
+const BookGrid: React.FC<BookGridProps> = ({ tab, books }) => {
   return (
     <div>
-      {tab === 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 ">
-          {books.map((book, index) => (
-            <BookCard key={index} url={book.main_cover} {...book} />
-          ))}
+      {books.length === 0 ? (
+        <div className="text-center text-gray-500 mt-4">
+          {tab === 0
+            ? "You have no books in your collection."
+            : "No books available from followed users."}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-          {[1, 3, 5, 6, 4].map((card, index) => (
-            <BookCard key={index} url="/assets/book-3.png" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {books.map((book, index) => (
+            <BookCard key={index} url={book.main_cover} />
           ))}
         </div>
       )}

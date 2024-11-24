@@ -24,14 +24,11 @@ const ProfileInfo = ({ id }: { id: string }) => {
 
     fetchUserInfo();
   }, [id]);
-  console.log(user);
 
-  // If data is still loading, display a loading message
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  // If there was an error fetching data, display an error message
   if (error) {
     return <div>{error}</div>;
   }
