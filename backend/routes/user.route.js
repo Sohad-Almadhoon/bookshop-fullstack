@@ -1,7 +1,7 @@
 import express from "express";
 import {
-  connectUserWithBook,
   followUser,
+  getFollowingUserBooks,
   getUser,
   getUserBooks,
 } from "../controllers/user.controller.js";
@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.get("/:id", verifyToken, getUser);
 router.post("/follow", verifyToken, followUser);
-router.post("/:userId/books", verifyToken, connectUserWithBook);
+router.get("/following/books", verifyToken, getFollowingUserBooks);
 router.get("/:userId/books", verifyToken, getUserBooks);
 
 export default router;

@@ -51,46 +51,6 @@ const followUser = async (req, res) => {
     return res.status(500).json({ error: "Error following user." });
   }
 };
-
-const connectUserWithBook = async (req, res) => {
-  const { userId } = req.params;
-  const { bookId, type } = req.body;
-
-  try {
-    // Check if the user-book relation already exists
-    const existingRelation = await prisma.user_books.findFirst({
-      where: {
-        user_id: parseInt(userId),
-        book_id: parseInt(bookId),
-      },
-    });
-
-    if (existingRelation) {
-      return res
-        .status(400)
-        .json({ error: "User is already connected to this book." });
-    }
-
-    // Create a new connection
-    const connection = await prisma.user_books.create({
-      data: {
-        user_id: parseInt(userId),
-        book_id: parseInt(bookId),
-        type: type || "ALL",
-      },
-    });
-
-    res.status(201).json({
-      message: "User connected to book successfully.",
-      connection,
-    });
-  } catch (error) {
-    console.error("Error connecting user with book:", error);
-    res.status(500).json({
-      error: "An error occurred while connecting the user with the book.",
-    });
-  }
-};
 const getUser = async (req, res) => {
   const { id } = req.params;
   try {
@@ -176,5 +136,41 @@ const getUserBooks = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+const getFollowingUserBooks = async (req, res) => {
+  const { id: userId } = req.user;
+  try {
+    // Fetch books from users the current user is following
+    const followingBooks = await prisma.user_books.findMany({
+      where: {
+        user: {
+          followers: {
+            some: { id: userId }, // Find books from users that the current user follows
+          },
+        },
+      },
+      include: {
+        book: true, // Include book details
+        user: { select: { name: true, id: true } }, // Include user details if needed
+      },
+    });
 
-export { followUser, connectUserWithBook, getUser, getBookUsers, getUserBooks };
+    if (!followingBooks.length) {
+      return res
+        .status(404)
+        .json({ message: "No books found from followed users." });
+    }
+
+    res.status(200).json("followingBooks");
+  } catch (error) {
+    console.error("Error fetching following user books:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export {
+  followUser,
+  getUser,
+  getBookUsers,
+  getUserBooks,
+  getFollowingUserBooks,
+};
