@@ -3,6 +3,7 @@ import NovelModal from "./NovelModal";
 import BookModal from "./BookModal";
 import InvestModal from "./PaymentModal";
 import FinalModal from "./FinalModal";
+import CommentModal from "./CommentModal";
 
 const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -19,6 +20,7 @@ const ModalProvider = () => {
   }
   return (
     <>
+      <CommentModal/>
       <NovelModal />
       <BookModal />
       <InvestModal />

@@ -119,10 +119,10 @@ const NovelModal = () => {
         {renderTabContent()}
 
         <Button
-          onClick={()=>{}}
+          onClick={() => { }}
           disabled={isLoading}
           className={twMerge("w-[250px] mt-12", !textInput.length && "")}
-          variant={!file ? "outline" : ""} // outline variant condition
+          variant={!file|| !textInput.length ? "outline" : ""} // outline variant condition
         >
           MINT FOR{" "}
           <strong className="ml-3">

@@ -5,9 +5,10 @@ import {
   MenuItem,
   Transition,
 } from "@headlessui/react";
-import {  BsPersonFill } from "react-icons/bs";
+import { BsFillSignNoLeftTurnFill, BsPersonFill, BsSignDeadEndFill, BsSignpost2 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { Fragment } from "react";
+import Button from "./shared/Button";
 
 const ProfileMenu = () => {
   return (
@@ -40,6 +41,16 @@ const ProfileMenu = () => {
               <BsPersonFill className="text-2xl" />
               Profile
             </Link>
+          </MenuItem>
+          <MenuItem as={Fragment}>
+            <Button
+              className={
+                "text-xl font-medium cursor-pointer border-none flex gap-4"
+              }
+              variant="outline">
+              <BsSignpost2 />
+              Logout
+            </Button>
           </MenuItem>
         </MenuItems>
       </Transition>

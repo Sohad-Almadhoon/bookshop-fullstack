@@ -3,9 +3,8 @@ import ProfileInfo from "../components/profile/ProfileInfo";
 import ProfileActions from "../components/profile/ProfileActions";
 import BookGrid from "../components/profile/BookGrid";
 import Header from "../components/shared/Header";
-import newRequest from "../utils/newRequest";
+import { useQuery } from "@tanstack/react-query";
 import { jwtDecode } from "jwt-decode";
-import axios from "axios";
 
 interface DecodedToken {
   id: string;
@@ -14,17 +13,49 @@ interface DecodedToken {
   exp?: number;
 }
 
+interface Book {
+  id: string;
+  title: string;
+  author: string;
+  [key: string]: any; // Extendable for other properties
+}
+
+const fetchUserBooks = async (
+  userId: string,
+  token: string
+): Promise<Book[]> => {
+  const response = await fetch(`/api/users/${userId}/books`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to fetch user's books.");
+  }
+
+  return response.json();
+};
+
+const fetchFollowingBooks = async (token: string): Promise<Book[]> => {
+  const response = await fetch(`/api/users/following/books`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to fetch following books.");
+  }
+
+  return response.json();
+};
+
 const Profile: React.FC = () => {
-  const [tab, setTab] = useState(0);
-  const [books, setBooks] = useState<any[]>([]); // State to store fetched books
-  const [followingBooks, setFollowingBooks] = useState<any[]>([]); // State for books of followed users
-  const [loading, setLoading] = useState<boolean>(true); // Loading state
-  const [error, setError] = useState<string | null>(null); // Error state
+  const [tab, setTab] = useState<number>(0);
   const [userId, setUserId] = useState<string | null>(null);
 
   const token = localStorage.getItem("token");
 
-  // Decode the token and set user ID
+  // Decode the token and set the user ID
   useEffect(() => {
     if (token) {
       try {
@@ -32,12 +63,49 @@ const Profile: React.FC = () => {
         setUserId(decodedToken.id);
       } catch (decodeError) {
         console.error("Invalid token format:", decodeError);
-        setError("Failed to decode token.");
       }
     }
   }, [token]);
 
-  // Tab configuration
+  const {
+    data: books = [],
+    isLoading: isLoadingBooks,
+    error: errorBooks,
+  } = useQuery<Book[], Error>({
+    queryKey: ["userBooks", userId, token],
+    queryFn: () => fetchUserBooks(userId!, token!),
+    enabled: !!userId && tab === 0,
+  });
+
+  const {
+    data: followingBooks = [],
+    isLoading: isLoadingFollowingBooks,
+    error: errorFollowingBooks,
+  } = useQuery<Book[], Error>({
+    queryKey: ["followingBooks", token],
+    queryFn: () => fetchFollowingBooks(token!),
+    enabled: !!token && tab === 1,
+  });
+
+  // Error message helper
+  const getErrorMessage = (error: Error | null | undefined): string =>
+    error?.message || "An unexpected error occurred.";
+
+  // Loading state
+  if (isLoadingBooks || isLoadingFollowingBooks) {
+    return <div>Loading...</div>;
+  }
+
+  // Error state
+  if (errorBooks || errorFollowingBooks) {
+    return (
+      <div>
+        Error:{" "}
+        {getErrorMessage(errorBooks) || getErrorMessage(errorFollowingBooks)}
+      </div>
+    );
+  }
+
   const tabs = [
     {
       title: "BOOKS",
@@ -52,57 +120,6 @@ const Profile: React.FC = () => {
       total: followingBooks.length,
     },
   ];
-
-  // Fetch books based on the selected tab
-  useEffect(() => {
-    const fetchBooks = async () => {
-      if (!userId || !token) return;
-
-      setLoading(true);
-      setError(null); // Reset error state
-
-      try {
-        if (tab === 0) {
-          // Fetch user's own books
-          const response = await newRequest.get(`/api/users/${userId}/books`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setBooks(response.data);
-        } else if (tab === 1) {
-          // Fetch books from followed users
-          const response = await newRequest.get(`/api/users/following/books`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setFollowingBooks(response.data);
-        }
-      } catch (err: unknown) {
-        if (axios.isAxiosError(err)) {
-          console.error(
-            "Error fetching books:",
-            err.response?.data?.message || err.message
-          );
-          setError(err.response?.data?.message || "Failed to fetch books.");
-        } else {
-          console.error("Unexpected error:", err);
-          setError("An unexpected error occurred.");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBooks();
-  }, [tab, token, userId]);
-
-  // Loading state
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  // Error state
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
 
   return (
     <div className="p-2">

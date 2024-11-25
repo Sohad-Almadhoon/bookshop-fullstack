@@ -46,16 +46,18 @@ interface HeadingProps {
   title?: ReactNode;
 }
 
-export const Heading: React.FC<HeadingProps> = ({ title }) => {
+export const Heading: React.FC<HeadingProps> = ({ title, className }) => {
   return (
     <div>
       {title ? (
-        title
+        <span className={className}>{title}</span>
       ) : (
         <div
-          className={twMerge(
-            "flex uppercase justify-start text-lg md:text-3xl font-romieMedium tracking-wide"
-          )}>
+          className={
+            (twMerge(
+              "flex uppercase justify-start text-lg md:text-3xl font-romieMedium tracking-wide"
+            ))
+          }>
           <sub className="text-xl mr-2 mt-1">the</sub>
           home
           <sub className="text-xl mx-2 mt-1">of</sub>

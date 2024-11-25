@@ -3,10 +3,16 @@ import CustomInput from "../shared/CustomInput";
 import Button from "../shared/Button";
 import { useRef } from "react";
 import { usePaymentModal } from "../../hooks/usePaymentModal";
+import { useNovelModal } from "../../hooks/useNovelModal";
 
 const PaymentModal = () => {
-  const { isOpen, closeModal } = usePaymentModal();
+  const { isOpen, closeModal } = usePaymentModal(); 
+  const {  openModal } = useNovelModal(); 
   const dateRef = useRef<HTMLInputElement>(null);
+  const handlePayment = () => {
+    closeModal();
+    openModal("visual");
+  }
   return (
     <Modal
       open={isOpen}
@@ -45,7 +51,9 @@ const PaymentModal = () => {
             className="p-3"
           />
         </div>
-        <Button className="text-xl">Invest as lıttle as $10</Button>
+        <Button className="text-xl" onClick={handlePayment}>
+          Invest as lıttle as $10
+        </Button>
       </form>
     </Modal>
   );
