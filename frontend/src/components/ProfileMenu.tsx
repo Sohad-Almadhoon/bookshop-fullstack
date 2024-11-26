@@ -5,10 +5,11 @@ import {
   MenuItem,
   Transition,
 } from "@headlessui/react";
-import { BsFillSignNoLeftTurnFill, BsPersonFill, BsSignDeadEndFill, BsSignpost2 } from "react-icons/bs";
+import {BsPersonFill, BsSignpost2 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { Fragment } from "react";
 import Button from "./shared/Button";
+import { logout } from "../actions/user.action";
 
 const ProfileMenu = () => {
   return (
@@ -47,7 +48,7 @@ const ProfileMenu = () => {
               className={
                 "text-xl font-medium cursor-pointer border-none flex gap-4"
               }
-              variant="outline">
+              variant="outline" onClick={logout}>
               <BsSignpost2 />
               Logout
             </Button>

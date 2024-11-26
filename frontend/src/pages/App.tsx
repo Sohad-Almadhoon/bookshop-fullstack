@@ -13,23 +13,20 @@ import ModalProvider from "../components/modals/ModalProvider";
 import Questionnaire from "./Questionnaire";
 import ComingSoon from "./ComingSoon";
 import Discover from "./Discover";
-import Chapter from "./Chapter";
 import ProtectedRoute from "./ProtectedRoute";
 import Main from "./Main";
-import QueryProvider from "../providers/QueryProvider";
+import CreatBook from "../components/modals/CeateBook";
 
 const App = () => {
   const Layout = () => {
     return (
-      <QueryProvider>
-        <ProtectedRoute>
-          <div className="bg-[#DDD1BB] min-h-screen p-2 relative font-romie">
-            <ToasterProvider />
-            <ModalProvider />
-            <Outlet />
-          </div>
-        </ProtectedRoute>
-      </QueryProvider>
+      <ProtectedRoute>
+        <div className="bg-[#DDD1BB] min-h-screen p-2 relative font-romie">
+          <ToasterProvider />
+          <ModalProvider />
+          <Outlet />
+        </div>
+      </ProtectedRoute>
     );
   };
   const router = createBrowserRouter([
@@ -44,10 +41,10 @@ const App = () => {
           path: "/messages/:id",
           element: <Message />,
         },
-        // {
-        //   path: "/profile",
-        //   element: <Profile />,
-        // },
+        {
+          path: "/profile",
+          element: <Profile />,
+        },
         {
           path: "/books/:id",
           element: <Book />,
@@ -71,6 +68,10 @@ const App = () => {
         {
           path: "/chapters/:id",
           element: <ComingSoon />,
+        },
+        {
+          path: "/create-book",
+          element: <CreatBook />,
         },
       ],
     },

@@ -1,42 +1,43 @@
-import { useEffect, useState } from "react";
-import Button from "../shared/Button";
+import { useQuery } from "@tanstack/react-query";
 import GenreTags from "./GenreTags";
 import ProfileStats from "./ProfileStats";
 import newRequest from "../../utils/newRequest";
 
-const ProfileInfo = ({ id }: { id: string }) => {
-  const [user, setUser] = useState<any>(null); // State to store user info
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState<string | null>(null); // Error state
+interface ProfileInfoProps {
+  id: string;
+}
 
-  useEffect(() => {
-    // Fetch user information from the server
-    const fetchUserInfo = async () => {
-      try {
-        const response = await newRequest.get(`/api/users/${id}`);
-        setUser(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError("Failed to load user data");
-        setLoading(false);
-      }
-    };
+const fetchUserInfo = async (id: string) => {
+  const response = await newRequest.get(`/api/users/${id}`);
+  return response.data;
+};
 
-    fetchUserInfo();
-  }, [id]);
+const ProfileInfo = ({ id }: ProfileInfoProps) => {
+  const {
+    data: user,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["userProfile", id],
+    queryFn: () => fetchUserInfo(id),
+    enabled: !!id,
+    retry: 1,
+  });
 
-  if (loading) {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (error) {
-    return <div>{error}</div>;
+  if (error instanceof Error) {
+    return <div>Failed to load user data: {error.message}</div>;
   }
 
   return (
     <div className="border border-opacity-30 border-black rounded-xl p-8 mt-5 flex gap-4">
       <div>
-        <img src="/assets/collection-thumbnail.png" alt="profile-img" />
+        <span className="flex uppercase size-24 text-6xl justify-center items-center bg-black text-white rounded-full">
+          {user.name.charAt(0)}
+        </span>
       </div>
       <div className="flex-1">
         <h1 className="uppercase text-5xl text-black font-romieMedium mb-3">
@@ -48,7 +49,6 @@ const ProfileInfo = ({ id }: { id: string }) => {
           at its best.
         </p>
         <div className="flex items-center gap-2">
-          <Button className="w-[200px] rounded-md">follow</Button>
           <ProfileStats
             following={user.following_users.length}
             followers={user.followers.length}
@@ -57,11 +57,10 @@ const ProfileInfo = ({ id }: { id: string }) => {
       </div>
       <div className="flex flex-col">
         <div className=" relative">
-          {" "}
           <div className="border border-black border-opacity-30 rounded-md text-center text-2xl p-2 z-10 text-black">
             <div className="absolute -left-10 top-[-38px]">
               <img
-                className="horn-left "
+                className="horn-left"
                 src="/assets/horn-left.png"
                 alt="Horn Left"
               />
@@ -81,4 +80,5 @@ const ProfileInfo = ({ id }: { id: string }) => {
     </div>
   );
 };
+
 export default ProfileInfo;

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import NovelModal from "./NovelModal";
-import BookModal from "./BookModal";
 import InvestModal from "./PaymentModal";
 import FinalModal from "./FinalModal";
 import CommentModal from "./CommentModal";
@@ -20,9 +19,8 @@ const ModalProvider = () => {
   }
   return (
     <>
-      <CommentModal/>
+      <CommentModal />
       <NovelModal />
-      <BookModal />
       <InvestModal />
       <FinalModal />
     </>

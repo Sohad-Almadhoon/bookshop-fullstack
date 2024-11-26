@@ -47,8 +47,8 @@ const Tree = () => {
                 alt=""
               />
             }
-            text="About&nbsp;&nbsp;About&nbsp;&nbsp;About&nbsp;&nbsp;About"
-            href="/coming-soon"
+            text="Create&nbsp;Book&nbsp;Create&nbsp;Book&nbsp;"
+            href="/create-book"
           />
         </div>
         <div className="absolute right-[22%] top-20">
@@ -73,7 +73,7 @@ const Tree = () => {
                 alt=""
               />
             }
-            text="Redeem&nbsp;Redeem&nbsp;Redeem&nbsp;Redeem"
+            text="Create&nbsp;Book&nbsp;Create&nbsp;Book&nbsp;"
             href="/coming-soon"
           />
         </div>

@@ -1,3 +1,9 @@
+import { FC, useState, useEffect, ReactNode } from "react";
+import { useParams } from "react-router-dom"; // To get the bookId from URL params
+import Button from "../components/shared/Button";
+import Header from "../components/shared/Header";
+import { usePaymentModal } from "../hooks/usePaymentModal";
+import { useCommentModal } from "../hooks/useCommentModal";
 import {
   BsCalendar2DateFill,
   BsChatFill,
@@ -6,55 +12,79 @@ import {
   BsPeopleFill,
   BsPersonFill,
 } from "react-icons/bs";
-import { useState, FC, ReactNode } from "react";
 import { Link } from "react-router-dom";
-import Button from "../components/shared/Button";
-import Header from "../components/shared/Header";
-import { useCommentModal } from "../hooks/useCommentModal";
-import { usePaymentModal } from "../hooks/usePaymentModal";
+import newRequest from "../utils/newRequest";
 
-// Main Book Component
+// Define the shape of the book data
+interface BookData {
+  title: string;
+  main_cover: string;
+  // Add other properties as needed
+}
+
 const Book: FC = () => {
-  const [tab, setTab] = useState<number>(0);
+  const { id: bookId } = useParams(); // Extract bookId from the URL params
+  // State to store book data and selected tab
+  const [bookData, setBookData] = useState<BookData | null>(null);
+  const [tab, setTab] = useState<number>(0); // State for managing the selected tab
 
-  const chapters = [1, 2, 3, 4];
+  const chapters = [1, 2, 3, 4]; // Example chapters data
+
+  // Fetch book info when the component mounts or bookId changes
+  useEffect(() => {
+    const fetchBookInfo = async () => {
+      try {
+        const response = await newRequest.get(`/api/books/${bookId}`);
+        console.log(response);
+        setBookData(response.data); // Assuming response.data contains the book info
+      } catch (error) {
+        console.error("Error fetching book info:", error);
+      }
+    };
+    fetchBookInfo();
+  }, [bookId]);
+
+  // Render loading state while the bookData is being fetched
+  if (!bookData) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header title="worldview ethics" className="text-3xl uppercase" />
+      <Header title={bookData.title} className="text-3xl uppercase" />
 
       <div className="flex border border-black flex-1">
-        <Sidebar />
+        <Sidebar bookData={bookData} />
         <ContentArea tab={tab} setTab={setTab} chapters={chapters} />
       </div>
     </div>
   );
 };
 
-// Sidebar Component
-const Sidebar: FC = () => {
+// Sidebar Component (Modified to receive book data)
+const Sidebar: FC<{ bookData: BookData }> = ({ bookData }) => {
   const { openModal } = usePaymentModal();
+
   return (
     <div className="border-r border-black justify-end flex-1 p-4 flex flex-col px-28">
       <Button onClick={openModal}>
         invest as little as <sup>$</sup>10
       </Button>
       <div className="self-end">
-        <ImageSection />
+        <ImageSection bookCover={bookData.main_cover} />
         <ActionButtons />
       </div>
     </div>
   );
 };
 
-// Image Section Component
-const ImageSection: FC = () => (
+// Image Section Component (Display the book cover image)
+const ImageSection: FC<{ bookCover: string }> = ({ bookCover }) => (
   <div className="mt-4">
-    <img src="/assets/book-2.png" alt="book cover" className="h-full w-full" />
+    <img src={bookCover} alt="book cover" className="h-full w-full" />
   </div>
 );
 
-// Action Buttons Component
 const ActionButtons: FC = () => {
   const { openModal } = useCommentModal();
   return (
@@ -80,14 +110,11 @@ const ActionButtons: FC = () => {
   );
 };
 
-// Content Area Component
-interface ContentAreaProps {
+const ContentArea: FC<{
   tab: number;
   setTab: (tab: number) => void;
   chapters: number[];
-}
-
-const ContentArea: FC<ContentAreaProps> = ({ tab, setTab, chapters }) => (
+}> = ({ tab, setTab, chapters }) => (
   <div className="flex-2 p-12 flex-col flex px-20">
     <ProjectStats />
     <TabSelector currentTab={tab} setTab={setTab} />
@@ -95,32 +122,23 @@ const ContentArea: FC<ContentAreaProps> = ({ tab, setTab, chapters }) => (
   </div>
 );
 
-// Project Stats Component
 const ProjectStats: FC = () => (
-  <div className="flex  items-center flex-wrap gap-10">
+  <div className="flex items-center flex-wrap gap-10">
     <InfoBlock icon={<BsPersonFill />} text="CONTRIBUTORS: 34" />
     <InfoBlock icon={<BsCalendar2DateFill />} text="DATE CREATED: 22/03/2024" />
   </div>
 );
 
-interface InfoBlockProps {
-  icon: ReactNode;
-  text: string;
-}
-
-const InfoBlock: FC<InfoBlockProps> = ({ icon, text }) => (
+const InfoBlock: FC<{ icon: ReactNode; text: string }> = ({ icon, text }) => (
   <div className="flex items-center text-xl gap-2 justify-center">
     {icon} {text}
   </div>
 );
 
-// Tab Selector Component
-interface TabSelectorProps {
+const TabSelector: FC<{
   currentTab: number;
   setTab: (tab: number) => void;
-}
-
-const TabSelector: FC<TabSelectorProps> = ({ currentTab, setTab }) => (
+}> = ({ currentTab, setTab }) => (
   <div className="flex my-10">
     <TabButton
       selected={currentTab === 0}
@@ -131,31 +149,21 @@ const TabSelector: FC<TabSelectorProps> = ({ currentTab, setTab }) => (
   </div>
 );
 
-// Tab Button Component
-interface TabButtonProps {
+const TabButton: FC<{
   selected: boolean;
   onClick: () => void;
   icon: ReactNode;
   label: string;
-}
-
-const TabButton: FC<TabButtonProps> = ({ selected, onClick, icon, label }) => (
+}> = ({ selected, onClick, icon, label }) => (
   <Button
     variant={selected ? "" : "outline"}
-    className={`text-2xl flex gap-2 items-center justify-center font-light ${
-      selected ? "" : ""
-    }`}
+    className={`text-2xl flex gap-2 items-center justify-center font-light`}
     onClick={onClick}>
     {icon} {label}
   </Button>
 );
 
-// Chapter Grid Component
-interface ChapterGridProps {
-  chapters: number[];
-}
-
-const ChapterGrid: FC<ChapterGridProps> = ({ chapters }) => (
+const ChapterGrid: FC<{ chapters: number[] }> = ({ chapters }) => (
   <div className="grid grid-cols-3 gap-x-2 gap-y-3">
     {chapters.map((num, index) => (
       <Link
@@ -167,4 +175,5 @@ const ChapterGrid: FC<ChapterGridProps> = ({ chapters }) => (
     ))}
   </div>
 );
+
 export default Book;
