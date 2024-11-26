@@ -9,11 +9,12 @@ import conversationRoutes from "./routes/conversation.route.js";
 import messageRoutes from "./routes/message.route.js";
 import { upload, uploadFile } from "./utils/upload.js";
 import { errorHandler } from "./middlewares/errorMiddleware.js";
-
+import bodyParser from "body-parser";
 const app = express();
 dotenv.config();
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(bodyParser.json());
 
 const routes = {
   "/api/auth": authRoutes,

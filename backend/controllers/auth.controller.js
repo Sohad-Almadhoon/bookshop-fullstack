@@ -67,4 +67,4 @@ const login = async (req, res) => {
     res.status(500).json({ error: "Error logging in" });
   }
 };
-export { register, login };
+export { register, login  };
