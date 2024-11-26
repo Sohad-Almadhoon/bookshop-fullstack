@@ -5,7 +5,7 @@ import { useFormStore } from "../hooks/useFormStore";
 import CustomInput from "../components/shared/CustomInput";
 import newRequest from "../utils/newRequest";
 
-const occupations = ["Writer", "Reader", "Musician", "Visual Artist", "Other"];
+const occupations = ["Writer", "Reader", "Musician", "Visual Artist"];
 const genres = [
   "Fiction",
   "PublicDomain",
@@ -20,7 +20,6 @@ const genres = [
   "Comedy",
   "InkoMint",
   "ShortStory",
-  "Other",
 ];
 
 const Questionnaire: React.FC = () => {
@@ -69,7 +68,7 @@ const Questionnaire: React.FC = () => {
          <div className="flex flex-col items-center px-12 max-w-xl mx-auto min-h-screen">
            {/* Occupations Section */}
            <div className="flex-1 mt-5 p-5 w-full bg-[#CFC5B0] border-[#868073] rounded-md shadow-md">
-             <p className="capitalize font-bold text-sm">
+             <p className="capitalize font-bold text-lg">
                Are you a writer, reader, musician, visual artist, or other?
              </p>
              <div className="mt-4 space-y-4">
@@ -82,19 +81,15 @@ const Questionnaire: React.FC = () => {
                      checked={selectedOccupation === occupation}
                      onChange={() => handleOccupationChange(occupation)}
                    />
-                   <label className="text-xs">{occupation}</label>
+                   <label className="text-sm">{occupation}</label>
                  </div>
                ))}
              </div>
-             <CustomInput
-               placeholder="Enter your answer here..."
-               className="mt-4 w-full max-w-xs"
-             />
            </div>
 
            {/* Genres Section */}
            <div className="flex-1 mt-5 p-5 w-full bg-[#CFC5B0] border-[#868073] rounded-md shadow-md">
-             <p className="capitalize font-semibold text-sm">
+             <p className="capitalize font-semibold text-lg">
                What genre are you interested in?
              </p>
              <div className="mt-5 flex flex-wrap gap-3">
@@ -106,14 +101,10 @@ const Questionnaire: React.FC = () => {
                      checked={selectedGenres.includes(genre)}
                      onChange={() => handleGenreChange(genre)}
                    />
-                   <label className="text-xs">{genre}</label>
+                   <label className="text-sm">{genre}</label>
                  </div>
                ))}
              </div>
-             <CustomInput
-               placeholder="Enter your answer here..."
-               className="mt-4 w-full max-w-xs"
-             />
            </div>
 
            {/* Register Button */}
