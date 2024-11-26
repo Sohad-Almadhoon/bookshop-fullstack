@@ -15,13 +15,10 @@ interface ConversationData {
     image: string;
   };
   lastMessage: string;
-  unread: number;
-  time: string;
 }
 
 const Messages = () => {
   const [conversations, setConversations] = useState<ConversationData[]>([]);
-
   useEffect(() => {
     const fetchConversations = async () => {
       try {
@@ -34,7 +31,7 @@ const Messages = () => {
 
     fetchConversations();
   }, []);
-console.log(conversations)
+
   return (
     <div className="min-h-screen border border-black m-2">
       <Header profile />

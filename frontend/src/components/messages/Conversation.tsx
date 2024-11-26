@@ -1,48 +1,11 @@
 import React from "react";
 import { BsChatDotsFill, BsPeopleFill } from "react-icons/bs";
-// Define types for the Book, User, Message, and Conversation
 
-interface User {
-  id: number;
-  userId: number;
-}
-
-interface Book {
-  id: number;
-  title: string;
-  main_cover: string;
-}
-
-interface Message {
-  id: number;
-  content: string;
-  createdAt: string; // You can also use Date if you're parsing it to a Date object
-}
-
-interface ConversationType {
-  id: number;
-  participants: User[];
-  book: Book;
-  messages: Message[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Props for the Conversation component
-interface ConversationProps {
-  book: Book;
-  sender: User;
-  lastMessage: string;
-  unread: number;
-  time: string;
-}
-
-// The Conversation component will receive props of type `ConversationProps`
 const Conversation: React.FC<any> = ({ book, participants, messages }) => {
   return (
     <div className="flex-1 p-2">
-      <div className="flex gap-2 mx-12 justify-around items-center border-b pb-2 border-black">
-        <div className="flex items-center">
+      <div className="flex gap-2 justify-around items-center border-b pb-2 border-black">
+        <div className="flex items-center gap-4">
           {" "}
           <img
             src={book.main_cover}
@@ -50,21 +13,16 @@ const Conversation: React.FC<any> = ({ book, participants, messages }) => {
             className="w-12 h-16 object-cover"
           />
           <div className="flex-1 truncate">
-            <div className="flex gap-10">
+            <div className="flex flex-col">
               <h3 className="text-xl font-bold tracking-tighter">
                 {book.title}
               </h3>{" "}
-              <div className="flex items-center gap-2">
-                <span className="font-medium">Author:{book.author}</span>
-              </div>
+              <span className="font-medium">Author:{book.author}</span>
             </div>
           </div>{" "}
         </div>
 
-        <p className="text-5xl">
-          {" "}
-          ...<BsChatDotsFill className="text-xl text-[#625C51]" />
-        </p>
+        <BsChatDotsFill className="text-4xl text-[#625C51]" />
         {participants.length > 0 && (
           <div className="flex gap-2 items-center">
             <BsPeopleFill className="text-5xl" />

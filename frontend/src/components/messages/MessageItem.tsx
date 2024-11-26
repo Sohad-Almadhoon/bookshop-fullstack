@@ -1,8 +1,16 @@
 interface MessageItemProps {
   text: string;
   isMe: boolean;
+  senderName: string; // Add sender's name
+  senderEmail: string; // Add sender's email or any other details you want
 }
-const MessageItem: React.FC<MessageItemProps> = ({ text, isMe }) => (
+
+const MessageItem: React.FC<MessageItemProps> = ({
+  text,
+  isMe,
+  senderName,
+  senderEmail,
+}) => (
   <div className={`flex mt-4 ${isMe ? "flex-row-reverse" : ""}`}>
     <div className={`self-end ${isMe ? "ml-2" : "mr-2"}`}>
       <img
@@ -15,14 +23,16 @@ const MessageItem: React.FC<MessageItemProps> = ({ text, isMe }) => (
       className={`flex p-2 flex-col flex-1 ${
         isMe ? "bg-black text-gray-300" : "bg-white"
       } rounded-md p-1`}>
+      {/* Display sender info dynamically */}
       {!isMe && (
         <div className="flex justify-between">
-          <span className="font-bold">{!isMe && "~Emaily89"}</span>
-          <span className="text-sm text-gray-400">14:22</span>
+          <span className="font-bold">{senderName || "~Anonymous"}</span>
+          <span className="text-sm text-gray-400">{senderEmail}</span>
         </div>
       )}
       <span className={isMe ? "" : "text-gray-600"}>{text}</span>
     </div>
   </div>
 );
+
 export default MessageItem;
