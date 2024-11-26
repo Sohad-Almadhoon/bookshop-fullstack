@@ -18,20 +18,25 @@ const createConversation = async (req, res) => {
     res.status(500).json({ error: "Something went wrong" });
   }
 };
-// Get all conversations for a user
 const getUserConversations = async (req, res) => {
   try {
-    const { id: userId } = req.user;
+    const { id } = req.user;
+
     const conversations = await prisma.conversation.findMany({
-      where: {
-        participants: {
-          some: {
-            userId: parseInt(userId),
-          },
-        },
-      },
+      // where: {
+      //   participants: {
+      //     some: {
+      //       userId: parseInt(id),
+      //     },
+      //   },
+      // },
       include: {
         participants: true,
+        book: true, // Include associated book details
+        messages: {
+          orderBy: { createdAt: "desc" },
+          take: 1, // Fetch the last message
+        },
       },
     });
     res.status(200).json(conversations);
@@ -40,6 +45,8 @@ const getUserConversations = async (req, res) => {
     res.status(500).json({ error: "Something went wrong" });
   }
 };
+
+
 // Get all participants in a conversation
 const getConversationParticipants = async (req, res) => {
   try {

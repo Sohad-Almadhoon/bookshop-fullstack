@@ -3,7 +3,6 @@ import prisma from "../utils/db.js";
 const createBook = async (req, res) => {
   const { title, author, description, generes, main_cover } = req.body;
   const { id: userId } = req.user; // Ensure the user is authenticated and the user ID is available
-  console.log("Request body:", req.body); // Log incoming data
 
   // Validate required fields
   if (!title || !author || !description || !generes || !main_cover) {
@@ -20,7 +19,6 @@ const createBook = async (req, res) => {
         main_cover,
       },
     });
-    console.log(newBook);
     const conversation = await prisma.conversation.create({
       data: {
         participants: {
@@ -29,6 +27,10 @@ const createBook = async (req, res) => {
               userId: userId,
             },
           ],
+        },
+
+        book: {
+          connect: { id: newBook.id }, // Connect the created book with the conversation
         },
       },
     });
@@ -159,4 +161,4 @@ const followBook = async () => {
   }
 };
 
-export { createBook, getBook , followBook};
+export { createBook, getBook, followBook };
