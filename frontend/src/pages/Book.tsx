@@ -35,7 +35,6 @@ const Book: FC = () => {
     const fetchBookInfo = async () => {
       try {
         const response = await newRequest.get(`/api/books/${bookId}`);
-        console.log(response);
         setBookData(response.data); // Assuming response.data contains the book info
       } catch (error) {
         console.error("Error fetching book info:", error);

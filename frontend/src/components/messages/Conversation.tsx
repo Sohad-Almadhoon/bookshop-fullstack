@@ -1,60 +1,81 @@
-import { BsChatDotsFill } from "react-icons/bs";
+import React from "react";
+import { BsChatDotsFill, BsPeopleFill } from "react-icons/bs";
+// Define types for the Book, User, Message, and Conversation
 
-interface ConversationProps {
+interface User {
   id: number;
-  sender: {
-    name: string;
-    avatar: string;
-  };
-  book: {
-    title: string;
-    image: string;
-  };
+  userId: number;
+}
+
+interface Book {
+  id: number;
+  title: string;
+  main_cover: string;
+}
+
+interface Message {
+  id: number;
+  content: string;
+  createdAt: string; // You can also use Date if you're parsing it to a Date object
+}
+
+interface ConversationType {
+  id: number;
+  participants: User[];
+  book: Book;
+  messages: Message[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Props for the Conversation component
+interface ConversationProps {
+  book: Book;
+  sender: User;
   lastMessage: string;
   unread: number;
   time: string;
 }
-const Conversation: React.FC<ConversationProps> = (props) => {
+
+// The Conversation component will receive props of type `ConversationProps`
+const Conversation: React.FC<any> = ({ book, participants, messages }) => {
   return (
     <div className="flex-1 p-2">
-      <div className="flex gap-2">
-        <img
-          src={props.book.image}
-          alt="book"
-          className="w-12 h-16 object-cover"
-        />
-        <div className="flex-1 truncate">
-          <div className="flex gap-10">
-            <h3 className="text-xl font-bold tracking-tighter">
-              {props.book.title}
-            </h3>
-            <div className="flex relative">
-              <div className="w-9 h-9 border-black border rounded-full absolute right-5 z-30">
-                <img src={props.sender.avatar} alt="" />
-              </div>
-              <div className="w-9 h-9 border-black border rounded-full absolute right-7 z-10"></div>
-              <div className="w-9 h-9 text-lg border-black border rounded-full flex justify-center items-center z-50 bg-[#dfd4bf]">
-                65+
+      <div className="flex gap-2 mx-12 justify-around items-center border-b pb-2 border-black">
+        <div className="flex items-center">
+          {" "}
+          <img
+            src={book.main_cover}
+            alt="book"
+            className="w-12 h-16 object-cover"
+          />
+          <div className="flex-1 truncate">
+            <div className="flex gap-10">
+              <h3 className="text-xl font-bold tracking-tighter">
+                {book.title}
+              </h3>{" "}
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Author:{book.author}</span>
               </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <img src="/assets/sender-1.png" alt="" />
-            <span className="font-medium">{props.sender.name}</span>
-            <BsChatDotsFill className="text-xl text-[#625C51]" />
-            <p className="text-gray-500">
-              {props.lastMessage.substring(0, 100)}.
-            </p>
-          </div>
+          </div>{" "}
         </div>
-        <div className="flex gap-2 items-center">
-          <span className="text-gray-400 text-xs">{props.time}</span>
-          <span className="rounded-full text-white bg-black flex items-center justify-center w-6 h-6">
-            {props.unread}
-          </span>
-        </div>
+
+        <p className="text-5xl">
+          {" "}
+          ...<BsChatDotsFill className="text-xl text-[#625C51]" />
+        </p>
+        {participants.length > 0 && (
+          <div className="flex gap-2 items-center">
+            <BsPeopleFill className="text-5xl" />
+            <span className=" text-2xl font-bold flex justify-center size-12 items-center border-black border rounded-full">
+              +{participants.length}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
 };
+
 export default Conversation;
