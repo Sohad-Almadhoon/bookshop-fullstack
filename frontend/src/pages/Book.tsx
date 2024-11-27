@@ -14,12 +14,11 @@ import {
 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import newRequest from "../utils/newRequest";
-
-// Define the shape of the book data
+import { useNovelModal } from "../hooks/useNovelModal";
 interface BookData {
   title: string;
   main_cover: string;
-  // Add other properties as needed
+
 }
 
 const Book: FC = () => {
@@ -62,11 +61,11 @@ const Book: FC = () => {
 
 // Sidebar Component (Modified to receive book data)
 const Sidebar: FC<{ bookData: BookData }> = ({ bookData }) => {
-  const { openModal } = usePaymentModal();
+  const { openModal } = useNovelModal();
 
   return (
     <div className="border-r border-black justify-end flex-1 p-4 flex flex-col px-28">
-      <Button onClick={openModal}>
+      <Button onClick={()=> openModal("visual")}>
         invest as little as <sup>$</sup>10
       </Button>
       <div className="self-end">

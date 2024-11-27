@@ -31,7 +31,7 @@ const Messages = () => {
 
     fetchConversations();
   }, []);
-
+  console.log(conversations[0]?.book);
   return (
     <div className="min-h-screen border border-black m-2">
       <Header profile />
@@ -46,7 +46,10 @@ const Messages = () => {
               <Link
                 to={`/messages/${conversation.id}`}
                 key={conversation.id}
-                className="flex gap-10 border-black mt-2">
+                className="flex gap-10 border-black mt-2"
+                state={{
+                  book: conversation.book, 
+                }}>
                 <Conversation
                   participants={conversation.participants}
                   book={conversation.book}

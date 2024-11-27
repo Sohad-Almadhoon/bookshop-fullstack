@@ -9,10 +9,10 @@ const newRequest = axios.create({
   baseURL,
   headers: {
     "Content-Type": "application/json",
-  },
+  }, withCredentials: true,
 
 });
-// Intercept every request to add the Authorization header dynamically
+
 newRequest.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");

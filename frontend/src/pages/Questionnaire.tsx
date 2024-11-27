@@ -54,7 +54,7 @@ const Questionnaire: React.FC = () => {
     };
 
     try {
-      await newRequest.post("/api/auth/register", finalData); // Replace with your API endpoint
+      await newRequest.post("/api/auth/register", finalData); 
       navigate("/success");
     } catch (error) {
       console.error("Failed to submit data", error);

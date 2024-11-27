@@ -14,6 +14,8 @@ const upload = multer({ dest: "uploads/" });
 
 // POST route to upload a file
 const uploadFile = (req, res) => {
+  console.log(req.file); // Check the uploaded file
+  console.log(req.body); // Check additional form data
   if (!req.file) {
     return res.status(400).send("No file uploaded");
   }

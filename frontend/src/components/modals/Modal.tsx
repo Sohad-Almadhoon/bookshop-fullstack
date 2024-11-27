@@ -43,13 +43,6 @@ const Modal: React.FC<ModalProps> = ({
               leaveTo="opacity-0 scale-95">
               <DialogPanel className="w-full bg-[#DDD1BB] max-w-3xl h-[90vh] transform overflow-hidden rounded-full border-4 border-black p-6 shadow-xl transition-all flex flex-col justify-center items-center">
                 <img src={modalLogo} alt="" className="w-20 h-20 mb-3" />
-                <DialogTitle className="text-center mb-3 uppercase leading-tight">
-                  {title}
-                </DialogTitle>
-                <img src={image} alt="" />
-                <span className="capitalize text-opacity-70 text-black text-lg leading-loose p-3">
-                  {description}
-                </span>
                 {children}
               </DialogPanel>
             </TransitionChild>

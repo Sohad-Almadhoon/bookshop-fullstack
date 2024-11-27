@@ -5,6 +5,7 @@ const sendMessage = async (req, res) => {
     const { conversationId } = req.params;
     const { id: senderId } = req.user;
     const { content } = req.body;
+    console.log(content)
     const message = await prisma.messages.create({
       data: {
         conversationId: parseInt(conversationId),
