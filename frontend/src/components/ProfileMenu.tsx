@@ -5,7 +5,7 @@ import {
   MenuItem,
   Transition,
 } from "@headlessui/react";
-import {BsPersonFill, BsSignpost2 } from "react-icons/bs";
+import { BsPersonFill, BsSignpost2 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { Fragment } from "react";
 import Button from "./shared/Button";
@@ -30,11 +30,6 @@ const ProfileMenu = () => {
         <MenuItems
           anchor="bottom"
           className="absolute bg-[#dfd4bf] -translate-x-[100px] mt-2 w-56 h-40 rounded-md  shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none drop-shadow bg-[#] p-6 z-50">
-          <img
-            src="/assets/dropdown-bgpattern.svg"
-            alt=""
-            className="absolute top-0 left-0 w-full h-full object-cover"
-          />
           <MenuItem as={Fragment}>
             <Link
               to="/profile"
@@ -46,11 +41,13 @@ const ProfileMenu = () => {
           <MenuItem as={Fragment}>
             <Button
               className={
-                "text-xl font-medium cursor-pointer border-none flex gap-4"
+                " px-0 text-xl font-medium cursor-pointer border-none flex gap-3 justify-start content-start w-full"
               }
-              variant="outline" onClick={logout}>
-              <BsSignpost2 />
-              Logout
+              variant="outline"
+              onClick={logout}>
+              <BsSignpost2 className="text-2xl" />
+
+              <span className=" capitalize">Logout</span>
             </Button>
           </MenuItem>
         </MenuItems>

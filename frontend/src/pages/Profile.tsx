@@ -4,12 +4,13 @@ import ProfileActions from "../components/profile/ProfileActions";
 import BookGrid from "../components/profile/BookGrid";
 import Header from "../components/shared/Header";
 import { useQuery } from "@tanstack/react-query";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import {
   Book,
   fetchFollowingBooks,
   fetchUserBooks,
 } from "../actions/books.action";
+import { useLocation } from "react-router-dom";
 
 interface DecodedToken {
   id: string;
@@ -22,6 +23,8 @@ const Profile: React.FC = () => {
   const [tab, setTab] = useState<number>(0);
   const [userId, setUserId] = useState<string>(localStorage.getItem("token")!);
   const token = localStorage.getItem("token");
+  const location = useLocation();
+  const id = location.state?.userId;
 
   useEffect(() => {
     if (token) {
@@ -34,18 +37,18 @@ const Profile: React.FC = () => {
     }
   }, [token]);
 
-const { data: books = [], isLoading: isLoadingBooks } = useQuery<Book[]>({
-  queryKey: ["userBooks", userId],
-  queryFn: () => fetchUserBooks(userId, token!),
-  enabled: !!userId,
-});
+  const { data: books = [], isLoading: isLoadingBooks } = useQuery<Book[]>({
+    queryKey: ["userBooks", userId],
+    queryFn: () => fetchUserBooks(userId, token!),
+    enabled: !!userId,
+  });
 
-const { data: followingBooks = [], isLoading: isLoadingFollowingBooks } = useQuery<Book[]>({
-  queryKey: ["followingBooks", userId],
-  queryFn: () => fetchFollowingBooks(userId),
-  enabled: !!userId,
-});
-
+  const { data: followingBooks = [], isLoading: isLoadingFollowingBooks } =
+    useQuery<Book[]>({
+      queryKey: ["followingBooks", userId],
+      queryFn: () => fetchFollowingBooks(userId),
+      enabled: !!userId,
+    });
 
   const tabs = [
     {
@@ -66,7 +69,7 @@ const { data: followingBooks = [], isLoading: isLoadingFollowingBooks } = useQue
     <div className="p-2">
       <Header profile />
       <div className="px-24 border-black border">
-        {userId && <ProfileInfo id={userId} />}
+        {userId && <ProfileInfo id={id ? id : userId} />}
         <div>
           <ProfileActions tabs={tabs} tab={tab} setTab={setTab} />
           {tab === 0 ? (

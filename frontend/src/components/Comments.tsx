@@ -2,8 +2,10 @@ import { FC, useState, useEffect } from "react";
 import Button from "./shared/Button";
 import newRequest from "../utils/newRequest"; // Assuming you have a custom utility for making requests
 import { useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 interface User{
   name: string;
+  id: number
 }
 interface CommentType {
   id: number;
@@ -99,9 +101,11 @@ const Comment: FC<CommentProps> = ({ comment }) => {
       <div className="flex justify-between w-full items-center">
         <div className="flex items-center gap-4">
           {/* Display user initials */}
-          <span className="size-8 rounded-full text-white bg-black flex justify-center items-center">
+          <Link to={`/profile`} state={{
+            userId: comment.user.id
+          }} className="size-8 rounded-full text-white bg-black flex justify-center items-center">
             {comment.user.name.charAt(0)}
-          </span>
+          </Link>
           <p className="font-bold">{comment.user.name}</p>
         </div>
         <span className="text-sm">
@@ -111,7 +115,7 @@ const Comment: FC<CommentProps> = ({ comment }) => {
           })}
         </span>
       </div>
-      <div className="leading-5 text-gray-600 text-sm mt-4 border-b border-black pb-3">
+      <div className="leading-5 text-start text-gray-600 text-sm mt-4 border-b border-black pb-3">
         {comment.content}
       </div>
     </div>

@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 const MessageHeader: React.FC = () => {
   const location = useLocation();
   const book = location.state?.book;
-  console.log(book);
+
   return (
     <div className="flex justify-between h-24 items-center border-b px-12 border-black">
       <div className="flex items-center gap-2">
