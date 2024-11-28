@@ -2,7 +2,7 @@ import { useNovelModal } from "../../hooks/useNovelModal";
 import Button from "../shared/Button";
 import ActionButtons from "./ActionButtons";
 
-const Sidebar= () => {
+const Sidebar = ({ imgUrl }:{imgUrl:string}) => {
   const { openModal } = useNovelModal();
 
   return (
@@ -10,9 +10,11 @@ const Sidebar= () => {
       <Button onClick={() => openModal("visual")}>
         invest as little as <sup>$</sup>10
       </Button>
-      <div className="self-end">
-        
-        <ActionButtons />
+      <div >
+        <div className="mt-4">
+          <img src={imgUrl} alt="book cover" className="h-full w-full object-cover" />
+          <ActionButtons />
+        </div>
       </div>
     </div>
   );

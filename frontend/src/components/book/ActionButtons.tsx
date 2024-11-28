@@ -4,6 +4,7 @@ import newRequest from "../../utils/newRequest";
 import Button from "../shared/Button";
 import { BsChatFill, BsHeartFill, BsPeopleFill } from "react-icons/bs";
 import { useParams } from "react-router-dom";
+import { twMerge } from "tailwind-merge";
 
 const ActionButtons = () => {
     const { openModal } = useCommentModal();
@@ -52,30 +53,38 @@ const ActionButtons = () => {
     };
 
     return (
-        <div className="flex gap-3 mt-2 items-center">
-            <Button
-                variant="outline"
-                className="flex gap-1 p-1 text-xs justify-center"
-                onClick={openModal}>
-                <BsChatFill className="text-black text-sm" /> comments
-            </Button>
+      <div className="flex gap-3 mt-2 items-center">
+        <Button
+          variant="outline"
+          className="flex gap-1 p-1 text-xs justify-center"
+          onClick={openModal}>
+          <BsChatFill className="text-black text-sm" /> comments
+        </Button>
 
-            <Button
-                variant={following ? "" : "outline"}
-                className="flex gap-1 p-1 text-xs justify-center"
-                onClick={handleFollow}>
-                <BsPeopleFill className="text-black text-sm" />{" "}
-                {following ? "Unfollow" : "Follow"}
-            </Button>
+        <Button
+          variant={following ? "" : "outline"}
+          className="flex gap-1 p-1 text-xs justify-center"
+          onClick={handleFollow}>
+          <BsPeopleFill
+            className={twMerge(
+              ` text-sm ${following ? "text-white" : "text-black"}`
+            )}
+          />{" "}
+          {following ? "Unfollow" : "Follow"}
+        </Button>
 
-            <Button
-                variant={liked ? "" : "outline"}
-                className="flex gap-1 p-1 px-2 text-xs justify-center"
-                onClick={handleLike}>
-                <BsHeartFill className="text-black text-sm" />{" "}
-                {liked ? "Unlike" : "Like"}
-            </Button>
-        </div>
+        <Button
+          variant={liked ? "" : "outline"}
+          className="flex gap-1 p-1 px-2 text-xs justify-center"
+          onClick={handleLike}>
+          <BsHeartFill
+            className={twMerge(
+              ` text-sm ${following ? "text-white" : "text-black"}`
+            )}
+          />{" "}
+          {liked ? "Unlike" : "Like"}
+        </Button>
+      </div>
     );
 };
 export default ActionButtons;

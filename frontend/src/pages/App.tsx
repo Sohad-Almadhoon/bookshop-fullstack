@@ -16,6 +16,7 @@ import Discover from "./Discover";
 import ProtectedRoute from "./ProtectedRoute";
 import Main from "./Main";
 import CreatBook from "../components/modals/CeateBook";
+import Chapter from "./Chapter";
 
 const App = () => {
   const Layout = () => {
@@ -67,7 +68,7 @@ const App = () => {
         },
         {
           path: "/chapters/:id",
-          element: <ComingSoon />,
+          element: <Chapter />,
         },
         {
           path: "/create-book",
