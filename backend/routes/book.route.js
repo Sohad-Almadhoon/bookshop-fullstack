@@ -4,6 +4,9 @@ import {
   createBook,
   followBook,
   getBook,
+  getBookStates,
+  likeBook,
+  unFollowBook,
 } from "../controllers/book.controller.js";
 import {
   createComment,
@@ -31,4 +34,11 @@ router.post("/:id/chapters", verifyToken, createChapter);
 router.get("/:id/users", verifyToken, getBookUsers);
 router.post("/:id/follow", verifyToken, followBook);
 
+router.delete("/:id/follow", verifyToken, unFollowBook);
+router.post("/:id/like", verifyToken, likeBook);
+router.delete("/:id/like", verifyToken, unFollowBook);
+router.get("/:id/book-states", verifyToken, getBookStates);
+
+
 export default router;
+

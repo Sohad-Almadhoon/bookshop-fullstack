@@ -95,70 +95,183 @@ const getBook = async (req, res) => {
       .json({ error: "An error occurred while fetching the book." });
   }
 };
-// Function to follow a book
-const followBook = async () => {
-  const { bookId } = req.body;
+
+const followBook = async (req, res) => {
   const { id: userId } = req.user;
+  const { id:bookId } = req.params;
+
+  if (!userId || !bookId) {
+    return res.status(400).json({ error: "Missing userId or bookId" });
+  }
+
   try {
-    // Check if the user is already following this book
+    // Check if the user is already following the book
     const existingFollow = await prisma.user_books.findFirst({
       where: {
-        user_id: parseInt(userId),
+        user_id: userId,
         book_id: parseInt(bookId),
         type: "FOLLOW",
       },
     });
 
     if (existingFollow) {
-      throw new Error("You are already following this book.");
+      return res.status(400).json({ message: "Already following this book." });
     }
 
-    // Create a new follow record
-    await prisma.user_books.create({
+    // Add the follow relation
+    const follow = await prisma.user_books.create({
       data: {
         user_id: userId,
-        book_id: bookId,
+        book_id: parseInt(bookId),
         type: "FOLLOW",
       },
     });
 
-    let conversation = await prisma.conversation.findFirst({
+    res.status(201).json(follow);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong." });
+  }
+};
+const unFollowBook = async (req, res) => {
+  const { id: userId } = req.user;
+  const { id:bookId } = req.params;
+
+  if (!userId || !bookId) {
+    return res.status(400).json({ error: "Missing userId or bookId." });
+  }
+
+  try {
+    const unfollow = await prisma.user_books.deleteMany({
       where: {
-        participants: {
-          some: {
-            userId: userId, // ensure user is part of the conversation
-          },
-        },
+        user_id: userId,
+        book_id: parseInt(bookId),
+        type: "FOLLOW",
       },
     });
 
-    // If no conversation exists for the book, create one
-    if (!conversation) {
-      conversation = await prisma.conversation.create({
-        data: {
-          participants: {
-            create: [{ userId }],
-          },
-        },
-      });
+    if (unfollow.count === 0) {
+      return res
+        .status(404)
+        .json({ message: "You are not following this book." });
     }
 
-    // Add the user as a participant in the conversation
-    await prisma.participant.create({
-      data: {
-        userId,
-        conversationId: conversation.id,
-      },
-    });
-
-    return {
-      success: true,
-      message: "You are now following the book and part of the conversation.",
-    };
+    res.status(200).json({ message: "Unfollowed successfully." });
   } catch (error) {
-    console.error("Error following book:", error);
-    return { success: false, message: error.message };
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong." });
   }
 };
 
-export { createBook, getBook, followBook };
+const likeBook = async (req, res) => {
+  const { id: bookId } = req.params;
+  const { id: userId } = req.user;
+
+  if (!userId || !bookId) {
+    return res.status(400).json({ error: "Missing userId or bookId." });
+  }
+
+  try {
+    // Check if already liked
+    const existingLike = await prisma.user_books.findFirst({
+      where: {
+        user_id: userId,
+        book_id: parseInt(bookId),
+        type: "LIKE",
+      },
+    });
+
+    if (existingLike) {
+      return res.status(400).json({ message: "Book already liked." });
+    }
+
+    // Add like relation
+    const like = await prisma.user_books.create({
+      data: {
+        user_id: userId,
+        book_id: parseInt(bookId),
+        type: "LIKE",
+      },
+    });
+
+    res.status(201).json(like);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong." });
+  }
+};
+const deleteLike = async (req, res) => {
+  const { id: bookId } = req.params;
+  const { id: userId } = req.user;
+
+
+  if (!userId || !bookId) {
+    return res.status(400).json({ error: "Missing userId or bookId." });
+  }
+
+  try {
+    // Remove like relation
+    const unlike = await prisma.user_books.deleteMany({
+      where: {
+        user_id: userId,
+        book_id: parseInt(bookId),
+        type: "LIKE",
+      },
+    });
+
+    if (unlike.count === 0) {
+      return res.status(404).json({ message: "Book was not liked." });
+    }
+
+    res.status(200).json({ message: "Book unliked successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong." });
+  }
+};
+const getBookStates = async (req, res) => {
+  const { id: userId } = req.user; 
+  const { id: bookId } = req.params; 
+
+  if (!userId || !bookId) {
+    return res.status(400).json({ error: "Missing userId or bookId" });
+  }
+
+  try {
+    // Fetch the "liked" state
+    const liked = await prisma.user_books.findFirst({
+      where: {
+        user_id: userId,
+        book_id: parseInt(bookId),
+        type: "LIKE",
+      },
+    });
+
+   
+    const followed = await prisma.user_books.findFirst({
+      where: {
+        user_id: userId,
+        book_id: parseInt(bookId),
+        type: "FOLLOW",
+      },
+    });
+
+
+    res.json({
+      liked: !!liked,
+      followed: !!followed,
+    });
+  } catch (error) {
+    console.error("Error fetching user states:", error);
+    res.status(500).json({ error: "Failed to fetch user states" });
+  }
+};
+export {
+  createBook,
+  getBook,
+  followBook,
+  unFollowBook,
+  likeBook,
+  deleteLike,
+  getBookStates,
+};

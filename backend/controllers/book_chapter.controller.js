@@ -2,15 +2,16 @@ import prisma from "../utils/db.js";
 
 // Create a chapter
 const createChapter = async (req, res) => {
-  const { bookId } = req.params;
-  const { title } = req.body;
+  const { id:bookId } = req.params;
+  const { title, cover_image } = req.body;
   try {
     const newChapter = await prisma.chapters.create({
       data: {
         title,
+        cover_image,
         book: {
           connect: {
-            id: Number(bookId),
+            id: parseInt(bookId),
           },
         },
       },
