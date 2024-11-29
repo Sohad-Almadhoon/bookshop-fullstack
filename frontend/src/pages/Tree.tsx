@@ -47,7 +47,7 @@ const Tree = () => {
                 alt=""
               />
             }
-            text="Create&nbsp;Book&nbsp;Create&nbsp;Book&nbsp;"
+            text="Create&nbsp;&nbsp;Book&nbsp;Create&nbsp;&nbsp;Book&nbsp;"
             href="/create-book"
           />
         </div>
@@ -73,7 +73,7 @@ const Tree = () => {
                 alt=""
               />
             }
-            text="Create&nbsp;Book&nbsp;Create&nbsp;Book&nbsp;"
+            text="About&nbsp;About&nbsp;About&nbsp;&nbsp;About&nbsp;"
             href="/coming-soon"
           />
         </div>

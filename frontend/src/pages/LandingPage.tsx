@@ -3,18 +3,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { Heading } from "../components/shared/Header";
 import { useEffect } from "react";
 
-const Main = () => {
-   const navigate = useNavigate();
+const LandingPage = () => {
+  const navigate = useNavigate();
 
-   useEffect(() => {
-     // Check for token in localStorage
-     const token = localStorage.getItem("token");
-     if (token) {
-       // If token exists, redirect to profile page
-       navigate("/profile");
-     }
-   }, [navigate]);
-  
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/profile");
+    }
+  }, [navigate]);
+
   return (
     <div className="w-full flex flex-col items-center min-h-screen bg-[#ddd1bb] font-romie">
       <div className="max-w-3xl py-5 flex justify-center items-center md:flex-1 w-full">
@@ -46,4 +44,4 @@ const Main = () => {
   );
 };
 
-export default Main;
+export default LandingPage;

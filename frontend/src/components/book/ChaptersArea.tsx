@@ -1,12 +1,16 @@
 import { FC, useState, useEffect } from "react";
-import { BsBook, BsLayoutSidebarInsetReverse} from "react-icons/bs";
+import { BsBook, BsLayoutSidebarInsetReverse } from "react-icons/bs";
 import { Link, useParams } from "react-router-dom";
 import newRequest from "../../utils/newRequest";
 
-interface Chapter {
+export interface Chapter {
   id: number;
   title: string;
   cover_image: string;
+  book: {
+    title: string;
+    id: number;
+  };
 }
 
 const ChaptersArea: FC = () => {
@@ -37,13 +41,15 @@ const ChaptersArea: FC = () => {
   if (error) {
     return <div className="text-red-500">{error}</div>;
   }
-
   return (
     <div className="flex-2 p-12 flex-col flex px-20">
       <div className="flex items-center flex-wrap gap-10">
         <div className="flex items-center text-xl gap-2 justify-center font-semibold">
           <BsBook className="text-2xl" /> CHAPTERS:
-          <span className="bg-black size-8 flex justify-center items-center text-white rounded-full"> {chapters.length}</span>
+          <span className="bg-black size-8 flex justify-center items-center text-white rounded-full">
+            {" "}
+            {chapters.length}
+          </span>
         </div>
       </div>
       <div className="w-full my-3 flex gap-4 items-center justify-center bg-black text-white uppercase px-5 py-3 text-3xl font-voyage rounded-lg">
@@ -54,7 +60,12 @@ const ChaptersArea: FC = () => {
           <Link
             key={chapter.id}
             className="border-black border-2 w-52 relative"
-            to={`/chapters/${chapter.id}`}>
+            to={`/chapters/${chapter.id}`}
+            state={{
+              title: chapter.book.title,
+              chapterTitle: chapter.title,
+              id: chapter.book.id,
+            }}>
             <img
               src={chapter.cover_image}
               alt={chapter.title}

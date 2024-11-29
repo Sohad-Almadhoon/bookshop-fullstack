@@ -55,7 +55,7 @@ const CreateBookPage = () => {
 
   return (
     <div>
-      <Header profile />
+      <Header  />
       <div className="bg-[#DDD1BB] flex flex-col mx-auto max-w-xl w-full rounded-lg p-6 mt-5 shadow-xl border-black border">
         <h2 className="text-4xl font-bold mb-4 uppercase text-center font-voyage">
           Create a New Book

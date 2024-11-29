@@ -5,18 +5,18 @@ import Messages from "./Messages";
 import Message from "./Message";
 import Profile from "./Profile";
 import SignLayout from "../components/auth/SignLayout";
-import ToasterProvider from "../components/ToasterProvider";
+import ToasterProvider from "../providers/ToasterProvider";
 import Book from "./Book";
 import Welcome from "./Welcome";
 import Tree from "./Tree";
-import ModalProvider from "../components/modals/ModalProvider";
+import ModalProvider from "../providers/ModalProvider";
 import Questionnaire from "./Questionnaire";
 import ComingSoon from "./ComingSoon";
 import Discover from "./Discover";
 import ProtectedRoute from "./ProtectedRoute";
-import Main from "./Main";
 import CreatBook from "../components/modals/CeateBook";
 import Chapter from "./Chapter";
+import LandingPage from "./LandingPage";
 
 const App = () => {
   const Layout = () => {
@@ -95,7 +95,7 @@ const App = () => {
     },
     {
       path: "/",
-      element: <Main />,
+      element: <LandingPage />,
     },
   ]);
   return <RouterProvider router={router} />;

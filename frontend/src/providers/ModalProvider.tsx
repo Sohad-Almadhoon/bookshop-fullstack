@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import NovelModal from "./NovelModal";
-import InvestModal from "./PaymentModal";
-import FinalModal from "./FinalModal";
-import CommentModal from "./CommentModal";
+import NovelModal from "../components/modals/NovelModal";
+import InvestModal from "../components/modals/PaymentModal";
+import FinalModal from "../components/modals/FinalModal";
+import CommentModal from "../components/modals/CommentModal";
 
 const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);

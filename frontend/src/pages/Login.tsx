@@ -21,11 +21,8 @@ const Login = () => {
   // onSubmit handler type-safe for LoginFormInputs
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     try {
-      console.log(data);
       const res = await newRequest.post("/api/auth/login", data);
-      // Save the token to localStorage
-      console.log(res.data.token);
-      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("currentUser", JSON.stringify(res.data));
       navigate("/welcome");
     } catch (error) {
       console.error("Failed to submit data", error);

@@ -16,7 +16,6 @@ const Discover: FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header
-        isDropDown
         title={
           <h3 className="text-3xl uppercase">
             NOVELS{" "}

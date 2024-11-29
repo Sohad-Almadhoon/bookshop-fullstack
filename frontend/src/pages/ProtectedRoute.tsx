@@ -6,8 +6,8 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const token = localStorage.getItem("token");
-  // If no token, redirect to login
+  const currentUser = localStorage.getItem("currentUser");
+  const token = currentUser ? JSON.parse(currentUser).token : null;
   if (!token) {
     return <Navigate to="/login" />;
   }

@@ -3,7 +3,6 @@ import CustomInput from "../components/shared/CustomInput";
 import Button from "../components/shared/Button";
 import { BsSendFill } from "react-icons/bs";
 import Header from "../components/shared/Header";
-import NewMessagesIndicator from "../components/messages/NewMessagesIndicator";
 import MessageHeader from "../components/messages/MessageHeader";
 import MessageItem from "../components/messages/MessageItem";
 import newRequest from "../utils/newRequest";
@@ -69,7 +68,7 @@ const Message: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen border border-black m-2">
-      <Header profile />
+      <Header  />
       <div className="border-black flex-1 flex flex-col border mx-16 mt-8">
         <MessageHeader />
         <div className="px-12 flex flex-1 flex-col">

@@ -26,16 +26,6 @@ const Profile: React.FC = () => {
   const location = useLocation();
   const id = location.state?.userId;
 
-  useEffect(() => {
-    if (token) {
-      try {
-        const decodedToken = jwtDecode<DecodedToken>(token);
-        setUserId(decodedToken.id);
-      } catch (decodeError) {
-        console.error("Invalid token format:", decodeError);
-      }
-    }
-  }, [token]);
 
   const { data: books = [], isLoading: isLoadingBooks } = useQuery<Book[]>({
     queryKey: ["userBooks", userId],
@@ -67,7 +57,7 @@ const Profile: React.FC = () => {
 
   return (
     <div className="p-2">
-      <Header profile />
+      <Header  />
       <div className="px-24 border-black border">
         {userId && <ProfileInfo id={id ? id : userId} />}
         <div>

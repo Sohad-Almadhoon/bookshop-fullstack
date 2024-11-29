@@ -1,41 +1,34 @@
 import React, { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { twMerge } from "tailwind-merge";
 import ProfileMenu from "../ProfileMenu";
 import Notifications from "../Notifications";
 
 interface HeaderProps {
-  profile?: boolean;
+
   title?: ReactNode;
   className?: string;
-  isDropDown?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ profile, title, className , isDropDown}) => {
+const Header: React.FC<HeaderProps> = ({
+  title,
+  className,
+}) => {
   return (
     <header className="flex items-center border-black border py-1 px-20 ">
-      {/* Logo Section */}
       <Link to="/" className="flex-1">
         <img src="/assets/logo-dark.svg" alt="logo" className="w-14" />
       </Link>
 
-      {/* Heading Section */}
-      {!profile && <Heading title={title} className={className} />}
-
-      {/* Profile Icons Section */}
+      <Heading title={title} className={className} />
       <div className="flex-1 flex justify-end gap-3">
-        {profile && (
-          <div className="flex gap-3">
-            {/* Notifications */}
-            <Notifications />
+        <div className="flex gap-3">
+          <Notifications />
+          <Link to="/messages">
+            <img src="/assets/messages.svg" alt="Messages" />
+          </Link>
+        </div>
 
-            {/* Messages */}
-            <Link to="/messages">
-              <img src="/assets/messages.svg" alt="Messages" />
-            </Link>
-          </div>
-        )}
-        {isDropDown && <ProfileMenu />}
+        <ProfileMenu />
       </div>
     </header>
   );
@@ -49,21 +42,7 @@ interface HeadingProps {
 export const Heading: React.FC<HeadingProps> = ({ title, className }) => {
   return (
     <div>
-      {title ? (
-        <span className={className}>{title}</span>
-      ) : (
-        <div
-          className={
-            (twMerge(
-              "flex uppercase justify-start text-lg md:text-3xl font-romieMedium tracking-wide"
-            ))
-          }>
-          <sub className="text-xl mr-2 mt-1">the</sub>
-          home
-          <sub className="text-xl mx-2 mt-1">of</sub>
-          collaborative writing
-        </div>
-      )}
+      <span className={className}>{title}</span>
     </div>
   );
 };
