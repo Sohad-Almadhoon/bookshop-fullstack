@@ -47,24 +47,7 @@ const getUserConversations = async (req, res) => {
 };
 
 
-// Get all participants in a conversation
-const getConversationParticipants = async (req, res) => {
-  try {
-    const { conversationId } = req.params;
-    const participants = await prisma.participant.findMany({
-      where: { conversationId: parseInt(conversationId) },
-      include: {
-        user: true,
-      },
-    });
-    res.status(200).json(participants);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Something went wrong" });
-  }
-};
 export {
   createConversation,
   getUserConversations,
-  getConversationParticipants,
 };

@@ -16,7 +16,6 @@ import {
   createChapter,
   getBookChapters,
 } from "../controllers/book_chapter.controller.js";
-import { getBookUsers } from "../controllers/user.controller.js";
 
 const router = express.Router();
 
@@ -30,8 +29,6 @@ router.get("/:id/comments", verifyToken, getComments);
 //Chapters
 router.get("/:id/chapters", verifyToken, getBookChapters);
 router.post("/:id/chapters", verifyToken, createChapter);
-
-router.get("/:id/users", verifyToken, getBookUsers);
 router.post("/:id/follow", verifyToken, followBook);
 
 router.delete("/:id/follow", verifyToken, unFollowBook);

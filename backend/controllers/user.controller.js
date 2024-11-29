@@ -41,27 +41,6 @@ const getUser = async (req, res) => {
   }
 };
 
-const getBookUsers = async (req, res) => {
-  const bookId = parseInt(req.params.id);
-
-  try {
-    const users = await prisma.user_books.findMany({
-      where: { book_id: bookId },
-      include: {
-        user: true,
-      },
-    });
-
-    if (!users.length) {
-      return res.status(404).json({ message: "No users found for this book" });
-    }
-
-    return res.json(users.map((userBook) => userBook.user));
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
 const getUserBooks = async (req, res) => {
   const { userId } = req.params;
   try {
@@ -89,6 +68,5 @@ const getUserBooks = async (req, res) => {
 
 export {
   getUser,
-  getBookUsers,
   getUserBooks,
 };

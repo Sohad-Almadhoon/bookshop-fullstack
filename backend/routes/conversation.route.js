@@ -3,19 +3,13 @@ import verifyToken from "../middlewares/verifyToken.js";
 import {
   getUserConversations,
   createConversation,
-  getConversationParticipants,
 } from "../controllers/conversation.controller.js";
+import { getAllMessages } from "../controllers/message.controller.js";
 
 const router = express.Router();
 // Create a new conversation
 router.post("/", verifyToken, createConversation);
 router.get("/", verifyToken, getUserConversations);
-router.get("/participants/:conversationId", verifyToken, getConversationParticipants);
-router.post("/participants", verifyToken, getConversationParticipants);
-router.get(
-  "/conversations/:id/messages",
-  verifyToken,
-  getConversationParticipants
-);
+router.get("/conversations/:id/messages", verifyToken, getAllMessages);
 
 export default router;

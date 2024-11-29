@@ -3,7 +3,7 @@ import prisma from "../utils/db.js";
 import jwt from "jsonwebtoken";
 const register = async (req, res) => {
   const { name, email, password, role, generes } = req.body;
-  console.log(req.body);
+  
   try {
     // Check if user already exists
     const existingUser = await prisma.users.findUnique({
@@ -30,7 +30,7 @@ const register = async (req, res) => {
     });
 
     const { password: _, ...userWithoutPassword } = user;
-
+    console.log(user)
     res.status(201).json(userWithoutPassword);
   } catch (error) {
     console.error(error);
@@ -61,7 +61,14 @@ const login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "3d" }
     );
-    return res.status(200).json({ message: "Login successful.", token });
+    return res.status(200).json({ 
+      message: "Login successful.", 
+      token, 
+      user: {
+        id: user.id,
+        name: user.name,
+      },
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error logging in" });
