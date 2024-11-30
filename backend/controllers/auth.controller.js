@@ -30,7 +30,7 @@ const register = async (req, res) => {
     });
 
     const { password: _, ...userWithoutPassword } = user;
-    console.log(user)
+
     res.status(201).json(userWithoutPassword);
   } catch (error) {
     console.error(error);
@@ -59,10 +59,8 @@ const login = async (req, res) => {
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "3d" }
     );
     return res.status(200).json({ 
-      message: "Login successful.", 
       token, 
       user: {
         id: user.id,

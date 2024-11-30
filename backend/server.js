@@ -7,13 +7,13 @@ import bookRoutes from "./routes/book.route.js";
 import chapterRoutes from "./routes/chapters.route.js";
 import conversationRoutes from "./routes/conversation.route.js";
 import messageRoutes from "./routes/message.route.js";
-import { upload, uploadFile } from "./utils/upload.js";
+import uploadRoutes from "./routes/upload.route.js";
 import { errorHandler } from "./middlewares/errorMiddleware.js";
 import bodyParser from "body-parser";
 const app = express();
 dotenv.config();
 app.use(express.json());
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors({ origin: "http://localhost:3000" , credentials : true}));
 app.use(bodyParser.json());
 
 const routes = {
@@ -23,11 +23,10 @@ const routes = {
   "/api/chapters": chapterRoutes,
   "/api/conversations": conversationRoutes,
   "/api/messages": messageRoutes,
+  "/api/upload": uploadRoutes,
 };
 Object.keys(routes).forEach((route) => app.use(route, routes[route]));
 
-// File upload route
-app.post("/api/upload", upload.single("file"), uploadFile);
 
 // Use the error handling middleware
 app.use(errorHandler);

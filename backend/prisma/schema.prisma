@@ -15,7 +15,8 @@ model users {
   role             String
   generes          String[]
   created_at       DateTime @default(now())
-  books_followed   user_books[]  // Changed relation: user follows books now
+  books            user_books[]
+
   comments         book_comments[]
   conversations    Participant[]
   messages         messages[]
@@ -28,9 +29,9 @@ model user_books {
   book_id     Int
   created_at  DateTime @default(now())
   type        UserBookRelationType
-
-  user        users @relation(fields: [user_id], references: [id])
+  user        users @relation(fields: [user_id], references: [id]) 
   book        books @relation(fields: [book_id], references: [id])
+ @@unique([user_id, book_id]) 
 }
 
 model books {
@@ -44,8 +45,8 @@ model books {
 
   comments    book_comments[]
   chapters    chapters[]
-  users       user_books[]  // This keeps track of the users who follow this book
-  conversations Conversation[] // Back-reference to conversations linked to this book
+  users       user_books[]  
+  conversations Conversation[]
 }
 
 model chapters {

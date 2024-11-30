@@ -97,6 +97,23 @@ const getChapterContent = async (req, res) => {
   }
 };
 
+const createChapterContent = async (req,res) => {
+  const { chapterId } = req.params; 
+  const {text , audio} = req.body;
+  try {
+    await prisma.chapter_content.createMany({
+      data: {
+        type: text ? "TEXT" : "AUDIO",
+        content: text || audio,
+        chapter_id: parseInt(chapterId),
+        
+      },
+     
+    });
+    res.status(201).json({ message: "Content created successfully." });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
 
-
-export { createChapter, getBookChapters,getChapterContent };
+  }
+}
+export { createChapter, getBookChapters,getChapterContent , createChapterContent};

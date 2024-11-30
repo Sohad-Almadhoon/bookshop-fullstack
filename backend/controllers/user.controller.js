@@ -13,16 +13,14 @@ const getUser = async (req, res) => {
             book: true, // Include the book details for books related to the user
           },
         },
-        followers: true, // Include the users who follow this user
-        following_users: true, // Include the users this user is following
         comments: {
           include: {
-            book: true, // Include the book details for the comments made by this user
+            book: true, 
           },
         },
         conversations: {
           include: {
-            conversation: true, // Include the conversations the user is part of
+            conversation: true, 
           },
         },
       },
@@ -64,9 +62,36 @@ const getUserBooks = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+ const getFollowedBooks = async (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId || isNaN(userId)) {
+    return res.status(400).json({ message: "Invalid user ID" });
+  }
+
+  try {
+    const followedBooks = await prisma.user_books.findMany({
+      where: {
+        user_id: parseInt(userId),
+        type: "FOLLOW", 
+      },
+      include: {
+        book: true,
+      },
+    });
 
 
-export {
-  getUser,
-  getUserBooks,
+    if (!followedBooks.length) {
+      return res.status(404).json({ message: "No followed books found for this user" });
+    }
+
+    return res.json(followedBooks.map((relation) => relation.book));
+  } catch (error) {
+    console.error("Error fetching followed books:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };
+
+
+
+export { getUser, getUserBooks, getFollowedBooks };
