@@ -1,13 +1,8 @@
-import {
-  ChangeEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { BsPauseFill, BsPlayFill } from "react-icons/bs";
-import { formatTime } from "../utils/helpers";
+import { formatTime } from "../../utils/helpers";
 
-const VoicePlayer = () => {
+const VoicePlayer = ({ url }: { url: string }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -49,7 +44,9 @@ const VoicePlayer = () => {
   };
   return (
     <div className="flex items-center justify-center  flex-1 px-1 py-0.5 gap-1">
-      <audio ref={audioRef} src="/assets/voice.mp3" />
+      <audio ref={audioRef}>
+        <source src={url} type="audio/mpeg" />
+      </audio>
       <button
         onClick={togglePlay}
         className="rounded-full w-10 h-10 flex justify-center items-center z-10">

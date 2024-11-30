@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { BsTrash } from "react-icons/bs";
-import VoicePlayer from "../../VoicePlayer";
+import VoicePlayer from "../../shared/VoicePlayer";
 
 interface FileUploadProps {
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -43,7 +43,7 @@ const FileUploader: FC<FileUploadProps> = ({
             </div>
           ) : isAudio ? (
             <div className="flex gap-2 items-center mt-12">
-              <VoicePlayer />
+              <VoicePlayer url="https://res.cloudinary.com/di3wcajzm/raw/upload/v1732977379/audio/dnh74pb1n1yzhoffq9fi" />
               <BsTrash className="text-3xl bg-black cursor-pointer text-white  p-1 rounded-full" />
             </div>
           ) : null}

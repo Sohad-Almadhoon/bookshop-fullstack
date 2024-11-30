@@ -1,6 +1,7 @@
 import { Menu  , MenuButton  , MenuItems} from "@headlessui/react";
 import { BsListCheck } from "react-icons/bs";
-import { useNotificationModal } from "../hooks/useNotificationModal";
+import { useNotificationModal } from "../../hooks/useNotificationModal";
+
 
 const Notifications = () => {
   const { toggleModal, isOpen } = useNotificationModal();

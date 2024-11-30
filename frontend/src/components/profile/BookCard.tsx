@@ -3,11 +3,12 @@ interface BookProps {
   title: string;
   author: string;
   main_cover: string;
+  id: number;
 }
-const BookCard = ({ title, author, main_cover }: BookProps) => {
+const BookCard = ({ title, author, main_cover ,id }: BookProps) => {
   return (
     <Link
-      to="/books/2"
+      to={`/books/${id}`}
       className="border border-black border-opacity-30 rounded-md p-5">
       <div className="relative">
         <img src={main_cover} alt="" />

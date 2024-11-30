@@ -13,7 +13,7 @@ import {
 import Header from "../components/shared/Header";
 import Button from "../components/shared/Button";
 import { useNovelModal } from "../hooks/useNovelModal";
-import VoicePlayer from "../components/VoicePlayer";
+import VoicePlayer from "../components/shared/VoicePlayer";
 
 import "swiper/css";
 import "swiper/css/effect-coverflow";
@@ -57,7 +57,6 @@ const ChapterPage: React.FC = () => {
     id: bookId,
     chapterIndex,
   } = location.state || {};
-  console.log(location.state)
   const { id } = useParams();
   const [chapters, setChapters] = useState<Chapter[]>([]);
 
@@ -75,17 +74,16 @@ const ChapterPage: React.FC = () => {
 
   const chapterImages = chapters.map((chapter) => chapter.cover_image);
   const handleImageClick = (index: number) => {
-   
-   const selectedChapter = chapters[index];
-   navigate(`/chapters/${selectedChapter.id}`, {
-     state: {
-       chapterTitle: selectedChapter.title,
-       title,
-       bookId,
-       chapterIndex: index,
-     },
-   });
- };
+    const selectedChapter = chapters[index];
+    navigate(`/chapters/${selectedChapter.id}`, {
+      state: {
+        chapterTitle: selectedChapter.title,
+        title,
+        bookId,
+        chapterIndex: index,
+      },
+    });
+  };
 
   return (
     <div className="min-h-screen border border-black">
@@ -134,17 +132,10 @@ const ChapterPage: React.FC = () => {
               <BsChevronRight className="text-sm" />
             </button>
 
-            <div className="flex p-2 gap-3 border-black border border-opacity-30 rounded-lg items-center">
-              <BsChevronLeft className="w-10 h-10 border border-opacity-30 rounded-full p-1 border-black cursor-pointer" />
-              <BsLightningCharge className="w-10 h-10 border-2 bg-black text-white rounded-full p-2 cursor-pointer" />
-              <BsHeart className="w-10 h-10 border-2 border-black rounded-full p-2 cursor-pointer" />
-              <VoicePlayer />
-              <img
-                src="/assets/collection-thumbnail.png"
-                alt="thumbnail"
-                width={40}
-              />
-              <BsChevronRight className="w-10 h-10 border border-opacity-30 rounded-full p-1 border-black cursor-pointer" />
+            <div className="flex p-2 gap-3 w-full max-w-lg border-black border border-opacity-30 rounded-2xl items-center">
+              
+              <VoicePlayer
+                url="https://res.cloudinary.com/di3wcajzm/raw/upload/v1732977379/audio/dnh74pb1n1yzhoffq9fi" />
             </div>
             <IconButton
               onClick={() => openModal("audio")}

@@ -8,8 +8,8 @@ import {
 import { BsPersonFill, BsSignpost2 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { Fragment } from "react";
-import Button from "./shared/Button";
-import { logout } from "../actions/user.action";
+import Button from "../shared/Button";
+import { logout } from "../../actions/user.action";
 
 const ProfileMenu = () => {
   return (

@@ -1,7 +1,6 @@
 import Modal from "./Modal";
 import { useCommentModal } from "../../hooks/useCommentModal";
-import Comments from "../Comments";
-
+import Comments from "../book/Comments";
 const CommentModal = () => {
   const { isOpen, closeModal } = useCommentModal();
   return (

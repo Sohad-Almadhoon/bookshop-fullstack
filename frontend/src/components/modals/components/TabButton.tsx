@@ -5,7 +5,6 @@ interface TabButtonProps {
   title: string;
   Icon: React.ComponentType<{ className?: string }>;
   active: boolean;
-  onClick: () => void;
   index?: number;
 }
 
@@ -14,12 +13,10 @@ const TabButton: FC<TabButtonProps> = ({
   title,
   Icon,
   active,
-  onClick,
 }) => (
   <Button
-    onClick={onClick}
     className={twMerge(
-      "flex items-center py-3 px-6 text-xl gap-2",
+      "flex items-center py-3 px-6 text-xl gap-2 cursor-default",
       index === 0
         ? "rounded-r-none"
         : index === 1

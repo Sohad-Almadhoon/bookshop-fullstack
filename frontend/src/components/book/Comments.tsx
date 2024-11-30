@@ -1,6 +1,6 @@
 import { FC, useState, useEffect } from "react";
-import Button from "./shared/Button";
-import newRequest from "../utils/newRequest"; // Assuming you have a custom utility for making requests
+import Button from "../shared/Button";
+import newRequest from "../../utils/newRequest"; // Assuming you have a custom utility for making requests
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 interface User{

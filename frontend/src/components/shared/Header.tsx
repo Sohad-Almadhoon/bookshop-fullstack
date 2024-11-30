@@ -1,18 +1,14 @@
 import React, { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import ProfileMenu from "../ProfileMenu";
-import Notifications from "../Notifications";
+import ProfileMenu from "../profile/ProfileMenu";
+import Notifications from "../shared/Notifications";
 
 interface HeaderProps {
-
   title?: ReactNode;
   className?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({
-  title,
-  className,
-}) => {
+const Header: React.FC<HeaderProps> = ({ title, className }) => {
   return (
     <header className="flex items-center border-black border py-1 px-20 ">
       <Link to="/" className="flex-1">
