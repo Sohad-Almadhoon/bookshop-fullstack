@@ -1,18 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import GenreTags from "./GenreTags";
-import ProfileStats from "./ProfileStats";
 import newRequest from "../../utils/newRequest";
 
 interface ProfileInfoProps {
   id: string;
 }
 
+const ProfileInfo = ({ id }: ProfileInfoProps) => {
 const fetchUserInfo = async (id: string) => {
   const response = await newRequest.get(`/api/users/${id}`);
   return response.data;
 };
-
-const ProfileInfo = ({ id }: ProfileInfoProps) => {
   const {
     data: user,
     isLoading,
@@ -23,7 +21,7 @@ const ProfileInfo = ({ id }: ProfileInfoProps) => {
     enabled: !!id,
     retry: 1,
   });
-
+  console.log("Fetched user data:", user);
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -36,24 +34,18 @@ const ProfileInfo = ({ id }: ProfileInfoProps) => {
     <div className="border border-opacity-30 border-black rounded-xl p-8 mt-5 flex gap-4">
       <div>
         <span className="flex uppercase size-24 text-6xl justify-center items-center bg-black text-white rounded-full">
-          {user.name.charAt(0)}
+          {user?.name?.charAt(0)}
         </span>
       </div>
       <div className="flex-1">
         <h1 className="uppercase text-5xl text-black font-romieMedium mb-3">
-          {user.name} <sub className="text-2xl">nox</sub>
+          {user?.name} <sub className="text-2xl">nox</sub>
         </h1>
         <p className="max-w-[640px] mb-3 text-sm font-baskervville">
           I am a dedicated writer that aspires to be the greatest of all time.
           One becomes part of the art we see and I want people to see the taste
           at its best.
         </p>
-        <div className="flex items-center gap-2">
-          <ProfileStats
-            following={user.following_users.length}
-            followers={user.followers.length}
-          />
-        </div>
       </div>
       <div className="flex flex-col">
         <div className=" relative">
@@ -75,7 +67,7 @@ const ProfileInfo = ({ id }: ProfileInfoProps) => {
             </div>
           </div>
         </div>
-        <GenreTags tags={user.generes} />
+        <GenreTags tags={user?.generes || []} />
       </div>
     </div>
   );

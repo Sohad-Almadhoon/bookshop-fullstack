@@ -9,6 +9,7 @@ export interface BookData {
   id: string;
   title: string;
   main_cover: string;
+  created_at: string;
 }
 const Book = () => {
   const { id: bookId } = useParams();
@@ -35,7 +36,7 @@ const Book = () => {
       <Header title={bookData.title} className="text-3xl uppercase" />
       <div className="flex border border-black flex-1">
         <Sidebar imgUrl={bookData.main_cover} />
-        <ChaptersArea />
+        <ChaptersArea date={bookData.created_at }/>
       </div>
     </div>
   );

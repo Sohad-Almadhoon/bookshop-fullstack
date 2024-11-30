@@ -1,19 +1,23 @@
 import newRequest from "./newRequest"; // Ensure this path is correct and the module exports a 'post' method
-const upload = async (file: File) => {
-  const data = new FormData();
-  data.append("file", file);
-  try {
-    const res = await newRequest.post("/api/upload", data, {
-      headers: {
-        "Content-Type": "multipart/form-data", // Ensure the correct header is set
-      },
-    });
-    const { url } = res.data;
-    return url;
-  } catch (error: any) {
-    console.error("Upload error:", error.response?.data || error.message);
+const upload = async (imageFile: File, audioFile: File, fileType: string) => {
+  const formData = new FormData();
+  formData.append('fileType', fileType);
 
-    return null;
+  if (fileType === 'image' && imageFile) {
+    formData.append('image', imageFile);
+  } else if (fileType === 'audio' && audioFile) {
+    formData.append('audio', audioFile);
+  }
+  try {
+    const response = await newRequest.post("api/upload", formData);
+    const result = response.data;
+    if (fileType === 'image') {
+      console.log('Image URL:', result.imageUrl);
+    } else if (fileType === 'audio') {
+      console.log('Audio URL:', result.audioUrl);
+    }
+  } catch (error) {
+    console.error('Error uploading file:', error);
   }
 };
 

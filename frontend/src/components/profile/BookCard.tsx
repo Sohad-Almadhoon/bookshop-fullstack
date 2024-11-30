@@ -1,20 +1,19 @@
 import { Link } from "react-router-dom";
-
-const BookCard = ({url}:{url:string}) => {
+interface BookProps {
+  title: string;
+  author: string;
+  main_cover: string;
+}
+const BookCard = ({ title, author, main_cover }: BookProps) => {
   return (
-    <Link to="/books/2" className="border border-black border-opacity-30 rounded-md p-5">
+    <Link
+      to="/books/2"
+      className="border border-black border-opacity-30 rounded-md p-5">
       <div className="relative">
-        <img src={url} alt="" />
-        <div className="absolute bottom-6 left-4 flex flex-col gap-1">
-          <span className="rounded-xl border-2 border-black bg-white flex px-1">
-            +1 <img src="/assets/music-note.svg" alt="music-note" />
-          </span>
-          <span className="rounded-xl border-2 border-black bg-white flex px-1">
-            +2 <img src="/assets/photos.svg" alt="photos" />
-          </span>
-          <span className="rounded-xl border-2 border-black bg-white flex px-1">
-            +1 <img src="/assets/pencil.svg" alt="pencil" />
-          </span>
+        <img src={main_cover} alt="" />
+        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+          <h1 className="text-2xl font-semibold">{title}</h1>
+          <p className="text-sm">{author}</p>
         </div>
       </div>
     </Link>

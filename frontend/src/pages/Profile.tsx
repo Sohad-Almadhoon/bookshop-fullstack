@@ -1,43 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ProfileInfo from "../components/profile/ProfileInfo";
 import ProfileActions from "../components/profile/ProfileActions";
 import BookGrid from "../components/profile/BookGrid";
 import Header from "../components/shared/Header";
 import { useQuery } from "@tanstack/react-query";
-import { jwtDecode } from "jwt-decode";
 import {
   Book,
   fetchFollowingBooks,
   fetchUserBooks,
 } from "../actions/books.action";
 import { useLocation } from "react-router-dom";
-
-interface DecodedToken {
-  id: string;
-  email?: string;
-  iat?: number;
-  exp?: number;
-}
+import { getUser } from "../utils/helpers";
 
 const Profile: React.FC = () => {
   const [tab, setTab] = useState<number>(0);
-  const [userId, setUserId] = useState<string>(localStorage.getItem("token")!);
-  const token = localStorage.getItem("token");
+  const currentUser = getUser();
+  const { user } = currentUser;
   const location = useLocation();
   const id = location.state?.userId;
 
-
   const { data: books = [], isLoading: isLoadingBooks } = useQuery<Book[]>({
-    queryKey: ["userBooks", userId],
-    queryFn: () => fetchUserBooks(userId, token!),
-    enabled: !!userId,
+    queryKey: ["userBooks", user.id],
+    queryFn: () => fetchUserBooks(user.id, currentUser.token!),
+    enabled: !!user.id,
   });
 
   const { data: followingBooks = [], isLoading: isLoadingFollowingBooks } =
     useQuery<Book[]>({
-      queryKey: ["followingBooks", userId],
-      queryFn: () => fetchFollowingBooks(userId),
-      enabled: !!userId,
+      queryKey: ["followingBooks", user.id],
+      queryFn: () => fetchFollowingBooks(user.id, currentUser.token!),
+      enabled: !!user.id,
     });
 
   const tabs = [
@@ -56,17 +48,13 @@ const Profile: React.FC = () => {
   ];
 
   return (
-    <div className="p-2">
-      <Header  />
-      <div className="px-24 border-black border">
-        {userId && <ProfileInfo id={id ? id : userId} />}
-        <div>
+    <div className="p-2 flex flex-col min-h-screen">
+      <Header />
+      <div className="px-24 border-black border flex-1">
+        {user.id && <ProfileInfo id={id ? id : user.id} />}
+        <div className="flex-1">
           <ProfileActions tabs={tabs} tab={tab} setTab={setTab} />
-          {tab === 0 ? (
-            <BookGrid tab={tab} books={books} />
-          ) : (
-            <BookGrid tab={tab} books={followingBooks} />
-          )}
+          <BookGrid tab={tab} books={tab === 0 ? books : followingBooks} />
         </div>
       </div>
     </div>

@@ -48,9 +48,17 @@ const NovelModal = () => {
 
     if (uploadedFile) {
       try {
-        const imageUrl = await upload(uploadedFile); // Assuming this function uploads the file and returns a URL
-        console.log(imageUrl);
-        setFile(imageUrl);
+        let fileUrl;
+        // Handle file upload for images and audio
+        if (uploadedFile.type.startsWith("image/")) {
+          fileUrl = await upload(uploadedFile); 
+        } else if (uploadedFile.type.startsWith("audio/")) {
+          fileUrl = await upload(uploadedFile); 
+        } else {
+          throw new Error("Unsupported file type");
+        }
+        console.log(fileUrl);
+        setFile(fileUrl);
         setFileType(uploadedFile.type);
         setIsLoading(false);
       } catch (error) {
@@ -70,7 +78,6 @@ const NovelModal = () => {
     setIsLoading(true);
 
     try {
-      // Send chapter data to the backend to create a new chapter
       const response = await newRequest.post(`/api/books/${id}/chapters`, {
         title,
         cover_image: fileType.startsWith("image/")

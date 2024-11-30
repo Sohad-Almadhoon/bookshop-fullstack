@@ -1,5 +1,5 @@
 import { BookFormData } from "../components/modals/CeateBook";
-import newRequest from "../utils/newRequest";  
+import newRequest from "../utils/newRequest";
 
 export interface Book {
     id: string;
@@ -16,7 +16,7 @@ const fetchUserBooks = async (userId: string, token: string) => {
             },
         });
 
-        return response.data; 
+        return response.data;
     } catch (error: any) {
         if (error.response) {
             throw new Error(
@@ -46,31 +46,20 @@ const createBook = async (data: BookFormData) => {
         );
     }
 };
-const fetchFollowingBooks = async (token: string) => {
+const fetchFollowingBooks = async (id: string, token: string) => {
     try {
-        const response = await newRequest.get(`/api/users/following/books`, {
+        const response = await newRequest.get(`/api/users/${id}/followed-books`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         });
-
-        return response.data;  // Return the data directly
+        return response.data;
     } catch (error: any) {
-        if (error.response) {
-            // Server responded with an error status
-            throw new Error(
-                error.response.data?.message || "Failed to fetch following books."
-            );
-        } else if (error.request) {
-            // No response received from the server
-            throw new Error("No response from server. Please check the API.");
-        } else {
-            // Some other error occurred
-            throw new Error(error.message || "Unexpected error occurred.");
-        }
+        console.error("Failed to fetch following books:", error?.response?.data || error.message);
+        throw new Error(error?.response?.data?.message || "Error fetching following books");
     }
 };
 const createComment = () => {
-    
+
 }
 export { fetchFollowingBooks, fetchUserBooks, createComment, createBook };

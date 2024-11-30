@@ -15,9 +15,9 @@ const BookGrid: React.FC<BookGridProps> = ({ tab, books }) => {
             : "No books available from followed users."}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 flex-1">
           {books.map((book, index) => (
-            <BookCard key={index} url={book.main_cover} />
+            <BookCard key={index} {...book} />
           ))}
         </div>
       )}
