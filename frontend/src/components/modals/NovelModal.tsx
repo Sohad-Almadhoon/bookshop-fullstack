@@ -4,14 +4,16 @@ import Modal from "./Modal";
 import { BsFileTextFill, BsImageFill, BsMusicNote } from "react-icons/bs";
 import { twMerge } from "tailwind-merge";
 import { useNovelModal } from "../../hooks/useNovelModal";
-import FileUploader from "./components/FileUploader";
 import TabButton from "./components/TabButton";
 import Loader from "../shared/Loader";
 import toast from "react-hot-toast";
 import newRequest from "../../utils/newRequest";
 import { useParams } from "react-router-dom";
+import TextUploader from "./components/TextUploader";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import FileUploader from "./components/FileUploader";
+import handleFileUpload from "../../actions/upload.action";
 import CustomInput from "../shared/CustomInput";
-import uploadFile from "../../utils/upload";
 
 type ContentType = "visual" | "audio" | "text";
 
@@ -24,114 +26,78 @@ const tabs: { title: ContentType; icon: React.ComponentType }[] = [
 const NovelModal = () => {
   const [textInput, setTextInput] = useState("");
   const [file, setFile] = useState<string>("");
-  const [isLoading, setIsLoading ] = useState(false);
-  const { isOpen, closeModal, contentType} = useNovelModal();
-  const [fileType, setFileType] = useState("");
+  const { isOpen, closeModal, contentType } = useNovelModal();
+  const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<ContentType>("visual");
   const [title, setTitle] = useState("");
   const { id } = useParams();
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     if (contentType) {
       setActiveTab(contentType);
     }
- },[contentType])
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const uploadedFile = e.target.files?.[0];
-    setIsLoading(true);
+  }, [contentType]);
 
-    if (uploadedFile) {
-      try {
-        const fileType = uploadedFile.type.split("/")[0] as "image" | "audio";
-        if (fileType === "image" || fileType === "audio") {
-          const fileUrl = await uploadFile(uploadedFile, fileType);
 
-          console.log(fileUrl);
-          setFile(fileUrl);
-          setFileType(fileType);
-        } else {
-          toast.error(
-            "Unsupported file type! Only images and audio files are allowed."
-          );
-        }
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Error uploading file!";
-        toast.error(errorMessage);
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      toast.error("No file selected!");
-      setIsLoading(false);
-    }
-  };
-
-  // Handle chapter creation
-  const handleChapterCreation = async () => {
-    if (!file && !textInput) {
-      toast.error("Please upload a file or add text.");
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
+  const handleChapterCreationMutation = useMutation({
+    mutationFn: async () => {
       const response = await newRequest.post(`/api/books/${id}/chapters`, {
         title,
         cover_image: file,
       });
-
-      if (response.status === 201) {
-        toast.success("Chapter created successfully!");
-        closeModal();
-      } else {
-        toast.error("Error creating chapter!");
-      }
-    } catch (error) {
+      return response;
+    },
+    onSuccess: () => {
+      toast.success("Chapter created successfully!");
+      closeModal();
+      queryClient.invalidateQueries({ queryKey: ["chapters"] });
+    },
+    onError: () => {
       toast.error("Error creating chapter!");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  const createChapterContent = async () => {
-    try {
+    },
+  });
+
+  // Mutation for uploading chapter content
+  const createChapterContentMutation = useMutation({
+    mutationFn: async () => {
+      const payload: { audio?: string; text?: string } = {};
+
+      if (activeTab === "audio") {
+        payload.audio = file;
+      } else if (activeTab === "text") {
+        payload.text = textInput;
+      }
+
       const response = await newRequest.post(
         `/api/chapters/${id}/content`,
-        {
-          audio: file
-        }
+        payload
       );
-      console.log(response.data , file)
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  
-  // Render content based on the active tab (visual, audio, or text)
+      return response;
+    },
+    onSuccess: () => {
+      toast.success("Content uploaded successfully!");
+      setTextInput("");
+      setFile("");
+    },
+    onError: () => {
+      toast.error("Failed to upload content!");
+    },
+  });
+
   const renderTabContent = () => {
     switch (activeTab) {
       case "text":
-        return (
-          <div className="mt-5">
-            <textarea
-              className="w-full h-[155px] p-3 border border-black rounded-lg bg-transparent placeholder-black placeholder-opacity-40"
-              placeholder="Write your text here..."
-              maxLength={400}
-              value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
-            />
-            <p className="text-right text-sm text-[#181818]">
-              {textInput.length}/400
-            </p>
-          </div>
-        );
+        return <TextUploader setTextInput={setTextInput} text={textInput} />;
       case "visual":
-        if (isLoading) return <Loader />;
+        if (isLoading) <Loader />;
         return (
           <div>
             <FileUploader
               file={file}
-              onFileChange={handleFileUpload}
+              onFileChange={(e) =>
+                handleFileUpload(e, setIsLoading, setFile, toast)
+              }
               label="Click to upload"
               accept="image/*"
               description="SVG, PNG, JPG, or GIF (max 800x400px, 20MB)"
@@ -144,11 +110,13 @@ const NovelModal = () => {
           </div>
         );
       case "audio":
-        if (isLoading) return <Loader />;
+        if (isLoading) <Loader />;
         return (
           <FileUploader
             file={file}
-            onFileChange={handleFileUpload}
+            onFileChange={(e) =>
+              handleFileUpload(e, setIsLoading, setFile, toast)
+            }
             label="Click to upload"
             accept="audio/*"
             description="MP3, WAV, FLAC (max 20MB)"
@@ -179,14 +147,32 @@ const NovelModal = () => {
         {renderTabContent()}
 
         <Button
-          onClick={createChapterContent}
-          disabled={isLoading}
+          onClick={() => {
+            if (activeTab === "visual") {
+              handleChapterCreationMutation.mutate();
+            } else {
+              createChapterContentMutation.mutate();
+            }
+          }}
+          disabled={createChapterContentMutation.isPending}
           className={twMerge(
             "w-[250px] mt-5 border-none font-baskervville font-bold",
-            !textInput.length && ""
+            (!file && activeTab !== "text") ||
+              (!textInput && activeTab === "text")
+              ? "opacity-50"
+              : ""
           )}
-          variant={!file || !textInput.length ? "outline" : ""}>
-          Create Chapter
+          variant={
+            (!file && activeTab !== "text") ||
+            (!textInput && activeTab === "text")
+              ? "outline"
+              : ""
+          }>
+          {createChapterContentMutation.isPending ? (
+            <Loader />
+          ) : (
+            "Create Chapter"
+          )}
         </Button>
       </div>
     </Modal>

@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
-  BsChevronLeft,
-  BsChevronRight,
   BsFileText,
   BsMusicNoteBeamed,
 } from "react-icons/bs";
@@ -12,30 +10,21 @@ import Button from "../components/shared/Button";
 import { useNovelModal } from "../hooks/useNovelModal";
 import VoicePlayer from "../components/shared/VoicePlayer";
 import newRequest from "../utils/newRequest";
-import "swiper/css";
-import "swiper/css/effect-coverflow";
-
 interface IconButtonProps {
   icon: React.ElementType<{ className?: string }>;
   label: string;
-  price: number;
   onClick: () => void;
 }
 const IconButton: React.FC<IconButtonProps> = ({
   icon: Icon,
   onClick,
   label,
-  price,
 }) => (
   <Button
     onClick={onClick}
     className="flex items-center justify-center gap-x-3 my-5 max-w-sm w-full mx-auto">
     <Icon className="text-lg" />
     {label}{" "}
-    <b className="text-lg">
-      <sup>$</sup>
-      {price}
-    </b>
   </Button>
 );
 const ChapterPage: React.FC = () => {
@@ -126,39 +115,27 @@ const ChapterPage: React.FC = () => {
       />
       <div className="flex">
         <div className="flex-1 border-r border-black">
-          <div className="flex flex-col items-center relative">
-            {/* Slider buttons */}
-            <button
-              onClick={handlePrevChapter}
-              className="absolute top-1/2 left-14 rounded-full w-10 h-10 flex justify-center items-center z-10 border border-black">
-              <BsChevronLeft className="text-sm" />
-            </button>
-            <button
-              onClick={handleNextChapter}
-              className="absolute top-1/2 right-14 rounded-full w-10 h-10 flex justify-center items-center z-10 border border-black">
-              <BsChevronRight className="text-sm" />
-            </button>
-            <div className="flex items-center justify-center">
-              <img
-                src={chapter?.cover_image}
-                alt="chapter cover"
-                className="h-[420px] w-full object-contain"
-              />
-            </div>
-            {/* Audio Player */}
-            <div className="flex p-2 gap-3 w-full max-w-lg border-black border border-opacity-30 rounded-2xl items-center">
+          <div className="flex flex-col items-center justify-center mt-9">
+            <img
+              src={chapter?.cover_image}
+              alt="chapter cover"
+              className="h-[420px] w-full object-contain"
+            />
+
+            <div className="flex p-2 mt-5 gap-3 w-full max-w-lg border-black border border-opacity-30 rounded-2xl items-center">
               {chapter?.chapter_content?.audio ? (
                 <VoicePlayer url={chapter.chapter_content.audio} />
               ) : (
                 <p>No audio available for this chapter.</p>
               )}
             </div>
-            <IconButton
-              onClick={() => openModal("audio")}
-              icon={BsMusicNoteBeamed}
-              label="ADD AUDIO BLOCK"
-              price={8}
-            />
+            {!chapter?.chapter_content?.audio && (
+              <IconButton
+                onClick={() => openModal("audio")}
+                icon={BsMusicNoteBeamed}
+                label="ADD AUDIO BLOCK"
+              />
+            )}
           </div>
         </div>
         <div className="p-6 flex-1">
@@ -179,7 +156,6 @@ const ChapterPage: React.FC = () => {
               onClick={() => openModal("text")}
               icon={BsFileText}
               label="ADD TEXT BLOCK"
-              price={8}
             />
           </div>
         </div>
