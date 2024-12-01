@@ -51,11 +51,11 @@ model books {
 
 model chapters {
   id          Int      @id @default(autoincrement())
-  title       String
+  title       String 
   cover_image String
   book_id     Int
   created_at  DateTime @default(now())
-  chapter_content chapter_content[]
+  chapter_content chapter_content?  @relation
 
   book        books @relation(fields: [book_id], references: [id])
 }
@@ -68,7 +68,7 @@ model chapter_content {
   created_at     DateTime @default(now())
   chapter        chapters @relation(fields: [chapter_id], references: [id])
   user_id        Int?          
-  user           users?         @relation(fields: [user_id], references: [id]) // Reverse relation
+  user           users?         @relation(fields: [user_id], references: [id]) 
 }
 
 model book_comments {

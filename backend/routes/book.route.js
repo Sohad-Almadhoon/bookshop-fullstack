@@ -14,6 +14,7 @@ import {
 } from "../controllers/book_comment.controller.js";
 import {
   createChapter,
+  getBookChapter,
   getBookChapters,
 } from "../controllers/book_chapter.controller.js";
 
@@ -28,7 +29,10 @@ router.get("/:id/comments", verifyToken, getComments);
 
 //Chapters
 router.get("/:id/chapters", verifyToken, getBookChapters);
+router.get("/:id/chapters/:chapterId", verifyToken, getBookChapter);
+
 router.post("/:id/chapters", verifyToken, createChapter);
+
 router.post("/:id/follow", verifyToken, followBook);
 
 router.delete("/:id/follow", verifyToken, unFollowBook);
