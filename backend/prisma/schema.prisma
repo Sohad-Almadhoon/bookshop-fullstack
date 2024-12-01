@@ -63,11 +63,11 @@ model chapters {
 model chapter_content {
   id             Int      @id @default(autoincrement())
   chapter_id     Int
-  content        String
-  type           ContentType
+  text           String[]
+  audio          String?  
   created_at     DateTime @default(now())
   chapter        chapters @relation(fields: [chapter_id], references: [id])
-  user_id        Int?           // Add user_id to relate to users (optional)
+  user_id        Int?          
   user           users?         @relation(fields: [user_id], references: [id]) // Reverse relation
 }
 
@@ -111,11 +111,6 @@ model messages {
 
   conversation    Conversation  @relation(fields: [conversationId], references: [id])
   sender          users         @relation(fields: [senderId], references: [id])
-}
-
-enum ContentType {
-  TEXT
-  AUDIO
 }
 
 enum UserBookRelationType {

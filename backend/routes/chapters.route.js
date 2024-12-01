@@ -8,7 +8,7 @@ import verifyToken from "../middlewares/verifyToken.js";
 
 //Chapters Content
 router.get("/:chapterId/content", verifyToken, getChapterContent);
-router.put("/:chapterId/content", verifyToken, createChapterContent);
+router.post("/:chapterId/content", verifyToken, createChapterContent);
 
 
 export default router;

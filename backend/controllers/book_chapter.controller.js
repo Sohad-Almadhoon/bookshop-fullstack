@@ -2,7 +2,7 @@ import prisma from "../utils/db.js";
 
 // Create a chapter
 const createChapter = async (req, res) => {
-  const { id:bookId } = req.params;
+  const { id: bookId } = req.params;
   const { title, cover_image } = req.body;
   try {
     const newChapter = await prisma.chapters.create({
@@ -23,11 +23,11 @@ const createChapter = async (req, res) => {
 };
 
 const getBookChapters = async (req, res) => {
-  const { id:bookId } = req.params; 
+  const { id: bookId } = req.params;
   try {
     const chapters = await prisma.chapters.findMany({
       where: {
-        book_id: parseInt(bookId), 
+        book_id: parseInt(bookId),
       },
       include: {
         chapter_content: true,
@@ -35,8 +35,8 @@ const getBookChapters = async (req, res) => {
           select: {
             title: true,
             id: true,
-          }
-        }
+          },
+        },
       },
     });
 
@@ -56,64 +56,96 @@ const getBookChapters = async (req, res) => {
 };
 
 const getChapterContent = async (req, res) => {
-  const { chapterId } = req.params; 
+  const { chapterId } = req.params;
 
   try {
-    const chapterContent = await prisma.chapter_content.findMany({
-      where: {
-        chapter_id: parseInt(chapterId), 
-      },
+    const chapterContent = await prisma.chapter_content.findFirst({
+      where: { chapter_id: parseInt(chapterId) },
       include: {
-        author: {
-          // Include the author details for each content block
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        chapter: {
-          // Include the chapter details for context
-          select: {
-            id: true,
-            title: true,
-          },
-        },
+        chapter: true, 
       },
     });
 
-    if (chapterContent.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No content found for the specified chapter." });
+    if (!chapterContent) {
+      return res.status(404).json({ error: "Chapter content not found" });
     }
 
-    res.status(200).json(chapterContent);
+    return res.status(200).json(chapterContent);
   } catch (error) {
     console.error("Error fetching chapter content:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching the chapter content." });
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
-const createChapterContent = async (req,res) => {
-  const { chapterId } = req.params; 
-  const {text , audio} = req.body;
-  try {
-    await prisma.chapter_content.createMany({
-      data: {
-        type: text ? "TEXT" : "AUDIO",
-        content: text || audio,
-        chapter_id: parseInt(chapterId),
-        
-      },
-     
-    });
-    res.status(201).json({ message: "Content created successfully." });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
 
+const createChapterContent = async (req, res) => {
+  const { chapterId } = req.params;
+  const { text, audio } = req.body;
+
+  if (!text && !audio) {
+    return res
+      .status(400)
+      .json({ error: "Either text or audio must be provided" });
   }
-}
-export { createChapter, getBookChapters,getChapterContent , createChapterContent};
+
+  try {
+    if (audio) {
+      const existingContent = await prisma.chapter_content.findFirst({
+        where: { chapter_id: parseInt(chapterId) },
+      });
+
+      if (existingContent && existingContent.audio) {
+        return res
+          .status(400)
+          .json({ error: "Audio has already been posted for this chapter" });
+      }
+      const newContent = await prisma.chapter_content.create({
+        data: {
+          chapter_id: parseInt(chapterId),
+          audio,
+        },
+      });
+
+      return res.status(201).json(newContent);
+    }
+
+    if (text) {
+      
+      const existingContent = await prisma.chapter_content.findFirst({
+        where: { chapter_id: parseInt(chapterId) },
+      });
+
+      if (existingContent) {
+        const updatedContent = await prisma.chapter_content.update({
+          where: { id: existingContent.id },
+          data: {
+            text: {
+              push: text, 
+            },
+          },
+        });
+
+        return res.status(200).json(updatedContent);
+      } else {
+        const newContent = await db.chapter_content.create({
+          data: {
+            chapter_id: parseInt(chapterId),
+            text: [text],
+          },
+        });
+
+        return res.status(201).json(newContent);
+      }
+    }
+  } catch (error) {
+    console.error("Error posting chapter content:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export {
+  createChapter,
+  getBookChapters,
+  getChapterContent,
+  createChapterContent,
+};
