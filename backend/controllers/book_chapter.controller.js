@@ -86,54 +86,22 @@ const createChapterContent = async (req, res) => {
   }
 
   try {
-    if (audio) {
-      const existingContent = await prisma.chapter_content.findFirst({
-        where: { chapter_id: parseInt(chapterId) },
-      });
+    const chapterIdInt = parseInt(chapterId);
 
-      if (existingContent && existingContent.audio) {
-        return res
-          .status(400)
-          .json({ error: "Audio has already been posted for this chapter" });
-      }
-      const newContent = await prisma.chapter_content.create({
-        data: {
-          chapter_id: parseInt(chapterId),
-          audio,
-        },
-      });
+    const updatedContent = await prisma.chapter_content.upsert({
+      where: { chapter_id: chapterIdInt },
+      update: {
+        text: text ? { push: text } : undefined,
+        audio: audio || undefined,
+      },
+      create: {
+        chapter_id: chapterIdInt,
+        text: text ? [text] : [],
+        audio: audio || null,
+      },
+    });
 
-      return res.status(201).json(newContent);
-    }
-
-    if (text) {
-      
-      const existingContent = await prisma.chapter_content.findFirst({
-        where: { chapter_id: parseInt(chapterId) },
-      });
-
-      if (existingContent) {
-        const updatedContent = await prisma.chapter_content.update({
-          where: { id: existingContent.id },
-          data: {
-            text: {
-              push: text, 
-            },
-          },
-        });
-
-        return res.status(200).json(updatedContent);
-      } else {
-        const newContent = await prisma.chapter_content.create({
-          data: {
-            chapter_id: parseInt(chapterId),
-            text: [text],
-          },
-        });
-
-        return res.status(201).json(newContent);
-      }
-    }
+    return res.status(200).json(updatedContent);
   } catch (error) {
     console.error("Error posting chapter content:", error);
     return res.status(500).json({ error: "Internal server error" });
