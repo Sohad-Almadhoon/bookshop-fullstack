@@ -7,10 +7,13 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const currentUser = localStorage.getItem("currentUser");
+    const token = currentUser ? JSON.parse(currentUser).token : null;
+
     if (token) {
       navigate("/profile");
     }
+
   }, [navigate]);
 
   return (

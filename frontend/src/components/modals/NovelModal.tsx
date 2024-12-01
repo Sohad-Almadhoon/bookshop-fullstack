@@ -93,19 +93,20 @@ const NovelModal = () => {
       setIsLoading(false);
     }
   };
-  // const createChapterContent = async () => {
-  //   try {
-  //     const response = await newRequest.put(
-  //       `/api/books/${id}/chapters/content`,
-  //       {
-  //         text: textInput,
-  //         audio: fileType === "audio" ? file : "",
-  //       }
-  //     );
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
+  const createChapterContent = async () => {
+    try {
+      const response = await newRequest.post(
+        `/api/chapters/${id}/content`,
+        {
+          audio: file
+        }
+      );
+      console.log(response.data , file)
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
   // Render content based on the active tab (visual, audio, or text)
   const renderTabContent = () => {
     switch (activeTab) {
@@ -178,7 +179,7 @@ const NovelModal = () => {
         {renderTabContent()}
 
         <Button
-          onClick={handleChapterCreation}
+          onClick={createChapterContent}
           disabled={isLoading}
           className={twMerge(
             "w-[250px] mt-5 border-none font-baskervville font-bold",

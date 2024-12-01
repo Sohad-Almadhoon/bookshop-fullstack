@@ -1,25 +1,19 @@
-import { Swiper, SwiperSlide } from "swiper/react";
-import { EffectCoverflow } from "swiper/modules";
-import { Swiper as SwiperType } from "swiper/types";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   BsChevronLeft,
   BsChevronRight,
-  BsLightningCharge,
-  BsHeart,
   BsFileText,
   BsMusicNoteBeamed,
 } from "react-icons/bs";
+
 import Header from "../components/shared/Header";
 import Button from "../components/shared/Button";
 import { useNovelModal } from "../hooks/useNovelModal";
 import VoicePlayer from "../components/shared/VoicePlayer";
-
+import newRequest from "../utils/newRequest";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import newRequest from "../utils/newRequest";
-import { Chapter } from "../components/book/ChaptersArea";
 
 interface IconButtonProps {
   icon: React.ElementType<{ className?: string }>;
@@ -27,7 +21,6 @@ interface IconButtonProps {
   price: number;
   onClick: () => void;
 }
-
 const IconButton: React.FC<IconButtonProps> = ({
   icon: Icon,
   onClick,
@@ -45,44 +38,85 @@ const IconButton: React.FC<IconButtonProps> = ({
     </b>
   </Button>
 );
-
 const ChapterPage: React.FC = () => {
   const { openModal } = useNovelModal();
-  const swiperRef = useRef<SwiperType | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const {
-    chapterTitle,
-    title,
-    id: bookId,
-    chapterIndex,
-  } = location.state || {};
+  const { chapterTitle, title, id: bookId } = location.state || {};
   const { id } = useParams();
-  const [chapters, setChapters] = useState<Chapter[]>([]);
+ 
+  interface Chapter {
+    id: string;
+    title: string;
+    cover_image: string;
+    chapter_content: ChapterContent | null;
+  }
+
+  interface ChapterContent {
+    text: string[]  | [];
+    audio: string | null;
+  }
+
+  const [chapter, setChapter] = useState<Chapter | null>(null);
 
   useEffect(() => {
-    const fetchChapters = async () => {
+    const fetchChapter = async () => {
       try {
-        const response = await newRequest.get(`/api/books/${bookId}/chapters`);
-        setChapters(response.data);
+        const response = await newRequest.get(
+          `/api/books/${bookId}/chapters/${id}`
+        );
+        console.log(response.data);
+        setChapter(response.data);
       } catch (err) {
-        console.error("Error fetching chapters:", err);
+        console.error("Error fetching chapter:", err);
       }
     };
-    fetchChapters();
-  }, [id, bookId]);
 
-  const chapterImages = chapters.map((chapter) => chapter.cover_image);
-  const handleImageClick = (index: number) => {
-    const selectedChapter = chapters[index];
-    navigate(`/chapters/${selectedChapter.id}`, {
-      state: {
-        chapterTitle: selectedChapter.title,
-        title,
-        bookId,
-        chapterIndex: index,
-      },
-    });
+    if (bookId && id) {
+      fetchChapter();
+    }
+  }, [bookId, id]);
+
+  const handleNextChapter = async () => {
+    if (!chapter) return;
+
+    try {
+      const nextChapterId = (parseInt(chapter.id) + 1).toString();
+      const { data } = await newRequest.get(
+        `/api/books/${bookId}/chapters/${nextChapterId}`
+      );
+
+      navigate(`/chapters/${nextChapterId}`, {
+        state: {
+          chapterTitle: data.chapter.title,
+          title,
+          bookId,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching next chapter:", error);
+    }
+  };
+
+  const handlePrevChapter = async () => {
+    if (!chapter) return;
+
+    try {
+      const prevChapterId = (parseInt(chapter.id) - 1).toString();
+      const { data } = await newRequest.get(
+        `/api/books/${bookId}/chapters/${prevChapterId}`
+      );
+
+      navigate(`/chapters/${prevChapterId}`, {
+        state: {
+          chapterTitle: data.chapter.title,
+          title,
+          bookId,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching previous chapter:", error);
+    }
   };
 
   return (
@@ -93,49 +127,31 @@ const ChapterPage: React.FC = () => {
       <div className="flex">
         <div className="flex-1 border-r border-black">
           <div className="flex flex-col items-center relative">
-            <Swiper
-              effect="coverflow"
-              grabCursor
-              centeredSlides
-              slidesPerView="auto"
-              initialSlide={chapterIndex || 0}
-              coverflowEffect={{
-                rotate: 50,
-                stretch: 15,
-                depth: 100,
-                modifier: 3,
-                slideShadows: true,
-              }}
-              modules={[EffectCoverflow]}
-              className="my-5 h-fit flex justify-center mx-auto"
-              onSwiper={(swiper) => (swiperRef.current = swiper)}>
-              {chapterImages.map((img, index) => (
-                <SwiperSlide
-                  key={index}
-                  onClick={() => handleImageClick(index)}>
-                  <img
-                    src={img}
-                    alt={`Chapter ${index + 1}`}
-                    className="h-[420px] w-full object-contain"
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
+            {/* Slider buttons */}
             <button
-              onClick={() => swiperRef.current?.slidePrev()}
+              onClick={handlePrevChapter}
               className="absolute top-1/2 left-14 rounded-full w-10 h-10 flex justify-center items-center z-10 border border-black">
               <BsChevronLeft className="text-sm" />
             </button>
             <button
-              onClick={() => swiperRef.current?.slideNext()}
+              onClick={handleNextChapter}
               className="absolute top-1/2 right-14 rounded-full w-10 h-10 flex justify-center items-center z-10 border border-black">
               <BsChevronRight className="text-sm" />
             </button>
-
+            <div className="flex items-center justify-center">
+              <img
+                src={chapter?.cover_image}
+                alt="chapter cover"
+                className="h-[420px] w-full object-contain"
+              />
+            </div>
+            {/* Audio Player */}
             <div className="flex p-2 gap-3 w-full max-w-lg border-black border border-opacity-30 rounded-2xl items-center">
-              
-              <VoicePlayer
-                url="https://res.cloudinary.com/di3wcajzm/raw/upload/v1732977379/audio/dnh74pb1n1yzhoffq9fi" />
+              {chapter?.chapter_content?.audio ? (
+                <VoicePlayer url={chapter.chapter_content.audio} />
+              ) : (
+                <p>No audio available for this chapter.</p>
+              )}
             </div>
             <IconButton
               onClick={() => openModal("audio")}
@@ -150,6 +166,15 @@ const ChapterPage: React.FC = () => {
             <h2 className="text-5xl font-medium tracking-wider mb-4">
               {chapterTitle}
             </h2>
+            {chapter?.chapter_content?.text?.length ? (
+              chapter.chapter_content.text.map((text, index) => (
+                <p key={index} className="mb-4">
+                  {text}
+                </p>
+              ))
+            ) : (
+              <p>No text content available for this chapter.</p>
+            )}
             <IconButton
               onClick={() => openModal("text")}
               icon={BsFileText}
