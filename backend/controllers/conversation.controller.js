@@ -23,13 +23,13 @@ const getUserConversations = async (req, res) => {
     const { id } = req.user;
 
     const conversations = await prisma.conversation.findMany({
-      // where: {
-      //   participants: {
-      //     some: {
-      //       userId: parseInt(id),
-      //     },
-      //   },
-      // },
+      where: {
+        participants: {
+          some: {
+            userId: parseInt(id),
+          },
+        },
+      },
       include: {
         participants: true,
         book: true, // Include associated book details

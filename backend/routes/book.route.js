@@ -5,6 +5,7 @@ import {
   followBook,
   getBook,
   getBookStates,
+  getRandomBooks,
   likeBook,
   unFollowBook,
 } from "../controllers/book.controller.js";
@@ -21,6 +22,7 @@ import {
 const router = express.Router();
 
 router.post("/", verifyToken, createBook);
+router.get("/random-books", verifyToken, getRandomBooks);
 router.get("/:id", verifyToken, getBook);
 
 //Comments
@@ -36,10 +38,10 @@ router.post("/:id/chapters", verifyToken, createChapter);
 router.post("/:id/follow", verifyToken, followBook);
 
 router.delete("/:id/follow", verifyToken, unFollowBook);
+
 router.post("/:id/like", verifyToken, likeBook);
 router.delete("/:id/like", verifyToken, unFollowBook);
 router.get("/:id/book-states", verifyToken, getBookStates);
-
 
 export default router;
 

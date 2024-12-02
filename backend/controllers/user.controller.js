@@ -7,23 +7,6 @@ const getUser = async (req, res) => {
       where: {
         id: parseInt(id),
       },
-      include: {
-        books: {
-          include: {
-            book: true, // Include the book details for books related to the user
-          },
-        },
-        comments: {
-          include: {
-            book: true, 
-          },
-        },
-        conversations: {
-          include: {
-            conversation: true, 
-          },
-        },
-      },
     });
 
     if (!user) {
@@ -42,10 +25,10 @@ const getUser = async (req, res) => {
 const getUserBooks = async (req, res) => {
   const { userId } = req.params;
   try {
-    // Fetching all books associated with the user
     const userBooks = await prisma.user_books.findMany({
       where: {
         user_id: parseInt(userId),
+        type:"ALL"
       },
       include: {
         book: true,

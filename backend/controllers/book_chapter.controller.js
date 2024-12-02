@@ -112,7 +112,7 @@ const getBookChapter = async (req, res) => {
 
   try {
 
-    const book = await prisma.user_books.findUnique({
+    const book = await prisma.books.findUnique({
       where: { id: parseInt(id) },
     });
     if (!book) {

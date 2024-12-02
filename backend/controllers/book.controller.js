@@ -64,23 +64,6 @@ const getBook = async (req, res) => {
       where: {
         id: parseInt(id),
       },
-      include: {
-        comments: {
-          include: {
-            user: true,
-          },
-        },
-        chapters: {
-          include: {
-            chapter_content: true,
-          },
-        },
-        users: {
-          include: {
-            user: true,
-          },
-        },
-      },
     });
 
     if (!book) {
@@ -98,7 +81,7 @@ const getBook = async (req, res) => {
 
 const followBook = async (req, res) => {
   const { id: userId } = req.user;
-  const { id:bookId } = req.params;
+  const { id: bookId } = req.params;
 
   if (!userId || !bookId) {
     return res.status(400).json({ error: "Missing userId or bookId" });
@@ -126,7 +109,19 @@ const followBook = async (req, res) => {
         type: "FOLLOW",
       },
     });
-
+    const conversation = await prisma.conversation.findFirst({
+      where: {
+        bookId: parseInt(bookId),
+      },
+    });
+    if (conversation) {
+      await prisma.participant.create({
+        data: {
+          user_id: userId,
+          conversation_id: conversation.id,
+        },
+      });
+    }
     res.status(201).json(follow);
   } catch (error) {
     console.error(error);
@@ -135,7 +130,7 @@ const followBook = async (req, res) => {
 };
 const unFollowBook = async (req, res) => {
   const { id: userId } = req.user;
-  const { id:bookId } = req.params;
+  const { id: bookId } = req.params;
 
   if (!userId || !bookId) {
     return res.status(400).json({ error: "Missing userId or bookId." });
@@ -204,7 +199,6 @@ const deleteLike = async (req, res) => {
   const { id: bookId } = req.params;
   const { id: userId } = req.user;
 
-
   if (!userId || !bookId) {
     return res.status(400).json({ error: "Missing userId or bookId." });
   }
@@ -230,8 +224,8 @@ const deleteLike = async (req, res) => {
   }
 };
 const getBookStates = async (req, res) => {
-  const { id: userId } = req.user; 
-  const { id: bookId } = req.params; 
+  const { id: userId } = req.user;
+  const { id: bookId } = req.params;
 
   if (!userId || !bookId) {
     return res.status(400).json({ error: "Missing userId or bookId" });
@@ -247,7 +241,6 @@ const getBookStates = async (req, res) => {
       },
     });
 
-   
     const followed = await prisma.user_books.findFirst({
       where: {
         user_id: userId,
@@ -255,7 +248,6 @@ const getBookStates = async (req, res) => {
         type: "FOLLOW",
       },
     });
-
 
     res.json({
       liked: !!liked,
@@ -266,6 +258,34 @@ const getBookStates = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user states" });
   }
 };
+const getRandomBooks = async (_, res) => {
+  try {
+    // Fetch all books
+    const allBooks = await prisma.books.findMany();
+
+    if (allBooks.length < 3) {
+      return res.status(200).json({
+        message: "Not enough books to fetch 3 random entries.",
+        books: [],
+      });
+    }
+
+    // Shuffle the books
+    const shuffledBooks = allBooks.sort(() => Math.random() - 0.5);
+
+    // Select the first 3 books
+    const randomBooks = shuffledBooks.slice(0, 3);
+
+    // Respond with the random books
+    return res.status(200).json(randomBooks);
+  } catch (error) {
+    console.error("Error fetching random books:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching random books." });
+  }
+};
+
 export {
   createBook,
   getBook,
@@ -274,4 +294,5 @@ export {
   likeBook,
   deleteLike,
   getBookStates,
+  getRandomBooks,
 };
