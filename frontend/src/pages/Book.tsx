@@ -5,6 +5,7 @@ import newRequest from "../utils/newRequest";
 import { useEffect, useState } from "react";
 import Sidebar from "../components/book/SideBar";
 import ChaptersArea from "../components/book/ChaptersArea";
+import Loader from "../components/shared/Loader";
 export interface BookData {
   id: string;
   title: string;
@@ -28,7 +29,7 @@ const Book = () => {
   }, [bookId]);
 
   if (!bookData) {
-    return <div>Loading...</div>;
+    return <Loader/>;
   }
 
   return (

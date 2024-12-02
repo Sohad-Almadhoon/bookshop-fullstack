@@ -8,13 +8,9 @@ export interface Book {
     [key: string]: any;
 }
 
-const fetchUserBooks = async (userId: string, token: string) => {
+const fetchUserBooks = async (userId: string) => {
     try {
-        const response = await newRequest.get(`/api/users/${userId}/books`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
+        const response = await newRequest.get(`/api/users/${userId}/books`);
 
         return response.data;
     } catch (error: any) {
@@ -46,13 +42,9 @@ const createBook = async (data: BookFormData) => {
         );
     }
 };
-const fetchFollowingBooks = async (id: string, token: string) => {
+const fetchFollowingBooks = async (id: string) => {
     try {
-        const response = await newRequest.get(`/api/users/${id}/followed-books`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
+        const response = await newRequest.get(`/api/users/${id}/followed-books`);
         return response.data;
     } catch (error: any) {
         console.error("Failed to fetch following books:", error?.response?.data || error.message);

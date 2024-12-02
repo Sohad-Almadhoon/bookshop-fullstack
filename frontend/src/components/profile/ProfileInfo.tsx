@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import GenreTags from "./GenreTags";
 import newRequest from "../../utils/newRequest";
+import Loader from "../shared/Loader";
 
 interface ProfileInfoProps {
   id: string;
@@ -23,9 +24,9 @@ const fetchUserInfo = async (id: string) => {
   });
   console.log("Fetched user data:", user);
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loader/>;
   }
-
+  console.log(user)
   if (error instanceof Error) {
     return <div>Failed to load user data: {error.message}</div>;
   }
@@ -57,7 +58,9 @@ const fetchUserInfo = async (id: string) => {
                 alt="Horn Left"
               />
             </div>
-            <p className=" text-opacity-70 text-black">TOTAL IP: $8400</p>
+            <p className=" text-opacity-70 text-black font-cardinal text-4xl">
+               {user.role}
+            </p>
             <div className="absolute -right-10 top-[-38px]">
               <img
                 className="horn-right"

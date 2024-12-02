@@ -21,14 +21,14 @@ const Profile: React.FC = () => {
 
   const { data: books = [], isLoading: isLoadingBooks } = useQuery<Book[]>({
     queryKey: ["userBooks", user.id],
-    queryFn: () => fetchUserBooks(user.id, currentUser.token!),
+    queryFn: () => fetchUserBooks(user.id),
     enabled: !!user.id,
   });
 
   const { data: followingBooks = [], isLoading: isLoadingFollowingBooks } =
     useQuery<Book[]>({
       queryKey: ["followingBooks", user.id],
-      queryFn: () => fetchFollowingBooks(user.id, currentUser.token!),
+      queryFn: () => fetchFollowingBooks(user.id),
       enabled: !!user.id,
     });
 

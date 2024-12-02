@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import {
   BsFileText,
   BsMusicNoteBeamed,
@@ -30,10 +30,8 @@ const IconButton: React.FC<IconButtonProps> = ({
 const ChapterPage: React.FC = () => {
   const { openModal } = useNovelModal();
   const location = useLocation();
-  const navigate = useNavigate();
   const { chapterTitle, title, id: bookId } = location.state || {};
   const { id } = useParams();
- 
   interface Chapter {
     id: string;
     title: string;
@@ -45,7 +43,7 @@ const ChapterPage: React.FC = () => {
     text: string[]  | [];
     audio: string | null;
   }
-
+  
   const [chapter, setChapter] = useState<Chapter | null>(null);
 
   useEffect(() => {
@@ -54,6 +52,7 @@ const ChapterPage: React.FC = () => {
         const response = await newRequest.get(
           `/api/books/${bookId}/chapters/${id}`
         );
+        console.log(id)
         console.log(response.data);
         setChapter(response.data);
       } catch (err) {
@@ -65,48 +64,6 @@ const ChapterPage: React.FC = () => {
       fetchChapter();
     }
   }, [bookId, id]);
-
-  const handleNextChapter = async () => {
-    if (!chapter) return;
-
-    try {
-      const nextChapterId = (parseInt(chapter.id) + 1).toString();
-      const { data } = await newRequest.get(
-        `/api/books/${bookId}/chapters/${nextChapterId}`
-      );
-
-      navigate(`/chapters/${nextChapterId}`, {
-        state: {
-          chapterTitle: data.chapter.title,
-          title,
-          bookId,
-        },
-      });
-    } catch (error) {
-      console.error("Error fetching next chapter:", error);
-    }
-  };
-
-  const handlePrevChapter = async () => {
-    if (!chapter) return;
-
-    try {
-      const prevChapterId = (parseInt(chapter.id) - 1).toString();
-      const { data } = await newRequest.get(
-        `/api/books/${bookId}/chapters/${prevChapterId}`
-      );
-
-      navigate(`/chapters/${prevChapterId}`, {
-        state: {
-          chapterTitle: data.chapter.title,
-          title,
-          bookId,
-        },
-      });
-    } catch (error) {
-      console.error("Error fetching previous chapter:", error);
-    }
-  };
 
   return (
     <div className="min-h-screen border border-black">

@@ -6,6 +6,7 @@ import {
 } from "react-icons/bs";
 import { Link, useParams } from "react-router-dom";
 import newRequest from "../../utils/newRequest";
+import Loader from "../shared/Loader";
 
 export interface Chapter {
   id: number;
@@ -39,7 +40,7 @@ const ChaptersArea = ({ date }: { date: string }) => {
   }, [id]);
 
   if (loading) {
-    return <div>Loading chapters...</div>;
+    return <Loader/>;
   }
 
   return (
