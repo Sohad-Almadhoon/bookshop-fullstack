@@ -7,60 +7,61 @@ import { useParams } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 
 const ActionButtons = () => {
-    const { openModal } = useCommentModal();
-    const [following, setFollowing] = useState<boolean>(false);
-    const [liked, setLiked] = useState<boolean>(false);
-    const { id } = useParams<{ id: string }>();
-    useEffect(() => {
-        const fetchStates = async () => {
-            try {
-                const response = await newRequest.get(
-                  `/api/books/${id}/book-states`
-                );
-                setFollowing(response.data.following);
-                setLiked(response.data.liked);
-            } catch (error) {
-                console.error("Error fetching states:", error);
-            }
-        };
-        fetchStates();
-    }, [id]);
-
-    const handleFollow = async () => {
-        try {
-            if (following) {
-                await newRequest.delete(`/api/books/${id}/follow`);
-            } else {
-                await newRequest.post(`/api/books/${id}/follow`);
-            }
-            setFollowing(!following);
-        } catch (error) {
-            console.error("Error toggling follow:", error);
-        }
+  const { openModal } = useCommentModal();
+  const [following, setFollowing] = useState<boolean>(false);
+  const [liked, setLiked] = useState<boolean>(false);
+  const [isOwner, setIsOwner] = useState<boolean>(false);
+  const { id } = useParams<{ id: string }>();
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        const response = await newRequest.get(`/api/books/${id}/book-states`);
+        setFollowing(response.data.followed);
+        setLiked(response.data.liked);
+        setIsOwner(response.data.isOwner);
+      } catch (error) {
+        console.error("Error fetching states:", error);
+      }
     };
+    fetchStates();
+  }, [id]);
 
-    const handleLike = async () => {
-        try {
-            if (liked) {
-                await newRequest.delete(`/api/books/${id}/like`);
-            } else {
-                await newRequest.post(`/api/books/${id}/like`);
-            }
-            setLiked(!liked);
-        } catch (error) {
-            console.error("Error toggling like:", error);
-        }
-    };
+  const handleFollow = async () => {
+    try {
+      if (following) {
+        await newRequest.delete(`/api/books/${id}/follow`);
+      } else {
+        await newRequest.post(`/api/books/${id}/follow`);
+      }
+      setFollowing(!following);
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+    }
+  };
 
-    return (
-      <div className="flex gap-3 mt-2 items-center">
-        <Button
-          variant="outline"
-          className="flex gap-1 p-1 text-xs justify-center"
-          onClick={openModal}>
-          <BsChatFill className="text-black text-sm" /> comments
-        </Button>
+  const handleLike = async () => {
+    try {
+      if (liked) {
+        await newRequest.delete(`/api/books/${id}/like`);
+      } else {
+        await newRequest.post(`/api/books/${id}/like`);
+      }
+      setLiked(!liked);
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    }
+  };
 
+  return (
+    <div className="flex gap-3 mt-2 items-center">
+      <Button
+        variant="outline"
+        className="flex gap-1 p-1 text-xs justify-center"
+        onClick={openModal}>
+        <BsChatFill className="text-black text-sm" /> comments
+      </Button>
+
+      {!isOwner && (
         <Button
           variant={following ? "" : "outline"}
           className="flex gap-1 p-1 text-xs justify-center"
@@ -72,19 +73,22 @@ const ActionButtons = () => {
           />{" "}
           {following ? "Unfollow" : "Follow"}
         </Button>
+      )}
 
+      {!isOwner && (
         <Button
           variant={liked ? "" : "outline"}
           className="flex gap-1 p-1 px-2 text-xs justify-center"
           onClick={handleLike}>
           <BsHeartFill
             className={twMerge(
-              ` text-sm ${following ? "text-white" : "text-black"}`
+              ` text-sm ${liked ? "text-white" : "text-black"}`
             )}
           />{" "}
           {liked ? "Unlike" : "Like"}
         </Button>
-      </div>
-    );
+      )}
+    </div>
+  );
 };
 export default ActionButtons;

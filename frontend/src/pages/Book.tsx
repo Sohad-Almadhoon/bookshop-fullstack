@@ -35,7 +35,7 @@ const Book = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header title={bookData.title} className="text-3xl uppercase" />
-      <div className="flex border border-black flex-1">
+      <div className="flex lg:flex-row flex-col border border-black flex-1">
         <Sidebar imgUrl={bookData.main_cover} />
         <ChaptersArea date={bookData.created_at }/>
       </div>

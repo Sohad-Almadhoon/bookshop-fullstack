@@ -52,8 +52,6 @@ const ChapterPage: React.FC = () => {
         const response = await newRequest.get(
           `/api/books/${bookId}/chapters/${id}`
         );
-        console.log(id)
-        console.log(response.data);
         setChapter(response.data);
       } catch (err) {
         console.error("Error fetching chapter:", err);
@@ -70,7 +68,7 @@ const ChapterPage: React.FC = () => {
       <Header
         title={<h3 className="text-3xl uppercase font-romieMedium">{title}</h3>}
       />
-      <div className="flex">
+      <div className="flex lg:flex-row flex-col">
         <div className="flex-1 border-r border-black">
           <div className="flex flex-col items-center justify-center mt-9">
             <img
@@ -95,7 +93,7 @@ const ChapterPage: React.FC = () => {
             )}
           </div>
         </div>
-        <div className="p-6 flex-1">
+        <div className="lg:p-6 flex-1">
           <div className="max-w-xl w-full flex flex-col mx-auto">
             <h2 className="text-5xl font-medium tracking-wider mb-4">
               {chapterTitle}

@@ -50,7 +50,7 @@ const Profile: React.FC = () => {
   return (
     <div className="p-2 flex flex-col min-h-screen">
       <Header />
-      <div className="px-24 border-black border flex-1">
+      <div className="lg:px-24 border-black border flex-1">
         {user.id && <ProfileInfo id={id ? id : user.id} />}
         <div className="flex-1">
           <ProfileActions tabs={tabs} tab={tab} setTab={setTab} />

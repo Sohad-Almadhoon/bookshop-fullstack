@@ -2,6 +2,7 @@ import React, { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import ProfileMenu from "../profile/ProfileMenu";
 import Notifications from "../shared/Notifications";
+import { twMerge } from "tailwind-merge";
 
 interface HeaderProps {
   title?: ReactNode;
@@ -18,7 +19,7 @@ const Header: React.FC<HeaderProps> = ({ title, className }) => {
       <Heading title={title} className={className} />
       <div className="flex-1 flex justify-end gap-3">
         <div className="flex gap-3">
-          <Notifications />
+          {/* <Notifications /> */}
           <Link to="/messages">
             <img src="/assets/messages.svg" alt="Messages" />
           </Link>
@@ -38,7 +39,9 @@ interface HeadingProps {
 export const Heading: React.FC<HeadingProps> = ({ title, className }) => {
   return (
     <div>
-      <span className={className}>{title}</span>
+      <span className={
+        twMerge("lg:block hidden" ,className)
+      }>{title}</span>
     </div>
   );
 };
