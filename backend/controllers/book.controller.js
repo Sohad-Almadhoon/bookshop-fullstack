@@ -101,12 +101,13 @@ const followBook = async (req, res) => {
       return res.status(200).json({ isOwner: true });
     }
 
-    // Use upsert to avoid duplication if the user is already following
+    // Use upsert to handle follow logic
     const follow = await prisma.user_books.upsert({
       where: {
-        user_id_book_id: {
+        user_id_book_id_type: {
           user_id: userId,
           book_id: parseInt(bookId),
+          type: "FOLLOW",
         },
       },
       update: {
@@ -119,19 +120,30 @@ const followBook = async (req, res) => {
       },
     });
 
-    // Check if there's a conversation related to the book
     const conversation = await prisma.conversation.findFirst({
       where: {
         bookId: parseInt(bookId),
       },
     });
 
-    if (conversation) {
-      // If a conversation exists, add the user as a participant
+    if (!conversation) {
+      return res.status(404).json({ error: "Conversation not found" });
+    }
+
+    // Check if the user is already a participant
+    const existingParticipant = await prisma.participant.findFirst({
+      where: {
+        userId: userId,
+        conversationId: conversation.id,
+      },
+    });
+
+    if (!existingParticipant) {
+      // Add the user as a participant
       await prisma.participant.create({
         data: {
-          user_id: userId,
-          conversation_id: conversation.id,
+          userId: userId,
+          conversationId: conversation.id,
         },
       });
     }
@@ -142,7 +154,6 @@ const followBook = async (req, res) => {
     res.status(500).json({ error: "Something went wrong." });
   }
 };
-
 
 const unFollowBook = async (req, res) => {
   const { id: userId } = req.user;
@@ -198,7 +209,7 @@ const likeBook = async (req, res) => {
       data: {
         user_id: userId,
         book_id: parseInt(bookId),
-        type: "LIKE", // Ensure type is LIKE when creating
+        type: "LIKE",
       },
     });
 

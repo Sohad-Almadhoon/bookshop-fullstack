@@ -31,7 +31,7 @@ model user_books {
   type        UserBookRelationType
   user        users @relation(fields: [user_id], references: [id]) 
   book        books @relation(fields: [book_id], references: [id])
- @@unique([user_id, book_id]) 
+ @@unique([user_id, book_id ,type]) 
 }
 
 model books {
@@ -55,7 +55,7 @@ model chapters {
   cover_image String
   book_id     Int
   created_at  DateTime @default(now())
-  chapter_content chapter_content?  @relation
+  chapter_content chapter_content?
 
   book        books @relation(fields: [book_id], references: [id])
 }
@@ -67,8 +67,10 @@ model chapter_content {
   audio          String?  
   created_at     DateTime @default(now())
   chapter        chapters @relation(fields: [chapter_id], references: [id])
-  user_id        Int?          
-  user           users?         @relation(fields: [user_id], references: [id]) 
+  user_id        Int?
+  user           users?         @relation(fields: [user_id], references: [id])
+
+  @@unique([chapter_id])
 }
 
 model book_comments {

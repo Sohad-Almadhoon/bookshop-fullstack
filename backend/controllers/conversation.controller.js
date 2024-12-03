@@ -32,7 +32,14 @@ const getUserConversations = async (req, res) => {
       },
       include: {
         participants: true,
-        book: true, // Include associated book details
+        book: {
+          select:
+          {
+            title: true,
+            author: true,
+            main_cover:true
+          }
+        }, // Include associated book details
         messages: {
           orderBy: { createdAt: "desc" },
           take: 1, // Fetch the last message
