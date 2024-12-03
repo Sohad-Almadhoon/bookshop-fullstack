@@ -7,6 +7,7 @@ import {
   getBookStates,
   getRandomBooks,
   likeBook,
+  unLikeBook,
   unFollowBook,
 } from "../controllers/book.controller.js";
 import {
@@ -40,7 +41,7 @@ router.post("/:id/follow", verifyToken, followBook);
 router.delete("/:id/follow", verifyToken, unFollowBook);
 
 router.post("/:id/like", verifyToken, likeBook);
-router.delete("/:id/like", verifyToken, unFollowBook);
+router.delete("/:id/like", verifyToken, unLikeBook);
 router.get("/:id/book-states", verifyToken, getBookStates);
 
 export default router;
