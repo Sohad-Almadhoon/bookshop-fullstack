@@ -178,7 +178,24 @@ const unFollowBook = async (req, res) => {
         .json({ message: "You are not following this book." });
     }
 
-    res.status(200).json({ message: "Unfollowed successfully." });
+    // Find the conversation related to the book
+    const conversation = await prisma.conversation.findFirst({
+      where: {
+        bookId: parseInt(bookId),
+      },
+    });
+
+    if (conversation) {
+      // Remove the user from the conversation participants
+      await prisma.participant.deleteMany({
+        where: {
+          userId: userId,
+          conversationId: conversation.id,
+        },
+      });
+    }
+
+    res.status(200).json({ message: "Unfollowed and removed from conversation successfully." });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Something went wrong." });
@@ -190,7 +207,6 @@ const likeBook = async (req, res) => {
   const { id: userId } = req.user;
 
   try {
-    // Check if the user has already liked the book
     const existingLike = await prisma.user_books.findFirst({
       where: {
         user_id: userId,
@@ -199,12 +215,10 @@ const likeBook = async (req, res) => {
       },
     });
 
-    // If already liked, return a message
     if (existingLike) {
       return res.status(400).json({ message: "Book already liked." });
     }
 
-    // Add the like relation
     const like = await prisma.user_books.create({
       data: {
         user_id: userId,
