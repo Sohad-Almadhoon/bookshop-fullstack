@@ -1,20 +1,18 @@
-import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import {
-  BsFileText,
-  BsMusicNoteBeamed,
-} from "react-icons/bs";
-
+import { BsFileText, BsMusicNoteBeamed } from "react-icons/bs";
 import Header from "../components/shared/Header";
 import Button from "../components/shared/Button";
 import { useNovelModal } from "../hooks/useNovelModal";
 import VoicePlayer from "../components/shared/VoicePlayer";
 import newRequest from "../utils/newRequest";
+import { useQuery } from "@tanstack/react-query";
+
 interface IconButtonProps {
   icon: React.ElementType<{ className?: string }>;
   label: string;
   onClick: () => void;
 }
+
 const IconButton: React.FC<IconButtonProps> = ({
   icon: Icon,
   onClick,
@@ -27,41 +25,44 @@ const IconButton: React.FC<IconButtonProps> = ({
     {label}{" "}
   </Button>
 );
+
+const fetchChapter = async (bookId: string, chapterId: string) => {
+  const response = await newRequest.get(
+    `/api/books/${bookId}/chapters/${chapterId}`
+  );
+  return response.data;
+};
+
 const ChapterPage: React.FC = () => {
   const { openModal } = useNovelModal();
   const location = useLocation();
   const { chapterTitle, title, id: bookId } = location.state || {};
   const { id } = useParams();
-  interface Chapter {
-    id: string;
-    title: string;
-    cover_image: string;
-    chapter_content: ChapterContent | null;
+  const {
+    data: chapter,
+    isLoading,
+    isError,
+    error,
+  } = useQuery(
+    {
+      queryKey: ["chapter", bookId, id],
+      queryFn: () => fetchChapter(bookId!, id!),
+      enabled: !!bookId && !!id,
+    } 
+  );
+
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
-  interface ChapterContent {
-    text: string[]  | [];
-    audio: string | null;
+  if (isError) {
+    return (
+      <div>
+        Error loading chapter:{" "}
+        {error instanceof Error ? error.message : "Unknown error"}
+      </div>
+    );
   }
-  
-  const [chapter, setChapter] = useState<Chapter | null>(null);
-
-  useEffect(() => {
-    const fetchChapter = async () => {
-      try {
-        const response = await newRequest.get(
-          `/api/books/${bookId}/chapters/${id}`
-        );
-        setChapter(response.data);
-      } catch (err) {
-        console.error("Error fetching chapter:", err);
-      }
-    };
-
-    if (bookId && id) {
-      fetchChapter();
-    }
-  }, [bookId, id]);
 
   return (
     <div className="min-h-screen border border-black">
@@ -95,15 +96,17 @@ const ChapterPage: React.FC = () => {
             )}
           </div>
         </div>
-        <hr className="border-t border-black my-5"/>
+        <hr className="border-t border-black my-5" />
         <div className="lg:p-6 flex-1 p-3">
           <div className="max-w-xl w-full flex flex-col mx-auto">
             <h2 className="text-5xl font-medium tracking-wider mb-4">
               {chapterTitle}
             </h2>
             {chapter?.chapter_content?.text?.length ? (
-              chapter.chapter_content.text.map((text, index) => (
-                <p key={index} className="mb-4 border-black border rounded-lg p-4">
+              chapter.chapter_content.text.map((text:string, index:number) => (
+                <p
+                  key={index}
+                  className="mb-4 border-black border rounded-lg p-4">
                   {text}
                 </p>
               ))
