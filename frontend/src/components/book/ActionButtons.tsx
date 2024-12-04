@@ -1,56 +1,45 @@
-import { useEffect, useState } from "react";
 import { useCommentModal } from "../../hooks/useCommentModal";
 import newRequest from "../../utils/newRequest";
 import Button from "../shared/Button";
 import { BsChatFill, BsHeartFill, BsPeopleFill } from "react-icons/bs";
 import { useParams } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+const fetchBookStates = async (id: string) => {
+  const response = await newRequest.get(`/api/books/${id}/book-states`);
+  return response.data;
+};
 
 const ActionButtons = () => {
   const { openModal } = useCommentModal();
-  const [following, setFollowing] = useState<boolean>(false);
-  const [liked, setLiked] = useState<boolean>(false);
-  const [isOwner, setIsOwner] = useState<boolean>(false);
   const { id } = useParams<{ id: string }>();
-  useEffect(() => {
-    const fetchStates = async () => {
-      try {
-        const response = await newRequest.get(`/api/books/${id}/book-states`);
-        setFollowing(response.data.followed);
-        setLiked(response.data.liked);
-        setIsOwner(response.data.isOwner);
-      } catch (error) {
-        console.error("Error fetching states:", error);
-      }
-    };
-    fetchStates();
-  }, [id]);
+  const queryClient = useQueryClient();
 
-  const handleFollow = async () => {
-    try {
-      if (following) {
-        await newRequest.delete(`/api/books/${id}/follow`);
-      } else {
-        await newRequest.post(`/api/books/${id}/follow`);
-      }
-      setFollowing(!following);
-    } catch (error) {
-      console.error("Error toggling follow:", error);
-    }
-  };
+  const { data, isError, error } = useQuery({
+    queryKey: ["bookStates", id],
+    queryFn: () => fetchBookStates(id as string),
+    enabled: !!id,
+  });
 
-  const handleLike = async () => {
-    try {
-      if (liked) {
-        await newRequest.delete(`/api/books/${id}/like`);
-      } else {
-        await newRequest.post(`/api/books/${id}/like`);
-      }
-      setLiked(!liked);
-    } catch (error) {
-      console.error("Error toggling like:", error);
-    }
-  };
+  const followMutation = useMutation({
+    mutationFn: () => (data?.followed ? newRequest.delete(`/api/books/${id}/follow`) : newRequest.post(`/api/books/${id}/follow`)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookStates", id as string] });
+    },
+  });
+
+  const likeMutation = useMutation({
+    mutationFn: () => (data?.liked ? newRequest.delete(`/api/books/${id}/like`) : newRequest.post(`/api/books/${id}/like`)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookStates", id] });
+    },
+  });
+
+  if (isError) {
+    console.error("Error fetching states:", error);
+    return <div>Error loading book states</div>;
+  }
 
   return (
     <div className="flex gap-3 mt-2 items-center">
@@ -61,34 +50,35 @@ const ActionButtons = () => {
         <BsChatFill className="text-black text-sm" /> comments
       </Button>
 
-      {!isOwner && (
+      {!data?.isOwner && (
         <Button
-          variant={following ? "" : "outline"}
+          variant={data?.followed ? "" : "outline"}
           className="flex gap-1 p-1 text-xs justify-center"
-          onClick={handleFollow}>
+          onClick={() => followMutation.mutate()}>
           <BsPeopleFill
             className={twMerge(
-              ` text-sm ${following ? "text-white" : "text-black"}`
+              ` text-sm ${data?.followed ? "text-white" : "text-black"}`
             )}
           />{" "}
-          {following ? "Unfollow" : "Follow"}
+          {data?.followed ? "Unfollow" : "Follow"}
         </Button>
       )}
 
-      {!isOwner && (
+      {!data?.isOwner && (
         <Button
-          variant={liked ? "" : "outline"}
+          variant={data?.liked ? "" : "outline"}
           className="flex gap-1 p-1 px-2 text-xs justify-center"
-          onClick={handleLike}>
+          onClick={() => likeMutation.mutate()}>
           <BsHeartFill
             className={twMerge(
-              ` text-sm ${liked ? "text-white" : "text-black"}`
+              ` text-sm ${data?.liked ? "text-white" : "text-black"}`
             )}
           />{" "}
-          {liked ? "Unlike" : "Like"}
+          {data?.liked ? "Unlike" : "Like"}
         </Button>
       )}
     </div>
   );
 };
+
 export default ActionButtons;

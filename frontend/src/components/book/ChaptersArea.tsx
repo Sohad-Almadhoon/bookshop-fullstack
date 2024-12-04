@@ -1,8 +1,4 @@
-import {useState, useEffect } from "react";
 import {
-  BsArrowsAngleExpand,
-  BsArrowsExpand,
-  BsArrowsExpandVertical,
   BsBook,
   BsCalendar2,
   BsLayoutSidebarInsetReverse,
@@ -11,6 +7,7 @@ import {
 import { Link, useParams } from "react-router-dom";
 import newRequest from "../../utils/newRequest";
 import Loader from "../shared/Loader";
+import { useQuery } from "@tanstack/react-query";
 
 export interface Chapter {
   id: number;
@@ -23,28 +20,22 @@ export interface Chapter {
 }
 
 const ChaptersArea = ({ date }: { date: string }) => {
-  const [chapters, setChapters] = useState<Chapter[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const { id } = useParams();
 
-  useEffect(() => {
-    const fetchChapters = async () => {
-      try {
-        const response = await newRequest.get(`/api/books/${id}/chapters`);
-        setChapters(response.data);
-      } catch (err) {
-        console.error("Error fetching chapters:", err);
-        setChapters([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+const {
+  data: chapters = [],
+  isLoading,
+} = useQuery<Chapter[]>({
+  queryKey: ["chapters", id],
+  queryFn: async () => {
+    const response = await newRequest.get(`/api/books/${id}/chapters`);
+    return response.data;
+  },
+  enabled: !!id,
+});
 
-    fetchChapters();
-  }, [id]);
-
-  if (loading) {
-    return <Loader/>;
+  if (isLoading) {
+    return <Loader />;
   }
 
   return (

@@ -4,7 +4,6 @@ import newRequest from "../../utils/newRequest";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { LoaderIcon } from "react-hot-toast";
 import Loader from "../shared/Loader";
 
 // Define types
@@ -21,10 +20,9 @@ interface CommentType {
 }
 
 const Comments = () => {
-  const { id } = useParams(); // Extract bookId from the URL params
+  const { id } = useParams();
   const queryClient = useQueryClient();
 
-  // Fetch comments using React Query's useQuery hook
   const {
     data: comments = [],
     isLoading,
@@ -35,19 +33,18 @@ const Comments = () => {
       const response = await newRequest.get(`/api/books/${id}/comments`);
       return response.data;
     },
-    enabled: !!id, // Only run query when id is available
+    enabled: !!id,
   });
+  const fetchComments = async (newCommentContent: string) => {
+    const response = await newRequest.post(`/api/books/${id}/comments`, {
+      content: newCommentContent,
+    });
+    return response.data;
+  };
 
-  // Handle the submission of a new comment using React Query's useMutation hook
   const mutation = useMutation({
-    mutationFn: async (newCommentContent: string) => {
-      const response = await newRequest.post(`/api/books/${id}/comments`, {
-        content: newCommentContent,
-      });
-      return response.data;
-    },
+    mutationFn: fetchComments,
     onSuccess: (newComment) => {
-      // After successful comment submission, update the comments cache
       queryClient.setQueryData(
         ["comments", id],
         (oldComments: CommentType[] | undefined) => [
@@ -65,20 +62,18 @@ const Comments = () => {
     },
   });
 
-  // Submit the comment when the button is clicked
   const handleCommentSubmit = (
     e: React.FormEvent<HTMLFormElement>,
     comment: string
   ) => {
     e.preventDefault();
     if (comment.trim()) {
-      mutation.mutate(comment); // Submit the comment
+      mutation.mutate(comment); 
     }
   };
 
   return (
     <div className="flex flex-col items-center w-full max-w-xl overflow-y-scroll">
-      {/* Comment input */}
       <form
         onSubmit={(e) =>
           handleCommentSubmit(e, (e.target as any).elements.comment.value)
@@ -89,7 +84,6 @@ const Comments = () => {
           placeholder="Enter your comments."
           className="p-3 bg-transparent border-black border-opacity-30 w-full border outline-none min-h-32 rounded-2xl placeholder:text-black placeholder:text-opacity-30"></textarea>
 
-        {/* Submit button */}
         <Button
           type="submit"
           className="mt-5 w-fit self-end"
@@ -124,7 +118,7 @@ const Comment: FC<CommentProps> = ({ comment }) => {
     <div className="flex mt-7 flex-col w-full">
       <div className="flex justify-between w-full items-center">
         <div className="flex items-center gap-4">
-          {/* Display user initials */}
+      
           <Link
             to={`/profile`}
             state={{

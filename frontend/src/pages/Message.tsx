@@ -7,31 +7,16 @@ import MessageHeader from "../components/messages/MessageHeader";
 import MessageItem from "../components/messages/MessageItem";
 import newRequest from "../utils/newRequest";
 import { useParams } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
-interface DecodedToken {
-  id: string;
-  email?: string;
-  iat?: number;
-  exp?: number;
-}
+
 
 const Message: React.FC = () => {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const messageRef = React.useRef<HTMLDivElement>(null);
-  const [userId, setUserId] = useState<string>(localStorage.getItem("token")!);
-  const token = localStorage.getItem("token");
   const { id } = useParams();
-  useEffect(() => {
-    if (token) {
-      try {
-        const decodedToken = jwtDecode<DecodedToken>(token);
-        setUserId(decodedToken.id);
-      } catch (decodeError) {
-        console.error("Invalid token format:", decodeError);
-      }
-    }
-  }, [token]);
+  const currentUser = localStorage.getItem("currentUser");
+  const user = currentUser ? JSON.parse(currentUser).user : null;
+
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -65,10 +50,9 @@ const Message: React.FC = () => {
       }
     }
   };
- 
   return (
     <div className="flex flex-col min-h-screen border border-black m-2">
-      <Header  />
+      <Header />
       <div className="border-black flex-1 flex flex-col border lg:mx-16 lg:mt-8">
         <MessageHeader />
         <div className="px-12 flex flex-1 flex-col">
@@ -76,9 +60,9 @@ const Message: React.FC = () => {
             {messages.map((msg: any) => (
               <MessageItem
                 text={msg.content}
-                isMe={msg.senderId === userId} 
-                senderName={msg.senderName} 
-                senderEmail={msg.senderEmail} 
+                isMe={msg.senderId === user.id}
+                senderName={msg.sender.name}
+                senderEmail={msg.sender.email}
                 key={msg.id}
               />
             ))}

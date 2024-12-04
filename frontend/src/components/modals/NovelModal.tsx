@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import Button from "../shared/Button";
 import Modal from "./Modal";
 import { BsFileTextFill, BsImageFill, BsMusicNote } from "react-icons/bs";
-import { twMerge } from "tailwind-merge";
 import { useNovelModal } from "../../hooks/useNovelModal";
 import TabButton from "./components/TabButton";
 import Loader from "../shared/Loader";
@@ -76,6 +75,8 @@ const NovelModal = () => {
     },
     onSuccess: () => {
       toast.success("Content uploaded successfully!");
+      closeModal();
+      window.location.reload();
       setTextInput("");
       setFile("");
     },
