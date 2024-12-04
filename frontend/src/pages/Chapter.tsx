@@ -71,11 +71,13 @@ const ChapterPage: React.FC = () => {
       <div className="flex lg:flex-row flex-col">
         <div className="flex-1 border-r border-black">
           <div className="flex flex-col items-center justify-center mt-9">
-            <img
-              src={chapter?.cover_image}
-              alt="chapter cover"
-              className="h-[420px] w-full object-contain"
-            />
+            <div className="">
+              <img
+                src={chapter?.cover_image}
+                alt="chapter cover"
+                className="h-[420px] max-w-lg w-full object-cover border-black border rounded-2xl"
+              />
+            </div>
 
             <div className="flex p-2 mt-5 gap-3 w-full max-w-lg border-black border border-opacity-30 rounded-2xl items-center">
               {chapter?.chapter_content?.audio ? (
@@ -93,14 +95,15 @@ const ChapterPage: React.FC = () => {
             )}
           </div>
         </div>
-        <div className="lg:p-6 flex-1">
+        <hr className="border-t border-black my-5"/>
+        <div className="lg:p-6 flex-1 p-3">
           <div className="max-w-xl w-full flex flex-col mx-auto">
             <h2 className="text-5xl font-medium tracking-wider mb-4">
               {chapterTitle}
             </h2>
             {chapter?.chapter_content?.text?.length ? (
               chapter.chapter_content.text.map((text, index) => (
-                <p key={index} className="mb-4">
+                <p key={index} className="mb-4 border-black border rounded-lg p-4">
                   {text}
                 </p>
               ))

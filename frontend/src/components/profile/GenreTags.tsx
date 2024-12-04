@@ -3,7 +3,7 @@ interface GenreTagProps {
 }
 
 const GenreTags: React.FC<GenreTagProps> = ({ tags }) => (
-  <div className="flex gap-2 flex-1 items-end ">
+  <div className="flex gap-2 flex-1 items-end lg:mt-0 mt-8">
     {tags.map((tag, index) => (
       <p
         key={index}

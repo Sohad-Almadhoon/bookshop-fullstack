@@ -54,10 +54,10 @@ const Message: React.FC = () => {
         const newMessage = {
           content: message,
         };
-        console.log(newMessage);
-
         await newRequest.post(`/api/messages/${id}`, newMessage);
-
+        const response = await newRequest.get(`/api/messages/${id}`);
+        const data = response.data;
+        setMessages(data);
         setMessage("");
         messageRef.current?.scrollIntoView({ behavior: "smooth" });
       } catch (error) {
@@ -65,20 +65,20 @@ const Message: React.FC = () => {
       }
     }
   };
-
+ 
   return (
     <div className="flex flex-col min-h-screen border border-black m-2">
       <Header  />
-      <div className="border-black flex-1 flex flex-col border mx-16 mt-8">
+      <div className="border-black flex-1 flex flex-col border lg:mx-16 lg:mt-8">
         <MessageHeader />
         <div className="px-12 flex flex-1 flex-col">
           <div className="flex-1 max-h-[60vh] overflow-auto">
             {messages.map((msg: any) => (
               <MessageItem
                 text={msg.content}
-                isMe={msg.senderId === userId} // Check if the sender is the current user
-                senderName={msg.senderName} // Pass the sender's name dynamically
-                senderEmail={msg.senderEmail} // Pass the sender's email dynamically
+                isMe={msg.senderId === userId} 
+                senderName={msg.senderName} 
+                senderEmail={msg.senderEmail} 
                 key={msg.id}
               />
             ))}
@@ -92,6 +92,11 @@ const Message: React.FC = () => {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               type="text"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  sendMessage();
+                }
+              }}
             />
             <Button
               onClick={sendMessage}

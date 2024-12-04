@@ -1,8 +1,12 @@
 import {useState, useEffect } from "react";
 import {
+  BsArrowsAngleExpand,
+  BsArrowsExpand,
+  BsArrowsExpandVertical,
   BsBook,
   BsCalendar2,
   BsLayoutSidebarInsetReverse,
+  BsLink,
 } from "react-icons/bs";
 import { Link, useParams } from "react-router-dom";
 import newRequest from "../../utils/newRequest";
@@ -44,10 +48,11 @@ const ChaptersArea = ({ date }: { date: string }) => {
   }
 
   return (
-    <div className="flex-2 p-12 flex-col flex px-20">
+    <div className="p-12 flex-col flex lg:px-20">
       <div className="flex gap-2 flex-col items-start">
         <div className="flex items-center text-xl gap-2 justify-center font-semibold">
-          <BsCalendar2 className="text-2xl" />Created Date:
+          <BsCalendar2 className="text-2xl" />
+          Created Date:
           <div className="text-lg text-gray-700 underline">
             {new Date(date).toLocaleTimeString(undefined, {
               hour: "2-digit",
@@ -63,10 +68,11 @@ const ChaptersArea = ({ date }: { date: string }) => {
           </span>
         </div>
       </div>
+        <Link to="/create-book" className="text-sm text-gray-800 underline flex items-center gap-2 justify-end">CREATE MORE BOOKS <BsLink className="text-lg"/></Link>
       <div className="w-full my-3 flex gap-4 items-center justify-center bg-black text-white uppercase px-5 py-3 text-3xl font-voyage rounded-lg">
         <BsLayoutSidebarInsetReverse /> chapters
       </div>
-      <div className="grid grid-cols-3 gap-x-3 gap-y-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 gap-5">
         {chapters.length > 0 ? (
           chapters.map((chapter) => (
             <Link

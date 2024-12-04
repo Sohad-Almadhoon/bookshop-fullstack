@@ -32,8 +32,8 @@ const fetchUserInfo = async (id: string) => {
   }
 
   return (
-    <div className="border border-opacity-30 border-black rounded-xl p-8 mt-5 flex gap-4">
-      <div>
+    <div className="border border-opacity-30 border-black rounded-xl p-8 mt-5 flex lg:flex-row flex-col gap-4">
+      <div className="flex justify-end lg:justify-start">
         <span className="flex uppercase size-24 text-6xl justify-center items-center bg-black text-white rounded-full">
           {user?.name?.charAt(0)}
         </span>
@@ -50,7 +50,7 @@ const fetchUserInfo = async (id: string) => {
       </div>
       <div className="flex flex-col">
         <div className=" relative">
-          <div className="border border-black border-opacity-30 rounded-md text-center text-2xl p-2 z-10 text-black">
+          <div className="border border-black px-16 border-opacity-30 rounded-md  text-center text-2xl p-2 z-10 text-black">
             <div className="absolute -left-10 top-[-38px]">
               <img
                 className="horn-left"

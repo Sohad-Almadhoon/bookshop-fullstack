@@ -5,7 +5,7 @@ import {
   MenuItem,
   Transition,
 } from "@headlessui/react";
-import { BsPersonFill, BsSignpost2 } from "react-icons/bs";
+import { BsPersonFill, BsSignpost2, BsTreeFill } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { Fragment } from "react";
 import Button from "../shared/Button";
@@ -29,13 +29,21 @@ const ProfileMenu = () => {
         leaveTo="transform opacity-0 scale-95">
         <MenuItems
           anchor="bottom"
-          className="absolute bg-[#dfd4bf] -translate-x-[100px] mt-2 w-56 h-40 rounded-md  shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none drop-shadow bg-[#] p-6 z-50">
+          className="absolute bg-[#dfd4bf] -translate-x-[100px] mt-2 w-56 h-44 rounded-md  shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none drop-shadow bg-[#] p-6 z-50">
           <MenuItem as={Fragment}>
             <Link
               to="/profile"
               className={"flex gap-4 text-xl font-medium cursor-pointer"}>
               <BsPersonFill className="text-2xl" />
               Profile
+            </Link>
+            </MenuItem>
+            <MenuItem as={Fragment}>
+            <Link
+              to="/tree"
+              className={"flex gap-4 text-xl font-medium cursor-pointer mt-2"}>
+              <BsTreeFill className="text-2xl" />
+              Tree
             </Link>
           </MenuItem>
           <MenuItem as={Fragment}>

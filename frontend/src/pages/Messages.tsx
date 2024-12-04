@@ -1,45 +1,42 @@
-import React, { useState, useEffect } from "react";
 import Header from "../components/shared/Header";
 import { Link } from "react-router-dom";
 import Conversation from "../components/messages/Conversation";
-import newRequest from "../utils/newRequest"; // Helper for API requests
-
-interface ConversationData {
-  id: number;
-  sender: {
-    name: string;
-    avatar: string;
-  };
-  book: {
-    title: string;
-    image: string;
-  };
-  lastMessage: string;
-}
+import newRequest from "../utils/newRequest";
+import { useQuery } from "@tanstack/react-query";
+import Loader from "../components/shared/Loader";
 
 const Messages = () => {
-  const [conversations, setConversations] = useState<ConversationData[]>([]);
-  useEffect(() => {
-    const fetchConversations = async () => {
-      try {
-        const { data } = await newRequest.get("/api/conversations");
-        setConversations(data);
-      } catch (error) {
-        console.error("Failed to fetch conversations:", error);
-      }
-    };
+  const fetchConversations = async () => {
+    const { data } = await newRequest.get("/api/conversations");
+    return data;
+  };
+  const {
+    data: conversations,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["conversations"],
+    queryFn: fetchConversations,
+  });
 
-    fetchConversations();
-  }, []);
-  console.log(conversations[0]?.book);
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  if (isError) {
+    return <div>Error: {error.message}</div>;
+  }
+
   return (
     <div className="min-h-screen border border-black m-2">
-      <Header  />
-      <div className="border-black border mx-16 my-8 h-screen">
+      <Header />
+      <div className="border-black border lg:mx-16 lg:my-8 h-screen">
         <div className="flex justify-between items-center p-4">
           <p className="text-2xl">Messages</p>
           <img src="/assets/file-check.svg" alt="file-check" />
         </div>
+        <hr className="border-t-2 border-black" />
         <div>
           {conversations.length > 0 ? (
             conversations.map((conversation: any) => (
@@ -48,7 +45,7 @@ const Messages = () => {
                 key={conversation.id}
                 className="flex gap-10 border-black mt-2"
                 state={{
-                  book: conversation.book, 
+                  book: conversation.book,
                 }}>
                 <Conversation
                   participants={conversation.participants}

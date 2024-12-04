@@ -11,7 +11,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ title, className }) => {
   return (
-    <header className="flex items-center border-black border py-1 px-20 ">
+    <header className="flex items-center border-black border p-2 ;g:py-1 lg:px-20 ">
       <Link to="/" className="flex-1">
         <img src="/assets/logo-dark.svg" alt="logo" className="w-14" />
       </Link>

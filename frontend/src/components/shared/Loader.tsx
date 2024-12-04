@@ -1,12 +1,11 @@
-import { RotatingSquare } from "react-loader-spinner";
+import { RotatingLines} from "react-loader-spinner";
 
 const Loader = () => {
   return (
-    <div className="flex items-center justify-center">
-      <RotatingSquare
-        height="100"
-        width="100"
-        color="#233"
+    <div className="flex items-center justify-center mt-2">
+      <RotatingLines
+        width="50"
+        strokeColor="#000"
         ariaLabel="triangle-loading"
         visible={true}
       />

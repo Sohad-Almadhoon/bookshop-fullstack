@@ -23,20 +23,8 @@ const MessageHeader: React.FC = () => {
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="flex items-center relative">
-          <div className="w-9 h-9 border-black border rounded-full absolute right-5 z-30">
-            <img src="/assets/profile.png" alt="profile" />
-          </div>
-          <div className="w-9 h-9 border-black border rounded-full absolute right-9 z-10"></div>
-          <div className="w-9 h-9 text-sm border-black border rounded-full flex justify-center items-center z-50 bg-[#dfd4bf]">
-            65+
-          </div>
-        </div>
-        <img src="/assets/file-check.svg" alt="file-check" />
-      </div>
     </div>
-  );
+  )
 };
 
 export default MessageHeader;

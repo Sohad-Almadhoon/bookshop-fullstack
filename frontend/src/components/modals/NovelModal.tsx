@@ -39,7 +39,6 @@ const NovelModal = () => {
     }
   }, [contentType]);
 
-
   const handleChapterCreationMutation = useMutation({
     mutationFn: async () => {
       const response = await newRequest.post(`/api/books/${id}/chapters`, {
@@ -155,19 +154,7 @@ const NovelModal = () => {
             }
           }}
           disabled={createChapterContentMutation.isPending}
-          className={twMerge(
-            "w-[250px] mt-5 border-none font-baskervville font-bold",
-            (!file && activeTab !== "text") ||
-              (!textInput && activeTab === "text")
-              ? "opacity-50"
-              : ""
-          )}
-          variant={
-            (!file && activeTab !== "text") ||
-            (!textInput && activeTab === "text")
-              ? "outline"
-              : ""
-          }>
+          className="w-[250px] mt-5 border-none font-baskervville font-bold">
           {createChapterContentMutation.isPending ? (
             <Loader />
           ) : (

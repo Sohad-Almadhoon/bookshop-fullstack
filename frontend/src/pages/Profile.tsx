@@ -11,6 +11,7 @@ import {
 } from "../actions/books.action";
 import { useLocation } from "react-router-dom";
 import { getUser } from "../utils/helpers";
+import Loader from "../components/shared/Loader";
 
 const Profile: React.FC = () => {
   const [tab, setTab] = useState<number>(0);
@@ -46,15 +47,19 @@ const Profile: React.FC = () => {
       total: followingBooks.length,
     },
   ];
-
+ const isLoading = isLoadingBooks || isLoadingFollowingBooks;
   return (
     <div className="p-2 flex flex-col min-h-screen">
       <Header />
-      <div className="lg:px-24 border-black border flex-1">
+      <div className="lg:px-24 p-3 border-black border flex-1">
         {user.id && <ProfileInfo id={id ? id : user.id} />}
         <div className="flex-1">
           <ProfileActions tabs={tabs} tab={tab} setTab={setTab} />
-          <BookGrid tab={tab} books={tab === 0 ? books : followingBooks} />
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <BookGrid tab={tab} books={tab === 0 ? books : followingBooks} />
+          )}
         </div>
       </div>
     </div>
