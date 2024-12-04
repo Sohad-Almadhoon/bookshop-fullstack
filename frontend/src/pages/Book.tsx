@@ -11,6 +11,7 @@ export interface BookData {
   title: string;
   main_cover: string;
   created_at: string;
+  description: string;
 }
 const Book = () => {
   const { id: bookId } = useParams();
@@ -36,7 +37,7 @@ const Book = () => {
     <div className="flex flex-col min-h-screen">
       <Header title={bookData.title} className="text-3xl uppercase" />
       <div className="flex lg:flex-row flex-col border border-black flex-1">
-        <Sidebar imgUrl={bookData.main_cover} />
+        <Sidebar imgUrl={bookData.main_cover} description={bookData.description} />
         <ChaptersArea date={bookData.created_at }/>
       </div>
     </div>

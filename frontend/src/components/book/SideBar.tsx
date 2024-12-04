@@ -2,7 +2,13 @@ import { useNovelModal } from "../../hooks/useNovelModal";
 import Button from "../shared/Button";
 import ActionButtons from "./ActionButtons";
 
-const Sidebar = ({ imgUrl }:{imgUrl:string}) => {
+const Sidebar = ({
+  imgUrl,
+  description,
+}: {
+  imgUrl: string;
+  description: string;
+}) => {
   const { openModal } = useNovelModal();
 
   return (
@@ -16,8 +22,9 @@ const Sidebar = ({ imgUrl }:{imgUrl:string}) => {
             <img
               src={imgUrl}
               alt="book cover"
-              className="lg:h-full h-96 w-96 mx-auto object-cover"
+              className="h-96 w-96 mx-auto object-cover"
             />
+            <p className=" font-voyage text-sm text-gray-800 bg-white p-2 rounded-b-lg">{description}</p>
             <ActionButtons />
           </div>
         </div>

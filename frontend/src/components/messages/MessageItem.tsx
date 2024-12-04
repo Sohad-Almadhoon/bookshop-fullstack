@@ -14,12 +14,16 @@ const MessageItem: React.FC<MessageItemProps> = ({
   senderEmail,
 }) => (
   <div className={`flex mt-4 ${isMe ? "flex-row-reverse" : ""}`}>
-    <span
-      className={twMerge(
-        "size-10  flex justify-center items-end object-cover bg-black rounded-full text-white"
-      , isMe ?"ml-2" : "mr-2")}>
-      {senderName.charAt(0)}
-    </span>
+    <div className="flex items-end">
+      {" "}
+      <span
+        className={twMerge(
+          "size-10  flex justify-center items-center  object-cover bg-black rounded-full text-white",
+          isMe ? "ml-2" : "mr-2"
+        )}>
+        {senderName.charAt(0)}
+      </span>
+    </div>
     <div
       className={`flex p-2 flex-col flex-1 ${
         isMe ? "bg-black text-gray-300" : "bg-white"

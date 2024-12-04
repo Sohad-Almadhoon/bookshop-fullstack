@@ -1,55 +1,73 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import CustomInput from "../components/shared/CustomInput";
 import Button from "../components/shared/Button";
 import { BsSendFill } from "react-icons/bs";
 import Header from "../components/shared/Header";
 import MessageHeader from "../components/messages/MessageHeader";
 import MessageItem from "../components/messages/MessageItem";
-import newRequest from "../utils/newRequest";
 import { useParams } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import newRequest from "../utils/newRequest";
 
+// Fetch messages function
+const fetchMessages = async (id: string) => {
+  const response = await newRequest.get(`/api/messages/${id}`);
+  return response.data;
+};
+
+// Send message function
+const sendMessageToApi = async (id: string, message: string) => {
+  const newMessage = { content: message };
+  await newRequest.post(`/api/messages/${id}`, newMessage);
+};
 
 const Message: React.FC = () => {
-  const [messages, setMessages] = useState([]);
-  const [message, setMessage] = useState("");
   const messageRef = React.useRef<HTMLDivElement>(null);
   const { id } = useParams();
   const currentUser = localStorage.getItem("currentUser");
   const user = currentUser ? JSON.parse(currentUser).user : null;
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const response = await newRequest.get(`/api/messages/${id}`);
-        const data = response.data;
-        setMessages(data);
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-      }
+  const queryClient = useQueryClient();
+
+  const {
+    data: messages,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["messages", id],
+    queryFn: () => fetchMessages(id!),
+    enabled: !!id, // Only run the query if `id` is available
+  });
+
+  interface Message {
+    id: string;
+    content: string;
+    senderId: string;
+    sender: {
+      name: string;
+      email: string;
     };
+  }
 
-    fetchMessages();
-  }, [id]); // Empty dependency array to run once when the component mounts
-
-  // Send message to API using POST
-  const sendMessage = async () => {
-    if (message) {
-      try {
-        // Post the new message to the API
-        const newMessage = {
-          content: message,
-        };
-        await newRequest.post(`/api/messages/${id}`, newMessage);
-        const response = await newRequest.get(`/api/messages/${id}`);
-        const data = response.data;
-        setMessages(data);
-        setMessage("");
-        messageRef.current?.scrollIntoView({ behavior: "smooth" });
-      } catch (error) {
-        console.error("Error sending message:", error);
+  const mutation = useMutation({
+    mutationFn: (newMessage: string) => sendMessageToApi(id!, newMessage),
+    onSuccess: () => {
+      if (id) {
+        queryClient.invalidateQueries({ queryKey: ["messages", id] }); // Invalidate and refetch messages after sending
       }
+      messageRef.current?.scrollIntoView({ behavior: "smooth" });
+    },
+    onError: (error: unknown) => {
+      console.error("Error sending message:", error);
+    },
+  });
+
+  const sendMessage = (message: string) => {
+    if (message) {
+      mutation.mutate(message); // Send the message via mutation
     }
   };
+
   return (
     <div className="flex flex-col min-h-screen border border-black m-2">
       <Header />
@@ -57,33 +75,39 @@ const Message: React.FC = () => {
         <MessageHeader />
         <div className="px-12 flex flex-1 flex-col">
           <div className="flex-1 max-h-[60vh] overflow-auto">
-            {messages.map((msg: any) => (
+            {isLoading && <div>Loading...</div>}
+            {isError && <div>Error loading messages.</div>}
+            {messages?.map((msg: Message) => (
               <MessageItem
                 text={msg.content}
-                isMe={msg.senderId === user.id}
+                isMe={msg.senderId === user?.id}
                 senderName={msg.sender.name}
                 senderEmail={msg.sender.email}
                 key={msg.id}
               />
             ))}
-
             <div ref={messageRef} />
           </div>
           <div className="flex items-center gap-3">
             <CustomInput
               className="my-5 w-full p-3 flex-3 rounded-xl"
               placeholder="Write a message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              type="text"
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  sendMessage();
+                if (e.key === "Enter" && e.currentTarget.value) {
+                  sendMessage(e.currentTarget.value);
+                  e.currentTarget.value = ""; // Clear the input after sending
                 }
               }}
             />
             <Button
-              onClick={sendMessage}
+              onClick={(e) => {
+                const input = e.currentTarget
+                  .previousElementSibling as HTMLInputElement;
+                if (input?.value) {
+                  sendMessage(input.value);
+                  input.value = ""; // Clear the input after sending
+                }
+              }}
               className="bg-transparent flex-1 border border-black h-full text-2xl rounded-xl">
               <BsSendFill className="text-black text-2xl" />
             </Button>
