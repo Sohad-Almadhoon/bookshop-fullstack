@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import NovelModal from "../components/modals/NovelModal";
-import InvestModal from "../components/modals/PaymentModal";
-import FinalModal from "../components/modals/FinalModal";
 import CommentModal from "../components/modals/CommentModal";
 
 const ModalProvider = () => {
@@ -21,8 +19,6 @@ const ModalProvider = () => {
     <>
       <CommentModal />
       <NovelModal />
-      <InvestModal />
-      <FinalModal />
     </>
   );
 };

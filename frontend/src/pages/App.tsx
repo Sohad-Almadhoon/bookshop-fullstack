@@ -17,6 +17,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import CreatBook from "../components/modals/CeateBook";
 import Chapter from "./Chapter";
 import LandingPage from "./LandingPage";
+import Success from "./Success";
 
 const App = () => {
   const Layout = () => {
@@ -74,6 +75,7 @@ const App = () => {
           path: "/create-book",
           element: <CreatBook />,
         },
+        { path: "/success", element: <Success /> },
       ],
     },
     {
