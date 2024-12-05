@@ -1,11 +1,20 @@
 import { Link } from "react-router-dom";
+import newRequest from "../../utils/newRequest";
+import { BsHeartFill, BsPersonCircle } from "react-icons/bs";
+import { useQuery } from "@tanstack/react-query";
 interface BookProps {
   title: string;
   author: string;
   main_cover: string;
   id: number;
 }
-const BookCard = ({ title, author, main_cover ,id  }: BookProps) => {
+const BookCard = ({ title, author, main_cover, id }: BookProps) => {
+
+
+  const { data: stats } = useQuery({ queryKey: ["bookStats", id], queryFn: async () => {
+    const { data } = await newRequest.get(`/api/books/${id}/stats`);
+    return data;
+  }});
   return (
     <Link
       to={`/books/${id}`}
@@ -15,6 +24,14 @@ const BookCard = ({ title, author, main_cover ,id  }: BookProps) => {
         <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
           <h1 className="text-2xl font-semibold">{title}</h1>
           <p className="text-sm">{author}</p>
+          <div className="flex items-center gap-4 justify-end p-1">
+            <span className="flex gap-2 items-center">
+              <BsPersonCircle /> {stats?.likes}
+            </span>
+            <span className="flex gap-2 items-center">
+              <BsHeartFill className="text-red-700" /> {stats?.follows}
+            </span>
+          </div>
         </div>
       </div>
     </Link>
