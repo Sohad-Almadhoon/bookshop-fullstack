@@ -366,6 +366,35 @@ const unLikeBook = async (req, res) => {
     res.status(500).json({ error: "Something went wrong." });
   }
 };
+const getBookStats = async (req, res) => {
+  const { id: bookId } = req.params; // Extract bookId from the route parameters
+  if (!bookId) {
+    return res.status(400).json({ error: "Missing bookId" });
+  }
+
+  try {
+    // Count the number of likes for the book
+    const likesCount = await prisma.user_books.count({
+      where: {
+        book_id: parseInt(bookId),
+        type: "LIKE",
+      },
+    });
+
+    // Count the number of follows for the book
+    const followsCount = await prisma.user_books.count({
+      where: {
+        book_id: parseInt(bookId),
+        type: "FOLLOW",
+      },
+    });
+
+    res.status(200).json({ likes: likesCount, follows: followsCount });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong." });
+  }
+};
 
 export {
   createBook,
@@ -377,4 +406,5 @@ export {
   getBookStates,
   getRandomBooks,
   unLikeBook,
+  getBookStats,
 };

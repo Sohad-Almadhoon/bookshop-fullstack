@@ -8,6 +8,8 @@ import chapterRoutes from "./routes/chapters.route.js";
 import conversationRoutes from "./routes/conversation.route.js";
 import messageRoutes from "./routes/message.route.js";
 import uploadRoutes from "./routes/upload.route.js";
+import checkoutRouter from './routes/checkout.route.js'; 
+import paymentRouter from './routes/payment.route.js'; 
 import { errorHandler } from "./middlewares/errorMiddleware.js";
 import bodyParser from "body-parser";
 const app = express();
@@ -24,6 +26,8 @@ const routes = {
   "/api/conversations": conversationRoutes,
   "/api/messages": messageRoutes,
   "/api/upload": uploadRoutes,
+  "/api/create-checkout-session": checkoutRouter,
+  "/api/payment": paymentRouter,
 };
 Object.keys(routes).forEach((route) => app.use(route, routes[route]));
 

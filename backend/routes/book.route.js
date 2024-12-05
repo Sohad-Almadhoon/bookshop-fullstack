@@ -9,6 +9,7 @@ import {
   likeBook,
   unLikeBook,
   unFollowBook,
+  getBookStats,
 } from "../controllers/book.controller.js";
 import {
   createComment,
@@ -43,6 +44,7 @@ router.delete("/:id/follow", verifyToken, unFollowBook);
 router.post("/:id/like", verifyToken, likeBook);
 router.delete("/:id/like", verifyToken, unLikeBook);
 router.get("/:id/book-states", verifyToken, getBookStates);
+router.get("/:id/stats", verifyToken, getBookStats);
 
 export default router;
 
