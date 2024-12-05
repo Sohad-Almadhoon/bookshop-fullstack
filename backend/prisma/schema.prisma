@@ -15,7 +15,7 @@ model users {
   role             String
   generes          String[]
   has_paid         Boolean @default(false)   
-  stripeId         String @unique        
+  stripeId         String? @unique        
   created_at       DateTime @default(now())
   books            user_books[]
 

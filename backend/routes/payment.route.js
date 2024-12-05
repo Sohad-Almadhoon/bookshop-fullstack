@@ -1,5 +1,5 @@
 import express from "express";
-import prisma from "../utils/db";
+import prisma from "../utils/db.js";
 const router = express.Router();
 router.get("/success", async (req, res) => {
   const { session_id } = req.query;
