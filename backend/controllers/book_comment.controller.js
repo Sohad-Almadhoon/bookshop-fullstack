@@ -34,12 +34,6 @@ const getComments = async (req, res) => {
       },
     });
 
-    if (!comments.length) {
-      return res
-        .status(404)
-        .json({ message: "No comments found for this book." });
-    }
-
     res.status(200).json(comments);
   } catch (error) {
     console.error("Error fetching comments:", error);

@@ -40,12 +40,6 @@ const getBookChapters = async (req, res) => {
       },
     });
 
-    if (chapters.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No chapters found for the specified book." });
-    }
-
     res.status(200).json(chapters);
   } catch (error) {
     console.error("Error fetching chapters:", error);
