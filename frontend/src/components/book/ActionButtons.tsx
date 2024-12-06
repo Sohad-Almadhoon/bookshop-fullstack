@@ -5,6 +5,7 @@ import { BsChatFill, BsHeartFill, BsPeopleFill } from "react-icons/bs";
 import { useParams } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const fetchBookStates = async (id: string) => {
   const response = await newRequest.get(`/api/books/${id}/book-states`);
@@ -25,6 +26,7 @@ const ActionButtons = () => {
   const followMutation = useMutation({
     mutationFn: () => (data?.followed ? newRequest.delete(`/api/books/${id}/follow`) : newRequest.post(`/api/books/${id}/follow`)),
     onSuccess: () => {
+      toast.success(data?.followed ? "Unfollowed" : "Followed");
       queryClient.invalidateQueries({ queryKey: ["bookStates", id as string] });
     },
   });
@@ -32,6 +34,7 @@ const ActionButtons = () => {
   const likeMutation = useMutation({
     mutationFn: () => (data?.liked ? newRequest.delete(`/api/books/${id}/like`) : newRequest.post(`/api/books/${id}/like`)),
     onSuccess: () => {
+      toast.success(data?.liked ? "Unliked" : "Liked");
       queryClient.invalidateQueries({ queryKey: ["bookStates", id] });
     },
   });
