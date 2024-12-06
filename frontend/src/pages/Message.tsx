@@ -46,6 +46,7 @@ const Message: React.FC = () => {
     sender: {
       name: string;
       email: string;
+      created_at: string;
     };
   }
 
@@ -82,7 +83,7 @@ const Message: React.FC = () => {
                 text={msg.content}
                 isMe={msg.senderId === user?.id}
                 senderName={msg.sender.name}
-                senderEmail={msg.sender.email}
+                time={msg.sender.created_at}
                 key={msg.id}
               />
             ))}

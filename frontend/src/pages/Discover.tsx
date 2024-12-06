@@ -27,7 +27,7 @@ const Discover: FC = () => {
     queryKey: ["randomBooks"],
     queryFn: fetchRandomBooks,
   });
-  console.log(books)
+
 
   const [activeCard, setActiveCard] = useState<number | null>(null);
 
@@ -64,7 +64,7 @@ const Discover: FC = () => {
                   <Link
                     to={`/books/${book.id}`}
                     key={book.id}
-                    className={`absolute w-72 h-auto cursor-pointer transition-transform duration-500 ease-in-out will-change-transform
+                    className={`absolute lg:w-72 w-64 h-auto cursor-pointer transition-transform duration-500 ease-in-out will-change-transform
                       ${
                         activeCard === index
                           ? "z-20 scale-110 rotate-0 translate-x-0 shadow-lg"
@@ -73,7 +73,7 @@ const Discover: FC = () => {
                           : defaultStyles[index]
                       }`}>
                     <img
-                      className="w-full h-auto"
+                      className="w-full lg:h-auto h-96"
                       key={book.id}
                       src={book.main_cover}
                       alt={book.title}
@@ -88,7 +88,7 @@ const Discover: FC = () => {
               })
             )}
           </div>
-          <div className="flex z-20">
+          <div className="lg:flex z-20 hidden">
             <img
               src="/assets/wolf-left.png"
               alt="Wolf Left"

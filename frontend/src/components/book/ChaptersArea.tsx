@@ -19,20 +19,17 @@ export interface Chapter {
   };
 }
 
-const ChaptersArea = ({ date }: { date: string }) => {
+const ChaptersArea = ({ date, genres }: { date: string; genres: string[] }) => {
   const { id } = useParams();
 
-const {
-  data: chapters = [],
-  isLoading,
-} = useQuery<Chapter[]>({
-  queryKey: ["chapters", id],
-  queryFn: async () => {
-    const response = await newRequest.get(`/api/books/${id}/chapters`);
-    return response.data;
-  },
-  enabled: !!id,
-});
+  const { data: chapters = [], isLoading } = useQuery<Chapter[]>({
+    queryKey: ["chapters", id],
+    queryFn: async () => {
+      const response = await newRequest.get(`/api/books/${id}/chapters`);
+      return response.data;
+    },
+    enabled: !!id,
+  });
 
   if (isLoading) {
     return <Loader />;
@@ -41,6 +38,11 @@ const {
   return (
     <div className="p-12 flex-col flex lg:px-20">
       <div className="flex gap-2 flex-col items-start">
+        <div className="flex justify-end w-full gap-2">
+          {genres.map((genre: string) => (
+            <span className="text-sm rounded-md p-1 bg-black text-white">#{genre}</span>
+          ))}
+        </div>
         <div className="flex items-center text-xl gap-2 justify-center font-semibold">
           <BsCalendar2 className="text-2xl" />
           Created Date:
@@ -59,7 +61,11 @@ const {
           </span>
         </div>
       </div>
-        <Link to="/create-book" className="text-sm text-gray-800 underline flex items-center gap-2 justify-end">CREATE MORE BOOKS <BsLink className="text-lg"/></Link>
+      <Link
+        to="/create-book"
+        className="text-sm text-gray-800 underline flex items-center gap-2 justify-end">
+        CREATE MORE BOOKS <BsLink className="text-lg" />
+      </Link>
       <div className="w-full my-3 flex gap-4 items-center justify-center bg-black text-white uppercase px-5 py-3 text-3xl font-voyage rounded-lg">
         <BsLayoutSidebarInsetReverse /> chapters
       </div>

@@ -24,7 +24,7 @@ const Book = () => {
     queryFn: () => fetchBookInfo(bookId!), 
     enabled: !!bookId, 
   });
-
+console.log(bookData)
   if (isLoading) {
     return <Loader />;
   }
@@ -40,13 +40,20 @@ const Book = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header title={bookData.title} className="text-3xl uppercase" />
+      <Header
+        title={
+          <h3 className="flex items-center gap-2">
+            {bookData.title}
+          </h3>
+        }
+        className="text-3xl uppercase"
+      />
       <div className="flex lg:flex-row flex-col border border-black flex-1">
         <Sidebar
           imgUrl={bookData.main_cover}
           description={bookData.description}
         />
-        <ChaptersArea date={bookData.created_at} />
+        <ChaptersArea date={bookData.created_at} genres={bookData.generes} />
       </div>
     </div>
   );

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { redirect, useNavigate } from "react-router-dom";
-import CustomInput from "../shared/CustomInput";
-import Button from "../shared/Button";
-import Header from "../shared/Header";
-import { createBook } from "../../actions/books.action";
+import CustomInput from "../components/shared/CustomInput";
+import Button from "../components/shared/Button";
+import Header from "../components/shared/Header";
+import { createBook } from "../actions/books.action";
 
 export interface BookFormData {
   title: string;
@@ -55,7 +55,7 @@ const CreateBookPage = () => {
 
   return (
     <div>
-      <Header  />
+      <Header />
       <div className="bg-[#DDD1BB] flex flex-col mx-auto max-w-xl w-full rounded-lg p-6 mt-5 shadow-xl border-black border">
         <h2 className="text-4xl font-bold mb-4 uppercase text-center font-voyage">
           Create a New Book
@@ -130,7 +130,9 @@ const CreateBookPage = () => {
             />
           </div>
           <div className="flex justify-end">
-            <Button type="submit">Create</Button>
+            <Button type="submit" disabled={mutation.isPending}>
+              {mutation.isPending ? "Creating..." : "Create Book"}
+            </Button>
             <Button
               type="button"
               onClick={() => redirect("/tree")}

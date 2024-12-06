@@ -1,4 +1,4 @@
-import { BookFormData } from "../components/modals/CeateBook";
+import { BookFormData } from "../pages/CeateBook";
 import newRequest from "../utils/newRequest";
 
 export interface Book {

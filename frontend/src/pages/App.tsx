@@ -13,11 +13,12 @@ import ModalProvider from "../providers/ModalProvider";
 import Questionnaire from "./Questionnaire";
 import ComingSoon from "./ComingSoon";
 import Discover from "./Discover";
-import ProtectedRoute from "./ProtectedRoute";
-import CreatBook from "../components/modals/CeateBook";
+import ProtectedRoute from "../components/route/ProtectedRoute";
+import CreatBook from "./CeateBook";
 import Chapter from "./Chapter";
 import LandingPage from "./LandingPage";
 import Success from "./Success";
+import PaymentRoute from "../components/route/PaymentRoute";
 
 const App = () => {
   const Layout = () => {
@@ -69,7 +70,11 @@ const App = () => {
         },
         {
           path: "/chapters/:id",
-          element: <Chapter />,
+          element: (
+            <PaymentRoute>
+              <Chapter />
+            </PaymentRoute>
+          ),
         },
         {
           path: "/create-book",
