@@ -14,8 +14,7 @@ model users {
   password         String
   role             String
   generes          String[]
-  has_paid         Boolean @default(false)   
-  stripeId         String? @unique        
+  has_paid         Boolean @default(false)       
   created_at       DateTime @default(now())
   books            user_books[]
 

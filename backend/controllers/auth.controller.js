@@ -62,10 +62,7 @@ const login = async (req, res) => {
     );
     return res.status(200).json({ 
       token, 
-      user: {
-        id: user.id,
-        name: user.name,
-      },
+      user
     });
   } catch (error) {
     console.error(error);
