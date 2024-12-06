@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Loader from "../shared/Loader";
+import toast from "react-hot-toast";
 
 // Define types
 interface User {
@@ -52,6 +53,7 @@ const Comments = () => {
           newComment,
         ]
       );
+      toast.success("Comment submitted successfully");
     },
     onError: (error) => {
       if (error instanceof Error) {
