@@ -1,9 +1,12 @@
 import { useForm, SubmitHandler } from "react-hook-form";
+import { AxiosResponse } from "axios";
 import { useNavigate } from "react-router-dom";
 import CustomInput from "../components/shared/CustomInput";
 import SignForm from "../components/auth/SignForm";
 import Button from "../components/shared/Button";
 import newRequest from "../utils/newRequest";
+import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 interface LoginFormInputs {
   email: string;
@@ -14,21 +17,26 @@ const Login = () => {
   const {
     register,
     handleSubmit,
+    
     formState: { errors },
   } = useForm<LoginFormInputs>();
   const navigate = useNavigate();
 
-  // onSubmit handler type-safe for LoginFormInputs
-  const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
-    try {
-      const res = await newRequest.post("/api/auth/login", data);
-      localStorage.setItem("currentUser", JSON.stringify(res.data));
-      navigate("/welcome");
-    } catch (error) {
-      console.error("Failed to submit data", error);
-    }
+ const mutation = useMutation<AxiosResponse<any>, Error, LoginFormInputs>({
+   mutationFn: (data: LoginFormInputs) => newRequest.post("/api/auth/login", data),
+   onSuccess: (response) => {
+     localStorage.setItem("currentUser", JSON.stringify(response.data));
+     toast.success("Logged In Successfully");
+     navigate("/welcome");
+   },
+   onError: (error: Error) => {
+     toast.error(error.message);
+   },
+ });
 
-  };
+ const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
+   mutation.mutate(data);
+ };
 
   return (
     <SignForm
@@ -39,7 +47,6 @@ const Login = () => {
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-5 mx-auto mt-5 flex-1 w-full max-w-sm">
     
-        {/* Email Input */}
         <CustomInput
           placeholder="Enter Your Email"
           {...register("email", {
@@ -51,7 +58,6 @@ const Login = () => {
           })}
         />
         {errors.email && <p className="text-red-500">{errors.email.message}</p>}
-        {/* Password Input */}
         <CustomInput
           type="password"
           placeholder="Enter Your Password"
@@ -67,7 +73,7 @@ const Login = () => {
           <p className="text-red-500">{errors.password.message}</p>
         )}
 
-        {/* Remember Me Checkbox  */}
+
         <div className="flex justify-between text-sm">
           <label className="flex items-center">
             <CustomInput type="checkbox" className="custom-checkbox" />
@@ -76,7 +82,6 @@ const Login = () => {
           <p>Forget Password?</p>
         </div>
 
-        {/* Login Button */}
         <Button type="submit">Login</Button>
       </form>
     </SignForm>

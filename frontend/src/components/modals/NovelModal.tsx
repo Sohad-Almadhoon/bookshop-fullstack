@@ -11,8 +11,8 @@ import { useParams } from "react-router-dom";
 import TextUploader from "./components/TextUploader";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import FileUploader from "./components/FileUploader";
-import handleFileUpload from "../../actions/upload.action";
 import CustomInput from "../shared/CustomInput";
+import uploadFile from "../../utils/upload";
 
 type ContentType = "visual" | "audio" | "text";
 
@@ -26,7 +26,6 @@ const NovelModal = () => {
   const [textInput, setTextInput] = useState("");
   const [file, setFile] = useState<string>("");
   const { isOpen, closeModal, contentType } = useNovelModal();
-  const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<ContentType>("visual");
   const [title, setTitle] = useState("");
   const { id } = useParams();
@@ -35,8 +34,41 @@ const NovelModal = () => {
   useEffect(() => {
     if (contentType) {
       setActiveTab(contentType);
+      setFile("");
     }
   }, [contentType]);
+
+  // React Query mutation for handling file upload
+  const { mutate, isPending: isFileUploading } = useMutation({
+    mutationFn: (file: File) => {
+      const fileType = file.type.split("/")[0] as "image" | "audio";
+      return uploadFile(file, fileType);
+    },
+    onError: () => {
+      toast.error("Error uploading file!");
+    },
+    onSuccess: (fileUrl: string) => {
+      setFile(fileUrl); // Set the file URL after a successful upload
+      toast.success("File uploaded successfully!");
+    },
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadedFile = e.target.files?.[0];
+
+    if (uploadedFile) {
+      const fileType = uploadedFile.type.split("/")[0];
+      if (fileType === "image" || fileType === "audio") {
+        mutate(uploadedFile); // Trigger file upload mutation
+      } else {
+        toast.error(
+          "Unsupported file type! Only images and audio files are allowed."
+        );
+      }
+    } else {
+      toast.error("No file selected!");
+    }
+  };
 
   const handleChapterCreationMutation = useMutation({
     mutationFn: async () => {
@@ -90,14 +122,13 @@ const NovelModal = () => {
       case "text":
         return <TextUploader setTextInput={setTextInput} text={textInput} />;
       case "visual":
-        if (isLoading) <Loader />;
+        if (isFileUploading) return <Loader />;
         return (
           <div>
             <FileUploader
               file={file}
-              onFileChange={(e) =>
-                handleFileUpload(e, setIsLoading, setFile, toast)
-              }
+              type="visual"
+              onFileChange={handleFileChange}
               label="Click to upload"
               accept="image/*"
               description="SVG, PNG, JPG, or GIF (max 800x400px, 20MB)"
@@ -110,13 +141,12 @@ const NovelModal = () => {
           </div>
         );
       case "audio":
-        if (isLoading) <Loader />;
+        if (isFileUploading) return <Loader />;
         return (
           <FileUploader
             file={file}
-            onFileChange={(e) =>
-              handleFileUpload(e, setIsLoading, setFile, toast)
-            }
+            onFileChange={handleFileChange}
+            type="audio"
             label="Click to upload"
             accept="audio/*"
             description="MP3, WAV, FLAC (max 20MB)"
@@ -144,6 +174,7 @@ const NovelModal = () => {
             />
           ))}
         </div>
+
         {renderTabContent()}
 
         <Button
@@ -154,9 +185,15 @@ const NovelModal = () => {
               createChapterContentMutation.mutate();
             }
           }}
-          disabled={createChapterContentMutation.isPending}
+          disabled={
+            isFileUploading ||
+            createChapterContentMutation.isPending ||
+            handleChapterCreationMutation.isPending
+          }
           className="w-[250px] mt-5 border-none font-baskervville font-bold">
-          {createChapterContentMutation.isPending ? (
+          {
+          createChapterContentMutation.isPending ||
+          handleChapterCreationMutation.isPending ? (
             <Loader />
           ) : (
             "Create Chapter"

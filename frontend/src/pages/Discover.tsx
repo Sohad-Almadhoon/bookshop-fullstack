@@ -45,7 +45,7 @@ const Discover: FC = () => {
         }
       />
       <div className="border border-black flex-1">
-        <div className="flex flex-col justify-center max-w-6xl w-full mx-auto">
+        <div className="flex flex-col justify-center items-center mt-5 max-w-6xl w-full mx-auto">
           <div className="relative mt-12 h-[400px] flex items-center justify-center">
             {isLoading ? (
               <Loader/>
@@ -53,7 +53,7 @@ const Discover: FC = () => {
               <p className="text-red-500">Error: {error.message}</p>
             ) : (
               books?.map((book, index) => {
-                // Default styles for cards
+              
                 const defaultStyles: string[] = [
                   "-rotate-15 -translate-x-28", // Card 1
                   "rotate-0 z-10", // Card 2
