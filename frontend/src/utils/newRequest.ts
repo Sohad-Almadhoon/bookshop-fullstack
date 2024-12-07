@@ -2,7 +2,7 @@ import axios from "axios";
 
 const baseURL =
   process.env.NODE_ENV === "production"
-    ? "https://your-production-domain.com"
+    ? "https://bookshop-hanx.onrender.com"
     : "http://localhost:5000";
 
 const newRequest = axios.create({
