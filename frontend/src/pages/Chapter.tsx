@@ -6,6 +6,7 @@ import { useNovelModal } from "../hooks/useNovelModal";
 import VoicePlayer from "../components/shared/VoicePlayer";
 import newRequest from "../utils/newRequest";
 import { useQuery } from "@tanstack/react-query";
+import Loader from "../components/shared/Loader";
 
 interface IconButtonProps {
   icon: React.ElementType<{ className?: string }>;
@@ -52,7 +53,7 @@ const ChapterPage: React.FC = () => {
   );
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loader/>;
   }
 
   if (isError) {

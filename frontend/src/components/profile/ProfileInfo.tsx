@@ -26,7 +26,6 @@ const fetchUserInfo = async (id: string) => {
   if (isLoading) {
     return <Loader/>;
   }
-  console.log(user)
   if (error instanceof Error) {
     return <div>Failed to load user data: {error.message}</div>;
   }
@@ -43,9 +42,9 @@ const fetchUserInfo = async (id: string) => {
           {user?.name} <sub className="text-2xl">nox</sub>
         </h1>
         <p className="max-w-[640px] mb-3 text-sm font-baskervville">
-          I am a dedicated writer that aspires to be the greatest of all time.
-          One becomes part of the art we see and I want people to see the taste
-          at its best.
+          I am a dedicated <b className="underline">{user.role}</b> that aspires to be the
+          greatest of all time. One becomes part of the art we see and I want
+          people to see the taste at its best.
         </p>
       </div>
       <div className="flex flex-col">
@@ -59,7 +58,7 @@ const fetchUserInfo = async (id: string) => {
               />
             </div>
             <p className=" text-opacity-70 text-black font-cardinal text-4xl">
-               {user.role}
+              {user.role}
             </p>
             <div className="absolute -right-10 top-[-38px]">
               <img

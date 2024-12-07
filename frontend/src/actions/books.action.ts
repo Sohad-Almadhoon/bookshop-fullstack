@@ -51,7 +51,5 @@ const fetchFollowingBooks = async (id: string) => {
         throw new Error(error?.response?.data?.message || "Error fetching following books");
     }
 };
-const createComment = () => {
 
-}
-export { fetchFollowingBooks, fetchUserBooks, createComment, createBook };
+export { fetchFollowingBooks, fetchUserBooks,createBook };

@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Loader from "../shared/Loader";
 import toast from "react-hot-toast";
+import { BsTrash } from "react-icons/bs";
 
 // Define types
 interface User {
@@ -70,7 +71,7 @@ const Comments = () => {
   ) => {
     e.preventDefault();
     if (comment.trim()) {
-      mutation.mutate(comment); 
+      mutation.mutate(comment);
     }
   };
 
@@ -101,11 +102,11 @@ const Comments = () => {
       ) : comments.length > 0 ? (
         <div className="w-full max-w-md p-3">
           {comments.map((comment) => (
-            <Comment key={comment.id} comment={comment} />
+            <Comment key={comment.id} bookId={id} comment={comment} />
           ))}
         </div>
       ) : (
-        <p className="text-gray-500">No comments yet.</p>
+        <p className="text-gray-500 mt-3">No comments yet.</p>
       )}
     </div>
   );
@@ -113,14 +114,33 @@ const Comments = () => {
 
 interface CommentProps {
   comment: CommentType;
+  bookId?: string;
 }
 
-const Comment: FC<CommentProps> = ({ comment }) => {
+const Comment: FC<CommentProps> = ({ comment, bookId }) => {
+  const queryClient = useQueryClient();
+
+  const handleDeleteComment = async () => {
+    try {
+      if (!bookId || !comment?.id) {
+        toast.error("Invalid comment or book ID");
+        return;
+      }
+
+      await newRequest.delete(`/api/books/${bookId}/comments/${comment.id}`);
+
+      queryClient.invalidateQueries({ queryKey: ["comments", bookId] });
+
+      toast.success("Comment deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
+      toast.error("Failed to delete the comment. Please try again.");
+    }
+  };
   return (
     <div className="flex mt-7 flex-col w-full">
       <div className="flex justify-between w-full items-center">
         <div className="flex items-center gap-4">
-      
           <Link
             to={`/profile`}
             state={{
@@ -138,8 +158,14 @@ const Comment: FC<CommentProps> = ({ comment }) => {
           })}
         </span>
       </div>
-      <div className="leading-5 text-start text-gray-600 text-sm mt-4 border-b border-black pb-3">
-        {comment.content}
+      <div className="flex w-full justify-between items-center border-b border-black pb-3">
+        <div className="leading-5 text-start text-gray-600 text-sm mt-4 ">
+          {comment.content}
+        </div>
+        <BsTrash
+          className="text-xl cursor-pointer"
+          onClick={handleDeleteComment}
+        />
       </div>
     </div>
   );

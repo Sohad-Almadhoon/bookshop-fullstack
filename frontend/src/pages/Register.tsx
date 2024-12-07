@@ -1,4 +1,3 @@
-// src/pages/Register.tsx
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useNavigate } from "react-router-dom"
 import CustomInput from "../components/shared/CustomInput";
@@ -22,7 +21,7 @@ const Register = () => {
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<RegisterFormInputs> = (data) => {
-    updateFormData(data); // Save data to Zustand store
+    updateFormData(data); 
     navigate("/questionnaire");
   };
 

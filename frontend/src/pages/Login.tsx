@@ -82,7 +82,9 @@ const Login = () => {
           <p>Forget Password?</p>
         </div>
 
-        <Button type="submit">Login</Button>
+        <Button type="submit" disabled={mutation.isPending}> 
+          {mutation.isPending ? "Logging In..." : "Login"}
+        </Button>
       </form>
     </SignForm>
   );

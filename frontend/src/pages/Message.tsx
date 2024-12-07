@@ -8,6 +8,7 @@ import MessageItem from "../components/messages/MessageItem";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import newRequest from "../utils/newRequest";
+import Loader from "../components/shared/Loader";
 
 // Fetch messages function
 const fetchMessages = async (id: string) => {
@@ -76,7 +77,7 @@ const Message: React.FC = () => {
         <MessageHeader />
         <div className="px-12 flex flex-1 flex-col">
           <div className="flex-1 max-h-[60vh] overflow-auto">
-            {isLoading && <div>Loading...</div>}
+            {isLoading && <Loader />}
             {isError && <div>Error loading messages.</div>}
             {messages?.map((msg: Message) => (
               <MessageItem
@@ -96,7 +97,7 @@ const Message: React.FC = () => {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && e.currentTarget.value) {
                   sendMessage(e.currentTarget.value);
-                  e.currentTarget.value = ""; // Clear the input after sending
+                  e.currentTarget.value = ""; 
                 }
               }}
             />
@@ -106,7 +107,7 @@ const Message: React.FC = () => {
                   .previousElementSibling as HTMLInputElement;
                 if (input?.value) {
                   sendMessage(input.value);
-                  input.value = ""; // Clear the input after sending
+                  input.value = ""; 
                 }
               }}
               className="bg-transparent flex-1 border border-black h-full text-2xl rounded-xl">

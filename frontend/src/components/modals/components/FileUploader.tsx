@@ -9,6 +9,7 @@ interface FileUploadProps {
   description: string;
   file?: string;
   type: "visual" | "audio";
+  setFile?: (file: string) => void;
 }
 
 const FileUploader: FC<FileUploadProps> = ({
@@ -18,6 +19,7 @@ const FileUploader: FC<FileUploadProps> = ({
   description,
   file,
   type,
+  setFile,
 }) => {
   return (
     <>
@@ -30,12 +32,18 @@ const FileUploader: FC<FileUploadProps> = ({
                 alt="Uploaded file"
                 className="bg-black rounded-xl"
               />
-              <BsTrash className="absolute -top-2 -right-3 text-4xl bg-black cursor-pointer text-white border-white border-4 p-1 rounded-full" />
+              <BsTrash
+                className="absolute -top-2 -right-3 text-4xl bg-black cursor-pointer text-white border-white border-4 p-1 rounded-full"
+                onClick={setFile && (() => setFile(""))}
+              />
             </div>
           ) : type === "audio" ? (
             <div className="flex gap-2 items-center mt-12">
-              <VoicePlayer url= {file} />
-              <BsTrash className="text-3xl bg-black cursor-pointer text-white  p-1 rounded-full" />
+              <VoicePlayer url={file} />
+              <BsTrash
+                className="text-3xl bg-black cursor-pointer text-white  p-1 rounded-full"
+                onClick={setFile && (() => setFile(""))}
+              />
             </div>
           ) : null}
         </div>

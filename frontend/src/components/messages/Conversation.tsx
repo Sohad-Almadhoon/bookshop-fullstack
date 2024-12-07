@@ -1,7 +1,7 @@
 import React from "react";
 import { BsChatDotsFill, BsPeopleFill } from "react-icons/bs";
 
-const Conversation: React.FC<any> = ({ book, participants, messages }) => {
+const Conversation: React.FC<any> = ({ book, participants }) => {
   return (
     <div className="flex-1 p-2">
       <div className="flex gap-2 justify-around items-center border-b pb-2 border-black">

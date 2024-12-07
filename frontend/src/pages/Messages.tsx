@@ -27,7 +27,6 @@ const Messages = () => {
   if (isError) {
     return <div>Error: {error.message}</div>;
   }
-
   return (
     <div className="min-h-screen border border-black m-2">
       <Header />
@@ -50,12 +49,11 @@ const Messages = () => {
                 <Conversation
                   participants={conversation.participants}
                   book={conversation.book}
-                  messages={conversation.messages}
                 />
               </Link>
             ))
           ) : (
-            <p className="text-center text-gray-500">No conversations found.</p>
+            <p className="text-center text-gray-500 mt-5">No conversations found.</p>
           )}
         </div>
       </div>

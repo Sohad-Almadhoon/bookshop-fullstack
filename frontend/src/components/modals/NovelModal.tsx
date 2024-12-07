@@ -127,6 +127,7 @@ const NovelModal = () => {
           <div>
             <FileUploader
               file={file}
+              setFile={setFile}
               type="visual"
               onFileChange={handleFileChange}
               label="Click to upload"
