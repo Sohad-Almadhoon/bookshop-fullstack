@@ -33,6 +33,7 @@ const Ring: FC<RingProps> = ({ text, content, href }) => {
       to={href}
       className="rounded-full w-full h-full z-50 border border-black flex justify-center items-center"
       ref={containerRef}>
+      {/* @ts-ignore: Suppressing TS2786 error for ReactCurvedText usage */}
       <ReactCurvedText
         width={containerWidth || 250}
         height={containerWidth || 250}
