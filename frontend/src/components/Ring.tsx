@@ -26,7 +26,7 @@ const Ring: FC<RingProps> = ({ text, content, href }) => {
         window.removeEventListener("resize", handleResize);
       };
     }
-  }, [containerRef]);
+  }, [containerRef.current]);
 
   return (
     <Link

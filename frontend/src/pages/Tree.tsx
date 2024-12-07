@@ -19,7 +19,7 @@ const Tree = () => {
         window.removeEventListener("resize", handleResize);
       };
     }
-  }, [treeRef]);
+  }, [treeRef.current]);
 
   return (
     <div className="flex flex-col min-h-screen">
