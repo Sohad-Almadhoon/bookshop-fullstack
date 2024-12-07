@@ -13,6 +13,7 @@ import {
 } from "../controllers/book.controller.js";
 import {
   createComment,
+  deleteComment,
   getComments,
 } from "../controllers/book_comment.controller.js";
 import {
@@ -30,6 +31,7 @@ router.get("/:id", verifyToken, getBook);
 //Comments
 router.post("/:id/comments", verifyToken, createComment);
 router.get("/:id/comments", verifyToken, getComments);
+router.delete("/:id/comments/:commentId", verifyToken, deleteComment);
 
 //Chapters
 router.get("/:id/chapters", verifyToken, getBookChapters);

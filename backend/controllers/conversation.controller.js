@@ -37,12 +37,13 @@ const getUserConversations = async (req, res) => {
           {
             title: true,
             author: true,
-            main_cover:true
+            main_cover: true,
+            id: true,
           }
-        }, // Include associated book details
+        },
         messages: {
           orderBy: { createdAt: "desc" },
-          take: 1, // Fetch the last message
+          take: 1,
         },
       },
     });

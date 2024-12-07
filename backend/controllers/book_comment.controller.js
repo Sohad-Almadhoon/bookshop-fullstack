@@ -21,7 +21,6 @@ const getComments = async (req, res) => {
   const { id:bookId } = req.params; 
 
   try {
-    // Fetch all comments for the book using Prisma
     const comments = await prisma.book_comments.findMany({
       where: {
         book_id: parseInt(bookId), 
@@ -30,7 +29,7 @@ const getComments = async (req, res) => {
         user: true, 
       },
       orderBy: {
-        created_at: "desc", // Sort comments by creation date (most recent first)
+        created_at: "desc", 
       },
     });
 
@@ -43,5 +42,20 @@ const getComments = async (req, res) => {
   }
 };
 
+const deleteComment = async (req, res) => {
+  const { id: bookId, commentId } = req.params;
+try {
+  const deletedComment = await prisma.book_comments.delete({
+    where: {
+      id: parseInt(commentId),
+      book_id: parseInt(bookId),
+    },
+  });
 
-export { createComment, getComments };
+  res.status(200).json(deletedComment);
+} catch (error) {
+  console.error("Error deleting comment:", error);
+  res.status(500).json({ error: "An error occurred while deleting the comment." });
+}
+};
+export { createComment, getComments, deleteComment };
