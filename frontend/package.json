@@ -58,6 +58,7 @@
   },
   "devDependencies": {
     "@types/jwt-decode": "^3.1.0",
+    "@types/react-curved-text": "^2.0.3",
     "@types/stripe-v3": "^3.1.33",
     "ajv": "^7.2.4",
     "autoprefixer": "^10.4.20",
