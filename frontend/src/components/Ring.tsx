@@ -1,4 +1,4 @@
-import { FC, ReactNode, useEffect, useRef, useState } from "react";
+import { FC, ReactNode, useLayoutEffect, useRef, useState } from "react";
 import ReactCurvedText from "react-curved-text";
 import { Link } from "react-router-dom";
 
@@ -12,21 +12,21 @@ const Ring: FC<RingProps> = ({ text, content, href }) => {
   const [containerWidth, setContainerWidth] = useState(0);
   const containerRef = useRef<HTMLAnchorElement>(null);
 
-  useEffect(() => {
-    if (containerRef.current) {
-      setContainerWidth(containerRef.current.clientWidth);
+  useLayoutEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.clientWidth);
+      }
+    };
 
-      const handleResize = () => {
-        setContainerWidth(containerRef.current!.clientWidth);
-      };
+    updateWidth(); // Get initial width
 
-      window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", updateWidth);
 
-      return () => {
-        window.removeEventListener("resize", handleResize);
-      };
-    }
-  }, [containerRef.current]);
+    return () => {
+      window.removeEventListener("resize", updateWidth);
+    };
+  }, []);
 
   return (
     <Link
