@@ -15,7 +15,11 @@ import bodyParser from "body-parser";
 const app = express();
 dotenv.config();
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: 'https://bookshop-pi-pink.vercel.app', 
+    credentials: true, 
+}));
+
 app.use(bodyParser.json());
 
 const routes = {
