@@ -31,6 +31,9 @@ app.use(
 app.use(bodyParser.json());
 
 const routes = {
+  "/api/warmup": (req, res) => {
+    res.send("Server is running")
+  },
   "/api/auth": authRoutes,
   "/api/users": userRoutes,
   "/api/books": bookRoutes,
