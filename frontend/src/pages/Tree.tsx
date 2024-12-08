@@ -6,20 +6,26 @@ const Tree = () => {
   const [treeRect, setTreeRect] = React.useState<DOMRect | null>(null);
 
   React.useLayoutEffect(() => {
-    const updateRect = () => {
-      if (treeRef.current) {
-        setTreeRect(treeRef.current.getBoundingClientRect());
-      }
-    };
+  const updateRect = () => {
+    if (treeRef.current) {
+      setTreeRect(treeRef.current.getBoundingClientRect());
+    }
+  };
 
-    updateRect(); // Get the initial rect
+  const img = treeRef.current;
+  if (img?.complete) {
+    updateRect(); // Image already loaded
+  } else {
+    img?.addEventListener('load', updateRect); // Wait for load
+  }
 
-    window.addEventListener('resize', updateRect);
+  window.addEventListener('resize', updateRect);
 
-    return () => {
-      window.removeEventListener('resize', updateRect);
-    };
-  }, []);
+  return () => {
+    img?.removeEventListener('load', updateRect);
+    window.removeEventListener('resize', updateRect);
+  };
+}, []);
 
   return (
     <div className="flex flex-col min-h-screen">
