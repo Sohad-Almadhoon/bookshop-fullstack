@@ -5,21 +5,21 @@ const Tree = () => {
   const treeRef = React.useRef<HTMLImageElement>(null);
   const [treeRect, setTreeRect] = React.useState<DOMRect | null>(null);
 
-  React.useEffect(() => {
-    if (treeRef.current) {
-      setTreeRect(treeRef.current.getBoundingClientRect());
+  React.useLayoutEffect(() => {
+    const updateRect = () => {
+      if (treeRef.current) {
+        setTreeRect(treeRef.current.getBoundingClientRect());
+      }
+    };
 
-      const handleResize = () => {
-        setTreeRect(treeRef.current!.getBoundingClientRect());
-      };
+    updateRect(); // Get the initial rect
 
-      window.addEventListener("resize", handleResize);
+    window.addEventListener('resize', updateRect);
 
-      return () => {
-        window.removeEventListener("resize", handleResize);
-      };
-    }
-  }, [treeRef.current]);
+    return () => {
+      window.removeEventListener('resize', updateRect);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
