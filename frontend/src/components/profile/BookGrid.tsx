@@ -17,7 +17,7 @@ const BookGrid: React.FC<BookGridProps> = ({ tab, books }) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 flex-1">
           {books.map((book, index) => (
-            <BookCard key={index} {...book} />
+            <BookCard key={index} book={book} />
           ))}
         </div>
       )}

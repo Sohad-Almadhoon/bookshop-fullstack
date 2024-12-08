@@ -2,19 +2,16 @@ import { Link } from "react-router-dom";
 import newRequest from "../../utils/newRequest";
 import { BsHeartFill, BsPersonCircle } from "react-icons/bs";
 import { useQuery } from "@tanstack/react-query";
-interface BookProps {
-  title: string;
-  author: string;
-  main_cover: string;
-  id: number;
-}
-const BookCard = ({ title, author, main_cover, id }: BookProps) => {
 
+const BookCard = ({ book }: any) => {
+  const { title, author, main_cover, id } = book.book;
 
   const { data: stats } = useQuery({ queryKey: ["bookStats", id], queryFn: async () => {
     const { data } = await newRequest.get(`/api/books/${id}/stats`);
     return data;
-  }});
+  }
+  });
+  
   return (
     <Link
       to={`/books/${id}`}
