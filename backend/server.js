@@ -15,11 +15,18 @@ import bodyParser from "body-parser";
 const app = express();
 dotenv.config();
 app.use(express.json());
-app.use(cors({
-    origin: '*', 
+app.use(
+  cors({
+    origin: "https://bookshop-frontend-gold.vercel.app", 
     credentials: true, 
-}));
-
+  })
+);
+app.use(
+  cors({
+    origin: "https://bookshop-frontend-gold.vercel.app",
+    credentials: true, 
+  })
+);
 
 app.use(bodyParser.json());
 
