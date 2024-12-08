@@ -19,6 +19,10 @@ app.use(cors({
     origin: 'https://bookshop-pi-pink.vercel.app', 
     credentials: true, 
 }));
+app.options('*', cors({
+    origin: 'https://bookshop-pi-pink.vercel.app',
+    credentials: true,
+}));
 
 app.use(bodyParser.json());
 
