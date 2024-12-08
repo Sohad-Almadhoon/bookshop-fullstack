@@ -2,7 +2,7 @@ import axios from "axios";
 
 const baseURL =
   process.env.NODE_ENV === "production"
-    ? "https://bookshop-pi-pink.vercel.app"
+    ? "https://bookshop-api-sage.vercel.app"
     : "http://localhost:5000";
 
 const newRequest = axios.create({
