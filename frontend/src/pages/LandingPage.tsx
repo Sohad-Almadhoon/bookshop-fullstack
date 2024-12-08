@@ -2,9 +2,19 @@ import Button from "../components/shared/Button";
 import { Link, useNavigate } from "react-router-dom";
 import { Heading } from "../components/shared/Header";
 import { useEffect } from "react";
+import newRequest from '../utils/newRequest';
+import { useQuery } from '@tanstack/react-query';
+
+const callWarmup = async () => {
+  await newRequest.get('/api/warmup')
+}
 
 const LandingPage = () => {
   const navigate = useNavigate();
+    useQuery({
+    queryKey: ['warmup'],
+    queryFn: callWarmup,
+  });
 
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
