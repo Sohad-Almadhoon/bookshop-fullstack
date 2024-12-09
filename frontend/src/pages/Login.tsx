@@ -17,19 +17,20 @@ const Login = () => {
   const {
     register,
     handleSubmit,
-    
+
     formState: { errors },
   } = useForm<LoginFormInputs>();
   const navigate = useNavigate();
 
- const mutation = useMutation<AxiosResponse<any>, Error, LoginFormInputs>({
-   mutationFn: (data: LoginFormInputs) => newRequest.post("/api/auth/login", data),
-   onSuccess: (response) => {
-     localStorage.setItem("currentUser", JSON.stringify(response.data));
-     toast.success("Logged In Successfully");
-     navigate("/welcome");
-   },
-   onError: (error: any) => {
+  const mutation = useMutation<AxiosResponse<any>, Error, LoginFormInputs>({
+    mutationFn: (data: LoginFormInputs) =>
+      newRequest.post("/api/auth/login", data),
+    onSuccess: (response) => {
+      localStorage.setItem("currentUser", JSON.stringify(response.data));
+      toast.success("Logged In Successfully");
+      navigate("/welcome");
+    },
+    onError: (error: any) => {
       if (error.response) {
         if (error.response.status === 404) {
           toast.error("Incorrect email or password.");
@@ -40,12 +41,12 @@ const Login = () => {
       } else {
         toast.error("An unexpected error occurred.");
       }
-   },
- });
+    },
+  });
 
- const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
-   mutation.mutate(data);
- };
+  const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
+    mutation.mutate(data);
+  };
 
   return (
     <SignForm
@@ -55,7 +56,6 @@ const Login = () => {
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-5 mx-auto mt-5 flex-1 w-full max-w-sm">
-    
         <CustomInput
           placeholder="Enter Your Email"
           {...register("email", {
@@ -66,7 +66,11 @@ const Login = () => {
             },
           })}
         />
-        {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+        {errors.email && (
+          <p className="text-red-500">
+            {errors.email.message || mutation.error?.message}
+          </p>
+        )}
         <CustomInput
           type="password"
           placeholder="Enter Your Password"
@@ -74,14 +78,13 @@ const Login = () => {
             required: "Password is required",
             minLength: {
               value: 5,
-              message: "Password must be at least 6 characters long",
+              message: mutation.error?.message || "Password is required",
             },
           })}
         />
         {errors.password && (
           <p className="text-red-500">{errors.password.message}</p>
         )}
-
 
         <div className="flex justify-between text-sm">
           <label className="flex items-center">
@@ -91,7 +94,7 @@ const Login = () => {
           <p>Forget Password?</p>
         </div>
 
-        <Button type="submit" disabled={mutation.isPending}> 
+        <Button type="submit" disabled={mutation.isPending}>
           {mutation.isPending ? "Logging In..." : "Login"}
         </Button>
       </form>
