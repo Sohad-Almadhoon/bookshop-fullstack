@@ -29,7 +29,13 @@ const Login = () => {
      toast.success("Logged In Successfully");
      navigate("/welcome");
    },
-   onError: (error: Error) => {
+   onError: (error: any) => {
+      if (error.response) {
+        const message = error.response.data.error || "An error occurred.";
+        toast.error(message);
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
      toast.error(error.message);
    },
  });

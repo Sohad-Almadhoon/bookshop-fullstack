@@ -54,6 +54,7 @@ const Comments = () => {
           newComment,
         ]
       );
+      (document.querySelector("textarea[name='comment']") as HTMLTextAreaElement).value = "";
       toast.success("Comment submitted successfully");
     },
     onError: (error) => {

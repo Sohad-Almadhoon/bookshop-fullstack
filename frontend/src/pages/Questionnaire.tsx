@@ -5,6 +5,7 @@ import Button from "../components/shared/Button";
 import { useFormStore } from "../hooks/useFormStore";
 import CustomInput from "../components/shared/CustomInput";
 import newRequest from "../utils/newRequest";
+import toast from "react-hot-toast";
 
 const occupations = ["Writer", "Reader", "Musician", "Visual Artist"];
 const genres = [
@@ -46,10 +47,13 @@ const Questionnaire: React.FC = () => {
       await newRequest.post("/api/auth/register", finalData);
     },
     onSuccess: () => {
-      navigate("/profile");
+      toast.success("Account created successfully. Please login to continue.");
+      navigate("/login");
     },
-    onError: (error) => {
-      console.error("Failed to submit data", error);
+    onError: (error:any) => {
+      const errorMessage =
+        error.response?.data?.error || "An unexpected error occurred.";
+      toast.error(errorMessage);
     },
   });
 
