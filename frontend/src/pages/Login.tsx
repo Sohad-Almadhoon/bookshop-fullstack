@@ -31,12 +31,15 @@ const Login = () => {
    },
    onError: (error: any) => {
       if (error.response) {
-        const message = error.response.data.error || "An error occurred.";
-        toast.error(message);
+        if (error.response.status === 404) {
+          toast.error("Incorrect email or password.");
+        } else {
+          const message = error.response.data.error || "An error occurred.";
+          toast.error(message);
+        }
       } else {
         toast.error("An unexpected error occurred.");
       }
-     toast.error(error.message);
    },
  });
 

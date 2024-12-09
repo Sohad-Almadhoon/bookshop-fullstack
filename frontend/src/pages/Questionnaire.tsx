@@ -52,7 +52,9 @@ const Questionnaire: React.FC = () => {
     },
     onError: (error:any) => {
       const errorMessage =
-        error.response?.data?.error || "An unexpected error occurred.";
+        error.response?.data?.error === "User already exists with this email"
+          ? "User already exists with this email. Please login."
+          : error.response?.data?.error || "An unexpected error occurred.";
       toast.error(errorMessage);
     },
   });
