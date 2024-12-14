@@ -137,6 +137,7 @@ const NovelModal = () => {
             <CustomInput
               onChange={(e) => setTitle(e.target.value)}
               className="w-full mt-4"
+              value={title}
               placeholder="Enter the chapter title..."
             />
           </div>
@@ -196,8 +197,12 @@ const NovelModal = () => {
           createChapterContentMutation.isPending ||
           handleChapterCreationMutation.isPending ? (
             <Loader />
+          ) : activeTab === 'visual' ? (
+            'Create Chapter'
+          ) : activeTab === 'audio' ? (
+            'Upload Audio'
           ) : (
-            "Create Chapter"
+            'Add Text'
           )}
         </Button>
       </div>
