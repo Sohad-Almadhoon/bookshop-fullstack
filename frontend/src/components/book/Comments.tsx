@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useLayoutEffect } from "react";
 import Button from "../shared/Button";
 import newRequest from "../../utils/newRequest";
 import { useParams } from "react-router-dom";
@@ -120,6 +120,21 @@ interface CommentProps {
 
 const Comment: FC<CommentProps> = ({ comment, bookId }) => {
   const queryClient = useQueryClient();
+  const [isAbleToDelete, setIsAbleToDelete] = useState(false);
+
+  useLayoutEffect(() => {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+    if (currentUser?.user?.id === comment.user.id) {
+      setIsAbleToDelete(true);
+    } else {
+      setIsAbleToDelete(false);
+    }
+
+    return () => {
+      setIsAbleToDelete(false);
+    }
+  }, [])
 
   const handleDeleteComment = async () => {
     try {
@@ -163,10 +178,9 @@ const Comment: FC<CommentProps> = ({ comment, bookId }) => {
         <div className="leading-5 text-start text-gray-600 text-sm mt-4 ">
           {comment.content}
         </div>
-        <BsTrash
-          className="text-xl cursor-pointer"
-          onClick={handleDeleteComment}
-        />
+        {isAbleToDelete && (
+          <BsTrash className="text-xl cursor-pointer" onClick={handleDeleteComment} />
+        )}
       </div>
     </div>
   );
