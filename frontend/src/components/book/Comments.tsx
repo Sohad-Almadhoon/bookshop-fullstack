@@ -1,4 +1,4 @@
-import { FC, useLayoutEffect } from "react";
+import { FC, useLayoutEffect, useState } from "react";
 import Button from "../shared/Button";
 import newRequest from "../../utils/newRequest";
 import { useParams } from "react-router-dom";
@@ -134,7 +134,7 @@ const Comment: FC<CommentProps> = ({ comment, bookId }) => {
     return () => {
       setIsAbleToDelete(false);
     }
-  }, [])
+  }, [comment.user.id])
 
   const handleDeleteComment = async () => {
     try {

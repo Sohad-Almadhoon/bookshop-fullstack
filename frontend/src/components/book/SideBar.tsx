@@ -26,7 +26,7 @@ const Sidebar = ({
       setHasPaid(false);
     }
   }, []);
-  const handlePayment = useMutation<void, Error>({
+   const handlePayment = useMutation<void, Error>({
     mutationFn: async () => {
       if (hasPaid) {
         openModal("visual");

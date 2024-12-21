@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const BookCard = ({ book }: any) => {
   const { title, author, main_cover, id } = book.book;
-
+  console.log(id)
   const { data: stats } = useQuery({ queryKey: ["bookStats", id], queryFn: async () => {
     const { data } = await newRequest.get(`/api/books/${id}/stats`);
     return data;

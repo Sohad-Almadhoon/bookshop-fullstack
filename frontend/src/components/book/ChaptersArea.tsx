@@ -31,6 +31,7 @@ const ChaptersArea = ({ date, genres }: { date: string; genres: string[] }) => {
     enabled: !!id,
   });
 
+  console.log(chapters)
   if (isLoading) {
     return <Loader />;
   }
