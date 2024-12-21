@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import newRequest from "../../utils/newRequest"; // Assuming this is your Axios instance
+import newRequest from "../../utils/newRequest"; 
 import stripePromise from "../../utils/stripe";
+import Button from "../shared/Button";
 
-// Initialize Stripe
 
 interface PaymentRouteProps {
   children: React.ReactNode;
@@ -14,7 +14,6 @@ const PaymentRoute: React.FC<PaymentRouteProps> = ({ children }) => {
   const [hasPaid, setHasPaid] = useState(false);
 
   useEffect(() => {
-    // Check payment status from localStorage
     const currentUser = localStorage.getItem("currentUser");
     const user = currentUser ? JSON.parse(currentUser).user : null;
     setHasPaid(user?.has_paid || false);
@@ -65,16 +64,9 @@ const PaymentRoute: React.FC<PaymentRouteProps> = ({ children }) => {
       <p className="mt-2 text-gray-600">
         To access premium features, you need to complete your payment.
       </p>
-      <button
-        onClick={handlePayment}
-        disabled={loading}
-        className={`mt-6 px-6 py-2 rounded-lg text-white font-medium ${
-          loading
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-blue-500 hover:bg-blue-600"
-        }`}>
+      <Button onClick={handlePayment} disabled={loading}>
         {loading ? "Processing..." : "Pay Now"}
-      </button>
+      </Button>
     </div>
   );
 };
