@@ -57,14 +57,14 @@ const PaymentRoute: React.FC<PaymentRouteProps> = ({ children }) => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+    <div className="flex flex-col items-center justify-center h-screen bg-[#DDD1BB]">
       <h1 className="text-2xl font-semibold text-gray-800">
         Access Restricted
       </h1>
       <p className="mt-2 text-gray-600">
         To access premium features, you need to complete your payment.
       </p>
-      <Button onClick={handlePayment} disabled={loading}>
+      <Button onClick={handlePayment} disabled={loading} className="mt-4 w-fit">
         {loading ? "Processing..." : "Pay Now"}
       </Button>
     </div>
