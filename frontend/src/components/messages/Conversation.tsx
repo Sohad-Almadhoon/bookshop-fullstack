@@ -3,9 +3,9 @@ import { BsChatDotsFill, BsPeopleFill } from "react-icons/bs";
 
 const Conversation: React.FC<any> = ({ book, participants }) => {
   return (
-    <div className="flex-1 p-2">
+    <div className="flex-1 p-2 max-w-full">
       <div className="flex gap-2 justify-around items-center border-b pb-2 border-black">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 truncate">
           {" "}
           <img
             src={book.main_cover}
@@ -22,11 +22,11 @@ const Conversation: React.FC<any> = ({ book, participants }) => {
           </div>{" "}
         </div>
 
-        <BsChatDotsFill className="text-4xl text-[#625C51]" />
+        <BsChatDotsFill className="text-2xl lg:text-4xl text-[#625C51]" />
         {participants.length > 0 && (
           <div className="flex gap-2 items-center">
-            <BsPeopleFill className="text-5xl" />
-            <span className=" text-2xl font-bold flex justify-center size-12 items-center border-black border rounded-full">
+            <BsPeopleFill className="text-3xl lg:text-5xl" />
+            <span className="text-lg lg:text-2xl font-bold flex justify-center size-8 lg:size-12 items-center border-black border rounded-full">
               +{participants.length}
             </span>
           </div>

@@ -12,11 +12,9 @@ interface Book {
 }
 
 const fetchRandomBooks = async (): Promise<Book[]> => {
-  const response = await newRequest.get("/api/books/random-books"); 
+  const response = await newRequest.get("/api/books/random-books");
   return response.data;
 };
-
-
 
 const Discover: FC = () => {
   const {
@@ -28,36 +26,27 @@ const Discover: FC = () => {
     queryFn: fetchRandomBooks,
   });
 
-
   const [activeCard, setActiveCard] = useState<number | null>(null);
-
 
   const handleCardHover = (index: number) => setActiveCard(index);
   const resetCardState = () => setActiveCard(null);
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header
-        title={
-          <h3 className="text-3xl uppercase">
-            Explore Books
-          </h3>
-        }
-      />
+      <Header title={<h3 className="text-3xl uppercase">Explore Books</h3>} />
       <div className="border border-black flex-1">
         <div className="flex flex-col justify-center items-center mt-5 max-w-6xl w-full mx-auto">
           <div className="relative mt-12 h-[400px] flex items-center justify-center">
             {isLoading ? (
-              <Loader/>
+              <Loader />
             ) : error ? (
               <p className="text-red-500">Error: {error.message}</p>
             ) : (
               books?.map((book, index) => {
-              
                 const defaultStyles: string[] = [
-                  "-rotate-15 -translate-x-28", // Card 1
-                  "rotate-0 z-10", // Card 2
-                  "rotate-15 translate-x-28", // Card 3
+                  "-rotate-15 -translate-x-6 lg:-translate-x-28", 
+                  "rotate-0 z-10", 
+                  "rotate-15 translate-x-6 translate-x-28", 
                 ];
 
                 return (

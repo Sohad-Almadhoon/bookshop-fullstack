@@ -8,10 +8,10 @@ interface ProfileInfoProps {
 }
 
 const ProfileInfo = ({ id }: ProfileInfoProps) => {
-const fetchUserInfo = async (id: string) => {
-  const response = await newRequest.get(`/api/users/${id}`);
-  return response.data;
-};
+  const fetchUserInfo = async (id: string) => {
+    const response = await newRequest.get(`/api/users/${id}`);
+    return response.data;
+  };
   const {
     data: user,
     isLoading,
@@ -24,7 +24,7 @@ const fetchUserInfo = async (id: string) => {
   });
   console.log("Fetched user data:", user);
   if (isLoading) {
-    return <Loader/>;
+    return <Loader />;
   }
   if (error instanceof Error) {
     return <div>Failed to load user data: {error.message}</div>;
@@ -32,19 +32,19 @@ const fetchUserInfo = async (id: string) => {
 
   return (
     <div className="border border-opacity-30 border-black rounded-xl p-8 mt-5 flex lg:flex-row flex-col gap-4">
-      <div className="flex justify-end lg:justify-start">
+      <div className="flex justify-center lg:justify-start">
         <span className="flex uppercase size-24 text-6xl justify-center items-center bg-black text-white rounded-full">
           {user?.name?.charAt(0)}
         </span>
       </div>
       <div className="flex-1">
-        <h1 className="uppercase text-5xl text-black font-romieMedium mb-3">
+        <h1 className="uppercase text-3xl lg:text-5xl text-black font-romieMedium mb-3">
           {user?.name} <sub className="text-2xl">nox</sub>
         </h1>
         <p className="max-w-[640px] mb-3 text-sm font-baskervville">
-          I am a dedicated <b className="underline">{user.role}</b> that aspires to be the
-          greatest of all time. One becomes part of the art we see and I want
-          people to see the taste at its best.
+          I am a dedicated <b className="underline">{user.role}</b> that aspires
+          to be the greatest of all time. One becomes part of the art we see and
+          I want people to see the taste at its best.
         </p>
       </div>
       <div className="flex flex-col">

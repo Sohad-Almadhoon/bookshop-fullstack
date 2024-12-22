@@ -31,7 +31,7 @@ const ChaptersArea = ({ date, genres }: { date: string; genres: string[] }) => {
     enabled: !!id,
   });
 
-  console.log(chapters)
+  console.log(chapters);
   if (isLoading) {
     return <Loader />;
   }
@@ -39,9 +39,11 @@ const ChaptersArea = ({ date, genres }: { date: string; genres: string[] }) => {
   return (
     <div className="p-12 flex-col flex lg:px-20">
       <div className="flex gap-2 flex-col items-start">
-        <div className="flex justify-end w-full gap-2">
+        <div className="flex lg:justify-end w-full gap-2 flex-wrap">
           {genres.map((genre: string) => (
-            <span className="text-sm rounded-md p-1 bg-black text-white">#{genre}</span>
+            <span className="text-sm rounded-md p-1 bg-black text-white">
+              #{genre}
+            </span>
           ))}
         </div>
         <div className="flex items-center text-xl gap-2 justify-center font-semibold">
