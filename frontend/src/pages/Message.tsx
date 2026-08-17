@@ -1,116 +1,131 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { BsSendFill } from "react-icons/bs";
+import toast from "react-hot-toast";
 import CustomInput from "../components/shared/CustomInput";
 import Button from "../components/shared/Button";
-import { BsSendFill } from "react-icons/bs";
 import Header from "../components/shared/Header";
 import MessageHeader from "../components/messages/MessageHeader";
 import MessageItem from "../components/messages/MessageItem";
-import { useParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import newRequest from "../utils/newRequest";
+import newRequest, { getErrorMessage } from "../utils/newRequest";
 import Loader from "../components/shared/Loader";
+import { getCurrentUser } from "../utils/session";
 
-// Fetch messages function
-const fetchMessages = async (id: string) => {
-  const response = await newRequest.get(`/api/messages/${id}`);
-  return response.data;
-};
+interface ChatMessage {
+  id: number;
+  content: string;
+  senderId: number;
+  createdAt: string;
+  sender: { id: number; name: string };
+}
 
-// Send message function
-const sendMessageToApi = async (id: string, message: string) => {
-  const newMessage = { content: message };
-  await newRequest.post(`/api/messages/${id}`, newMessage);
-};
+interface ConversationData {
+  id: number;
+  book: { id: number; title: string; author: string; main_cover: string } | null;
+}
 
 const Message: React.FC = () => {
-  const messageRef = React.useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const { id } = useParams();
-  const currentUser = localStorage.getItem("currentUser");
-  const user = currentUser ? JSON.parse(currentUser).user : null;
-
+  const currentUser = getCurrentUser();
   const queryClient = useQueryClient();
+  const [draft, setDraft] = useState("");
+
+  // Fetched from the API instead of router state, so a refresh no longer
+  // crashes the header with "cannot read property id of undefined".
+  const { data: conversation } = useQuery<ConversationData>({
+    queryKey: ["conversation", id],
+    queryFn: async () => (await newRequest.get(`/api/conversations/${id}`)).data,
+    enabled: Boolean(id),
+  });
 
   const {
-    data: messages,
+    data: messages = [],
     isLoading,
     isError,
-  } = useQuery({
+    error,
+  } = useQuery<ChatMessage[]>({
     queryKey: ["messages", id],
-    queryFn: () => fetchMessages(id!),
-    enabled: !!id, // Only run the query if `id` is available
+    queryFn: async () => {
+      const response = await newRequest.get(`/api/messages/${id}`);
+      return Array.isArray(response.data) ? response.data : [];
+    },
+    enabled: Boolean(id),
   });
 
-  interface Message {
-    id: string;
-    content: string;
-    senderId: string;
-    sender: {
-      name: string;
-      email: string;
-      created_at: string;
-    };
-  }
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages.length]);
 
   const mutation = useMutation({
-    mutationFn: (newMessage: string) => sendMessageToApi(id!, newMessage),
+    mutationFn: (content: string) =>
+      newRequest.post(`/api/messages/${id}`, { content }),
     onSuccess: () => {
-      if (id) {
-        queryClient.invalidateQueries({ queryKey: ["messages", id] }); // Invalidate and refetch messages after sending
-      }
-      messageRef.current?.scrollIntoView({ behavior: "smooth" });
+      setDraft("");
+      queryClient.invalidateQueries({ queryKey: ["messages", id] });
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
     },
-    onError: (error: unknown) => {
-      console.error("Error sending message:", error);
-    },
+    onError: (error) => toast.error(getErrorMessage(error, "Message could not be sent.")),
   });
 
-  const sendMessage = (message: string) => {
-    if (message) {
-      mutation.mutate(message); // Send the message via mutation
-    }
+  const sendMessage = () => {
+    const content = draft.trim();
+    if (!content) return;
+    mutation.mutate(content);
   };
 
   return (
-    <div className="flex flex-col min-h-screen border border-black m-2">
+    <div className="flex flex-col min-h-screen border border-black m-1 sm:m-2">
       <Header />
-      <div className="border-black flex-1 flex flex-col border lg:mx-16 lg:mt-8">
-        <MessageHeader />
-        <div className="px-12 flex flex-1 flex-col">
-          <div className="flex-1 max-h-[60vh] overflow-auto">
+      <div className="border-black flex-1 flex flex-col border sm:mx-4 lg:mx-16 sm:mt-4 lg:mt-8">
+        <MessageHeader book={conversation?.book ?? null} />
+        <div className="px-4 lg:px-12 flex flex-1 flex-col">
+          <div className="flex-1 max-h-[55vh] sm:max-h-[60vh] overflow-y-auto">
             {isLoading && <Loader />}
-            {isError && <div>Error loading messages.</div>}
-            {messages?.map((msg: Message) => (
+            {isError && (
+              <div className="text-red-600 mt-4">
+                {getErrorMessage(error, "Error loading messages.")}
+              </div>
+            )}
+            {!isLoading && !isError && messages.length === 0 && (
+              <p className="text-center text-gray-500 mt-5">
+                No messages yet. Say hello!
+              </p>
+            )}
+            {messages.map((msg) => (
               <MessageItem
-                text={msg.content}
-                isMe={msg.senderId === user?.id}
-                senderName={msg.sender.name}
-                time={msg.sender.created_at}
                 key={msg.id}
+                text={msg.content}
+                isMe={msg.senderId === currentUser?.id}
+                senderName={msg.sender?.name || "Anonymous"}
+                // was msg.sender.created_at: the sender's signup date
+                time={msg.createdAt}
               />
             ))}
-            <div ref={messageRef} />
+            <div ref={bottomRef} />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <CustomInput
-              className="my-5 w-full p-3 flex-3 rounded-xl"
+              className="my-5 w-full min-w-0 flex-1 p-3 rounded-xl"
               placeholder="Write a message"
+              value={draft}
+              maxLength={2000}
+              disabled={mutation.isPending}
+              onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && e.currentTarget.value) {
-                  sendMessage(e.currentTarget.value);
-                  e.currentTarget.value = ""; 
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  sendMessage();
                 }
               }}
             />
             <Button
-              onClick={(e) => {
-                const input = e.currentTarget
-                  .previousElementSibling as HTMLInputElement;
-                if (input?.value) {
-                  sendMessage(input.value);
-                  input.value = ""; 
-                }
-              }}
-              className="bg-transparent flex-1 border border-black h-full text-2xl rounded-xl">
+              onClick={sendMessage}
+              disabled={mutation.isPending || !draft.trim()}
+              aria-label="Send message"
+              // was flex-1: the send button used to take half of a phone screen
+              className="bg-transparent w-auto shrink-0 border border-black px-4 py-3 text-2xl rounded-xl">
               <BsSendFill className="text-black text-2xl" />
             </Button>
           </div>

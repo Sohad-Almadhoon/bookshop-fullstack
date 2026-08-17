@@ -21,7 +21,7 @@ const SignForm: React.FC<SignFormProps> = ({
     ? "Don't have an account?"
     : "Already have an account?";
   return (
-    <div className="text-center flex flex-col border border-black flex-1">
+    <div className="text-center flex flex-col border border-black flex-1 px-3 sm:px-6 pb-4">
       <div className="border border-black w-fit h-fit mx-auto rounded-full p-1 mt-5">
         <img
           src="/assets/mask-dark.svg"

@@ -1,18 +1,20 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
+import { getStoredToken } from "../../utils/session";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const currentUser = localStorage.getItem("currentUser");
-  const token = currentUser ? JSON.parse(currentUser).token : null;
+  const location = useLocation();
+  const token = getStoredToken();
+
   if (!token) {
-    return <Navigate to="/login" />;
+    // `state` lets the login page send the user back where they were heading.
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  // If token exists, render the children (protected content)
   return <>{children}</>;
 };
 

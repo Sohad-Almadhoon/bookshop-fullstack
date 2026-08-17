@@ -26,7 +26,7 @@ const SocialMedia = () => {
     // },
   ];
   return (
-    <ul className="flex gap-3 w-[300px] items-center justify-center mx-auto mb-5 flex-1">
+    <ul className="flex gap-3 w-full max-w-[300px] items-center justify-center mx-auto mb-5 flex-1">
       {socialLogIn.map((social) => {
         return (
           <li key={social.icon} className="text-center">

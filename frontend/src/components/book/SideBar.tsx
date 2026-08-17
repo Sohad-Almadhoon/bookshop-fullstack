@@ -1,75 +1,49 @@
+import toast from "react-hot-toast";
 import { useNovelModal } from "../../hooks/useNovelModal";
-import newRequest from "../../utils/newRequest";
 import Button from "../shared/Button";
 import ActionButtons from "./ActionButtons";
-import stripePromise from "../../utils/stripe";
-import { useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+import useAccount from "../../hooks/useAccount";
+import useCheckout from "../../hooks/useCheckout";
 
-const Sidebar = ({
-  imgUrl,
-  description,
-}: {
-  imgUrl: string;
-  description: string;
-}) => {
+const Sidebar = ({ imgUrl, description }: { imgUrl: string; description: string }) => {
   const { openModal } = useNovelModal();
-  const [hasPaid, setHasPaid] = useState<boolean | null>(null);
+  // Server-verified: has_paid used to be read from localStorage.
+  const { hasPaid, isChecking } = useAccount();
+  const checkout = useCheckout();
 
-  useEffect(() => {
-    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
-
-    if (currentUser?.user?.has_paid) {
-      setHasPaid(true);
-    } else {
-      setHasPaid(false);
+  const handleClick = () => {
+    if (isChecking) {
+      toast("Checking your subscription…");
+      return;
     }
-  }, []);
-   const handlePayment = useMutation<void, Error>({
-    mutationFn: async () => {
-      if (hasPaid) {
-        openModal("visual");
-        return;
-      }
-      try {
-        const response = await newRequest.post("/api/create-checkout-session");
-
-        if (response.status !== 200) {
-          throw new Error("Failed to create checkout session");
-        }
-
-        const { id } = response.data;
-        const stripe = await stripePromise;
-        const result = await stripe?.redirectToCheckout({
-          sessionId: id,
-        });
-
-        if (result?.error) {
-          toast.error(result.error.message || "An unknown error occurred");
-        }
-      } catch (error) {
-        toast.error("Payment Error");
-      }
-    },
-  });
+    if (hasPaid) {
+      openModal("visual");
+      return;
+    }
+    checkout.mutate();
+  };
 
   return (
     <>
-      <div className="border-r lg:my-2 mt-4 border-black justify-end  lg:max-w-xl w-full flex-1 p-4 flex flex-col lg:px-28">
-        <Button onClick={() => handlePayment.mutate()}>
-          {hasPaid ? "Create Content for 5$" : "Subscribe For More"}
+      <div className="border-r lg:my-2 mt-4 border-black justify-end lg:max-w-xl w-full flex-1 p-4 flex flex-col sm:px-8 lg:px-28">
+        <Button onClick={handleClick} disabled={checkout.isPending || isChecking}>
+          {isChecking
+            ? "Checking…"
+            : checkout.isPending
+            ? "Processing…"
+            : hasPaid
+            ? "Create New Chapter"
+            : "Subscribe for $5 to contribute"}
         </Button>
         <div>
           <div className="mt-4">
             <img
               src={imgUrl}
               alt="book cover"
-              className="h-96 w-96 mx-auto object-cover"
+              // portrait ratio: a square frame cropped the top of every cover
+              className="w-full max-w-xs sm:max-w-sm aspect-[2/3] mx-auto object-cover"
             />
-            <p className="text-xs text-gray-800 bg-white p-2 rounded-b-lg">
-              {description}
-            </p>
+            <p className="text-xs text-gray-800 bg-white p-2 rounded-b-lg">{description}</p>
             <ActionButtons />
           </div>
         </div>
@@ -78,4 +52,5 @@ const Sidebar = ({
     </>
   );
 };
+
 export default Sidebar;

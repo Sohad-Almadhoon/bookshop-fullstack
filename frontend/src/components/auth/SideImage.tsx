@@ -1,15 +1,16 @@
-const SideImage = () => {
-  return (
-    <div className="border border-black min-h-screen p-2 hidden lg:block">
-      <div className="border border-black min-h-screen h-full">
-        <img
-          src="/assets/landing-pattern.svg"
-          alt="side-img"
-          className="w-full h-full object-cover"
-        />
-      </div>
+// Decorative column beside the auth forms. Hidden below `lg`, and it no longer
+// stacks two `min-h-screen` boxes (which made the auth pages scroll for no
+// reason on tablets).
+const SideImage = () => (
+  <div className="border border-black p-2 hidden lg:block w-40 xl:w-56 shrink-0">
+    <div className="border border-black h-full">
+      <img
+        src="/assets/landing-pattern.svg"
+        alt=""
+        className="w-full h-full object-cover"
+      />
     </div>
-  );
-};
+  </div>
+);
 
 export default SideImage;

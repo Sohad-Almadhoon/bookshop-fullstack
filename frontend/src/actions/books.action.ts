@@ -1,55 +1,48 @@
 import { BookFormData } from "../pages/CeateBook";
-import newRequest from "../utils/newRequest";
+import newRequest, { getErrorMessage } from "../utils/newRequest";
 
 export interface Book {
-    id: string;
+    id: number;
     title: string;
     author: string;
-    [key: string]: any;
+    description?: string;
+    main_cover?: string;
+    generes?: string[];
+    created_at?: string;
 }
 
-const fetchUserBooks = async (userId: string) => {
+/** Rows returned by /users/:id/books - the book sits under `.book`. */
+export interface UserBookRow {
+    id: number;
+    created_at: string;
+    book: Book;
+}
+
+const fetchUserBooks = async (userId: number | string): Promise<UserBookRow[]> => {
     try {
         const response = await newRequest.get(`/api/users/${userId}/books`);
-
-        return response.data;
-    } catch (error: any) {
-        if (error.response) {
-            throw new Error(
-                error.response.data?.message || "Failed to fetch user's books."
-            );
-        } else if (error.request) {
-            // No response received from the server
-            throw new Error("No response from server. Please check the API.");
-        } else {
-            // Some other error occurred
-            throw new Error(error.message || "Unexpected error occurred.");
-        }
+        return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+        throw new Error(getErrorMessage(error, "Failed to fetch user's books."));
     }
 };
+
+const fetchFollowingBooks = async (userId: number | string): Promise<UserBookRow[]> => {
+    try {
+        const response = await newRequest.get(`/api/users/${userId}/followed-books`);
+        return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+        throw new Error(getErrorMessage(error, "Error fetching following books."));
+    }
+};
+
 const createBook = async (data: BookFormData) => {
     try {
         const response = await newRequest.post("/api/books", data);
-
-        if (response.status !== 201) {
-            throw new Error(response.data.message || "Failed to create book.");
-        }
-
-        return response.data as BookFormData;
-    } catch (error: any) {
-        throw new Error(
-            error.message || "An error occurred while creating the book."
-        );
-    }
-};
-const fetchFollowingBooks = async (id: string) => {
-    try {
-        const response = await newRequest.get(`/api/users/${id}/followed-books`);
-        return response.data;
-    } catch (error: any) {
-        console.error("Failed to fetch following books:", error?.response?.data || error.message);
-        throw new Error(error?.response?.data?.message || "Error fetching following books");
+        return response.data as { book: Book; conversation: { id: number } };
+    } catch (error) {
+        throw new Error(getErrorMessage(error, "An error occurred while creating the book."));
     }
 };
 
-export { fetchFollowingBooks, fetchUserBooks,createBook };
+export { fetchFollowingBooks, fetchUserBooks, createBook };

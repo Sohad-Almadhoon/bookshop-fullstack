@@ -1,8 +1,7 @@
 import React, { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import ProfileMenu from "../profile/ProfileMenu";
-import Notifications from "../shared/Notifications";
 import { twMerge } from "tailwind-merge";
+import ProfileMenu from "../profile/ProfileMenu";
 
 interface HeaderProps {
   title?: ReactNode;
@@ -11,20 +10,17 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ title, className }) => {
   return (
-    <header className="flex items-center border-black border p-2 ;g:py-1 lg:px-20 ">
+    <header className="flex items-center border-black border p-2 lg:py-1 lg:px-20">
       <Link to="/" className="flex-1">
-        <img src="/assets/logo-dark.svg" alt="logo" className="w-14" />
+        <img src="/assets/logo-dark.svg" alt="Block Book logo" className="w-14" />
       </Link>
 
       <Heading title={title} className={className} />
-      <div className="flex-1 flex justify-end gap-3">
-        <div className="flex gap-3">
-          {/* <Notifications /> */}
-          <Link to="/messages">
-            <img src="/assets/messages.svg" alt="Messages" />
-          </Link>
-        </div>
 
+      <div className="flex-1 flex justify-end gap-3">
+        <Link to="/messages" aria-label="Messages">
+          <img src="/assets/messages.svg" alt="" />
+        </Link>
         <ProfileMenu />
       </div>
     </header>
@@ -36,14 +32,10 @@ interface HeadingProps {
   title?: ReactNode;
 }
 
-export const Heading: React.FC<HeadingProps> = ({ title, className }) => {
-  return (
-    <div>
-      <span className={
-        twMerge("lg:block hidden" ,className)
-      }>{title}</span>
-    </div>
-  );
-};
+export const Heading: React.FC<HeadingProps> = ({ title, className }) => (
+  <div>
+    <span className={twMerge("lg:block hidden", className)}>{title}</span>
+  </div>
+);
 
 export default Header;

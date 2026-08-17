@@ -47,6 +47,31 @@
   --primary-color: #000;
   --secondary-color: #dfd4bf;
 }
+
+/* Safety net: decorative absolutely-positioned art must never create a
+   horizontal scrollbar on small screens. */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Images should shrink with their container by default. */
+img,
+svg,
+video {
+  max-width: 100%;
+}
+
+/* Long words / URLs in user generated content must not push the layout out. */
+p,
+h1,
+h2,
+h3,
+span {
+  overflow-wrap: break-word;
+}
+
 ul {
   list-style: none;
 }

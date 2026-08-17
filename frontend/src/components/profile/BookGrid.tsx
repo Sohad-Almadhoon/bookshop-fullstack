@@ -1,26 +1,34 @@
 import BookCard from "./BookCard";
+import { UserBookRow } from "../../actions/books.action";
 
 interface BookGridProps {
   tab: number;
-  books: any[];
+  books: UserBookRow[];
+  isOwnProfile?: boolean;
 }
 
-const BookGrid: React.FC<BookGridProps> = ({ tab, books }) => {
-  return (
-    <div>
-      {books.length === 0 ? (
-        <div className="text-center text-gray-500 mt-4">
-          {tab === 0
+const BookGrid: React.FC<BookGridProps> = ({ tab, books, isOwnProfile = true }) => {
+  if (books.length === 0) {
+    return (
+      <div className="text-center text-gray-500 mt-4">
+        {tab === 0
+          ? isOwnProfile
             ? "You have no books in your collection."
-            : "No books available from followed users."}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 flex-1">
-          {books.map((book, index) => (
-            <BookCard key={index} book={book} />
-          ))}
-        </div>
-      )}
+            : "This user has no books yet."
+          : isOwnProfile
+          ? "You are not following any book yet."
+          : "This user is not following any book yet."}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8 flex-1">
+      {books
+        .filter((row) => row?.book)
+        .map((row) => (
+          <BookCard key={row.id} book={row.book} />
+        ))}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import CustomInput from "../components/shared/CustomInput";
 import SignForm from "../components/auth/SignForm";
 import Button from "../components/shared/Button";
@@ -17,11 +18,12 @@ const Register = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterFormInputs>();
-  const {updateFormData} = useFormStore();
+  const { updateFormData } = useFormStore();
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<RegisterFormInputs> = (data) => {
-    updateFormData(data); 
+    updateFormData(data);
+    toast.success("One more step: tell us what you are into");
     navigate("/questionnaire");
   };
 
@@ -36,30 +38,43 @@ const Register = () => {
         <CustomInput
           placeholder="Enter Your Name"
           aria-label="Name"
-          {...register("name", { required: "Name is required" })}
+          autoComplete="name"
+          {...register("name", {
+            required: "Name is required",
+            maxLength: { value: 60, message: "Name is too long" },
+          })}
         />
         {errors.name && <p className="text-red-500">{errors.name.message}</p>}
+
         <CustomInput
           placeholder="Enter Your Email"
           aria-label="Email"
+          autoComplete="email"
           {...register("email", {
             required: "Email is required",
             pattern: {
-              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
               message: "Enter a valid email address",
             },
           })}
         />
         {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+
         <CustomInput
           placeholder="Create A Password"
           aria-label="Password"
           type="password"
-          {...register("password", { required: "Password is required" })}
+          autoComplete="new-password"
+          {...register("password", {
+            required: "Password is required",
+            // Mirrors the server rule, so the user finds out here and not
+            // after filling in the questionnaire.
+            minLength: { value: 8, message: "Password must be at least 8 characters" },
+            maxLength: { value: 72, message: "Password must be at most 72 characters" },
+          })}
         />
-        {errors.password && (
-          <p className="text-red-500">{errors.password.message}</p>
-        )}
+        {errors.password && <p className="text-red-500">{errors.password.message}</p>}
+
         <Button type="submit">Register</Button>
       </form>
     </SignForm>

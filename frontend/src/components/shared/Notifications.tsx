@@ -22,7 +22,7 @@ const Notifications = () => {
       {isOpen && (
         <Menu
           as="div"
-          className="absolute right-0 mt-1 mr-1 w-[400px] min-h-48 border border-black bg-[#dfd4bf] rounded-md shadow-lg z-20">
+          className="absolute right-0 mt-1 mr-1 w-[min(400px,calc(100vw-2rem))] min-h-48 border border-black bg-[#dfd4bf] rounded-md shadow-lg z-20">
           <MenuButton className="flex items-center w-full justify-between text-3xl p-2 bg-[#dfd4bf] border-b border-black">
             <p className="font-bold">Notifications</p>
             <BsListCheck />

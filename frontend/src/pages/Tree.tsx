@@ -1,155 +1,108 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Header from "../components/shared/Header";
 import Ring from "../components/Ring";
-const Tree = () => {
-  const treeRef = React.useRef<HTMLImageElement>(null);
-  const [treeRect, setTreeRect] = React.useState<DOMRect | null>(null);
 
-  React.useLayoutEffect(() => {
-  const updateRect = () => {
-    if (treeRef.current) {
-      setTreeRect(treeRef.current.getBoundingClientRect());
-    }
-  };
+interface Destination {
+  icon: string;
+  label: string;
+  ringText: string;
+  href: string;
+  /** Position of the ring around the tree on large screens. */
+  desktop: string;
+}
 
-  const img = treeRef.current;
-  if (img?.complete) {
-    updateRect(); // Image already loaded
-  } else {
-    img?.addEventListener('load', updateRect); // Wait for load
-  }
+const destinations: Destination[] = [
+  {
+    icon: "/assets/owl.png",
+    label: "Profile",
+    ringText: "Profile Profile Profile Profile",
+    href: "/profile",
+    desktop: "left-[14%] bottom-[16%]",
+  },
+  {
+    icon: "/assets/dog.png",
+    label: "Discover",
+    ringText: "Discover  Discover  Discover",
+    href: "/discover",
+    desktop: "left-[20%] bottom-[52%]",
+  },
+  {
+    icon: "/assets/fish.png",
+    label: "Create Book",
+    ringText: "Create  Book Create  Book ",
+    href: "/create-book",
+    desktop: "left-1/2 -translate-x-1/2 top-[6%]",
+  },
+  {
+    icon: "/assets/bat.png",
+    label: "How it works",
+    ringText: "How it works  How it works",
+    href: "/coming-soon",
+    desktop: "right-[20%] bottom-[52%]",
+  },
+  {
+    icon: "/assets/fish-2.png",
+    label: "About",
+    ringText: "About About About  About ",
+    href: "/coming-soon",
+    desktop: "right-[14%] bottom-[16%]",
+  },
+];
 
-  window.addEventListener('resize', updateRect);
+const Tree = () => (
+  <div className="flex flex-col min-h-screen">
+    <Header />
 
-  return () => {
-    img?.removeEventListener('load', updateRect);
-    window.removeEventListener('resize', updateRect);
-  };
-}, []);
-
-  return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-
-      <div className="relative flex pt-12 justify-center w-full items-end flex-1 min-h-screen  border-black border">
-        <div
-          className="absolute w-[20%] lg:w-[13%] aspect-square left-[25%] z-10 bottom-[20%] bg-[#ddd1bb]"
-          style={
-            !treeRect
-              ? { left: "25%" }
-              : {
-                  left: treeRect.x > 20 ? `calc(${treeRect.x}px - 10%)` : 0,
-                }
-          }>
-          <Ring
-            content={
-              <img
-                className="h-[60%] w-auto object-contain"
-                src="/assets/owl.png"
-                alt=""
-              />
-            }
-            text="Profile&nbsp;Profile&nbsp;Profile&nbsp;Profile"
-            href="/profile"
-          />
-        </div>
-        <div
-          className="absolute z-10 w-[20%] lg:w-[13%] aspect-square left-[25%] bottom-[56%] bg-[#ddd1bb]"
-          style={
-            !treeRect
-              ? { left: "25%", bottom: "56%" }
-              : {
-                  left: treeRect.x > 20 ? `calc(${treeRect.x}px - 6%)` : 0,
-                  bottom: `${treeRect.height - (30 / 100) * treeRect.height}px`,
-                }
-          }>
-          <Ring
-            content={
-              <img
-                className="h-[60%] w-auto object-contain"
-                src="/assets/dog.png"
-                alt=""
-              />
-            }
-            text="Discover&nbsp;&nbsp;Discover&nbsp;&nbsp;Discover"
-            href="/discover"
-          />
-        </div>
-        <div
-          className="absolute z-10 left-[44%] w-[20%] lg:w-[13%] aspect-square bg-[#ddd1bb]"
-          style={
-            treeRect
-              ? {
-                  bottom: `${treeRect.width + 20}px`,
-                }
-              : {
-                  top: 0,
-                }
-          }>
-          <Ring
-            content={
-              <img
-                className="h-[60%] w-auto object-contain"
-                src="/assets/fish.png"
-                alt=""
-              />
-            }
-            text="Create&nbsp;&nbsp;Book&nbsp;Create&nbsp;&nbsp;Book&nbsp;"
-            href="/create-book"
-          />
-        </div>
-        <div
-          className="absolute z-10 right-[25%] w-[20%] lg:w-[13%] aspect-square bottom-[56%] bg-[#ddd1bb]"
-          style={
-            !treeRect
-              ? { right: "25%", bottom: "56%" }
-              : {
-                  right: treeRect.x > 20 ? `calc(${treeRect.x}px - 6%)` : 0,
-                  bottom: `${treeRect.height - (30 / 100) * treeRect.height}px`,
-                }
-          }>
-          <Ring
-            content={
-              <img
-                className="h-[60%] w-auto object-contain"
-                src="/assets/bat.png"
-                alt=""
-              />
-            }
-            text="How it works&nbsp;&nbsp;How it works"
-            href="/coming-soon"
-          />
-        </div>
-        <div
-          className="absolute z-10 right-[25%] bottom-[20%] w-[20%] lg:w-[13%] aspect-square bg-[#ddd1bb]"
-          style={
-            !treeRect
-              ? { right: "25%" }
-              : {
-                  right: treeRect.x > 20 ? `calc(${treeRect.x}px - 10%)` : 0,
-                }
-          }>
-          <Ring
-            content={
-              <img
-                className="h-[60%] w-auto object-contain"
-                src="./assets/fish-2.png"
-                alt=""
-              />
-            }
-            text="About&nbsp;About&nbsp;About&nbsp;&nbsp;About&nbsp;"
-            href="/coming-soon"
-          />
-        </div>
-        <img
-          src="/assets/tree.svg"
-          alt="tree"
-          className="mt-28 w-full z-0 relative lg:w-[35%]"
-          ref={treeRef}
-        />
+    {/* Phones and tablets: a plain, tappable grid. The decorative tree with
+        absolutely positioned rings only appears once there is room for it -
+        it used to be computed from getBoundingClientRect and collapsed into
+        an unusable pile on small screens. */}
+    <div className="lg:hidden border-black border flex-1 p-4">
+      <img
+        src="/assets/tree.svg"
+        alt=""
+        className="w-40 mx-auto mb-6 opacity-80"
+        aria-hidden="true"
+      />
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-xl mx-auto">
+        {destinations.map((item) => (
+          <Link
+            key={item.label}
+            to={item.href}
+            className="border border-black rounded-2xl p-4 flex flex-col items-center gap-2 text-center bg-[#d5c9b3] active:scale-95 transition-transform">
+            <img src={item.icon} alt="" className="h-16 w-auto object-contain" />
+            <span className="uppercase text-sm tracking-wide">{item.label}</span>
+          </Link>
+        ))}
       </div>
     </div>
-  );
-};
+
+    <div className="hidden lg:flex relative pt-12 justify-center w-full items-end flex-1 min-h-[80vh] border-black border">
+      {destinations.map((item) => (
+        <div
+          key={item.label}
+          className={`absolute z-10 w-[13%] aspect-square bg-[#ddd1bb] ${item.desktop}`}>
+          <Ring
+            content={
+              <img
+                className="h-[60%] w-auto object-contain"
+                src={item.icon}
+                alt=""
+              />
+            }
+            text={item.ringText}
+            href={item.href}
+          />
+        </div>
+      ))}
+      <img
+        src="/assets/tree.svg"
+        alt="tree"
+        className="mt-28 w-[35%] z-0 relative"
+      />
+    </div>
+  </div>
+);
 
 export default Tree;

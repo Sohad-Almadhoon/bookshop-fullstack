@@ -27,9 +27,11 @@ const ProfileMenu = () => {
         leave="transition ease-in duration-75"
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95">
+        {/* anchor "bottom end" keeps the menu inside the viewport; the old
+            manual -translate-x-[100px] pushed it off-screen on phones. */}
         <MenuItems
-          anchor="bottom"
-          className="absolute bg-[#dfd4bf] -translate-x-[100px] mt-2 w-56 h-44 rounded-md  shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none drop-shadow bg-[#] p-6 z-50">
+          anchor="bottom end"
+          className="bg-[#dfd4bf] mt-2 w-56 max-w-[calc(100vw-1.5rem)] rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none drop-shadow p-6 z-50">
           <MenuItem as={Fragment}>
             <Link
               to="/profile"
