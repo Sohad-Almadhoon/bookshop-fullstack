@@ -1,19 +1,24 @@
 import jwt from "jsonwebtoken";
-const verifyToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1]; // Extract token from "Authorization: Bearer <token>"
+import env from "../utils/env.js";
 
-  if (!token) {
+const verifyToken = (req, res, next) => {
+  const header = req.headers.authorization || "";
+  const [scheme, token] = header.split(" ");
+
+  if (scheme !== "Bearer" || !token) {
     return res.status(401).json({ error: "No token provided." });
   }
 
   try {
-    // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, env.jwtSecret);
+    // Only trust the id: everything else is re-read from the database.
     req.user = { id: decoded.id };
-    next();
+    return next();
   } catch (error) {
-    console.error("Authentication error:", error);
-    return res.status(403).json({ error: "Invalid or expired token." });
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ error: "Session expired. Please log in again." });
+    }
+    return res.status(401).json({ error: "Invalid token." });
   }
 };
 

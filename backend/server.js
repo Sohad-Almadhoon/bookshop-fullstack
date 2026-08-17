@@ -1,6 +1,10 @@
+// MUST be first: loads and validates .env before any module reads process.env.
+import env from "./utils/env.js";
+
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
+import helmet from "helmet";
+
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import bookRoutes from "./routes/book.route.js";
@@ -8,49 +12,51 @@ import chapterRoutes from "./routes/chapters.route.js";
 import conversationRoutes from "./routes/conversation.route.js";
 import messageRoutes from "./routes/message.route.js";
 import uploadRoutes from "./routes/upload.route.js";
-import checkoutRouter from './routes/checkout.route.js'; 
-import paymentRouter from './routes/payment.route.js'; 
-import { errorHandler } from "./middlewares/errorMiddleware.js";
-import bodyParser from "body-parser";
+import checkoutRouter from "./routes/checkout.route.js";
+import paymentRouter from "./routes/payment.route.js";
+import { errorHandler, notFoundHandler } from "./middlewares/errorMiddleware.js";
+import { apiLimiter, authLimiter } from "./middlewares/rateLimit.js";
+
 const app = express();
-dotenv.config();
-app.use(express.json());
-// app.use(
-//   cors({
-//     origin: "http://localhost:3000", 
-//     credentials: true, 
-//   })
-// );
+
+app.set("trust proxy", 1); // correct client IPs behind Render/Vercel proxies
+app.use(helmet());
+
 app.use(
   cors({
-    origin: "https://bookshop-frontend-gold.vercel.app",
-    credentials: true, 
+    origin: (origin, callback) => {
+      // Allow same-origin/server-to-server calls (no Origin header).
+      if (!origin || env.clientUrls.includes(origin)) return callback(null, true);
+      return callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    },
+    credentials: true,
   })
 );
 
-app.use(bodyParser.json());
+// Stripe signatures are computed over the raw body, so this must be mounted
+// before express.json().
+app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
 
-const routes = {
-  "/api/warmup": (req, res) => {
-    res.send("Server is running")
-  },
-  "/api/auth": authRoutes,
-  "/api/users": userRoutes,
-  "/api/books": bookRoutes,
-  "/api/chapters": chapterRoutes,
-  "/api/conversations": conversationRoutes,
-  "/api/messages": messageRoutes,
-  "/api/upload": uploadRoutes,
-  "/api/create-checkout-session": checkoutRouter,
-  "/api/payment": paymentRouter,
-};
-Object.keys(routes).forEach((route) => app.use(route, routes[route]));
+app.use(express.json({ limit: "1mb" }));
+app.use(apiLimiter);
 
+app.get("/api/warmup", (req, res) => res.json({ status: "ok" }));
 
-// Use the error handling middleware
+app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/books", bookRoutes);
+app.use("/api/chapters", chapterRoutes);
+app.use("/api/conversations", conversationRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/upload", uploadRoutes);
+app.use("/api/create-checkout-session", checkoutRouter);
+app.use("/api/payment", paymentRouter);
+
+app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Start the server
-app.listen(5000, () => {
-  console.log("Backend server is running on port 5000!");
+app.listen(env.port, () => {
+  console.log(`Backend server is running on port ${env.port}!`);
 });
+
+export default app;

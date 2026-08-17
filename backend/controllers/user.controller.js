@@ -1,69 +1,53 @@
 import prisma from "../utils/db.js";
+import { bookSelect, publicUserSelect, selfUserSelect } from "../utils/selects.js";
+import { notFound, parseId } from "../utils/httpError.js";
+
+/** Fresh copy of the logged-in account: the client uses it to refresh has_paid. */
+const getMe = async (req, res) => {
+  const user = await prisma.users.findUnique({
+    where: { id: req.user.id },
+    select: selfUserSelect,
+  });
+  if (!user) throw notFound("User not found.");
+  res.status(200).json(user);
+};
 
 const getUser = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const user = await prisma.users.findUnique({
-      where: {
-        id: parseInt(id),
-      },
-    });
+  const id = parseId(req.params.id, "user id");
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found." });
-    }
+  const user = await prisma.users.findUnique({
+    where: { id },
+    // Never the password hash, and the email only for your own profile.
+    select: id === req.user.id ? selfUserSelect : publicUserSelect,
+  });
 
-    res.status(200).json(user);
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching the user." });
-  }
+  if (!user) throw notFound("User not found.");
+
+  res.status(200).json(user);
 };
 
 const getUserBooks = async (req, res) => {
-  const { userId } = req.params;
-  try {
-    const userBooks = await prisma.user_books.findMany({
-      where: {
-        user_id: parseInt(userId),
-        type:"ALL"
-      },
-      include: {
-        book: true,
-      },
-    });
+  const userId = parseId(req.params.userId, "user id");
 
+  const userBooks = await prisma.user_books.findMany({
+    where: { user_id: userId, type: "ALL" },
+    select: { id: true, created_at: true, book: { select: bookSelect } },
+    orderBy: { created_at: "desc" },
+  });
 
-    return res.json(userBooks);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
- const getFollowedBooks = async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    const followedBooks = await prisma.user_books.findMany({
-      where: {
-        user_id: parseInt(userId),
-        type: "FOLLOW", 
-      },
-      include: {
-        book: true,
-      },
-    });
-
-
-    return res.json(followedBooks);
-  } catch (error) {
-    console.error("Error fetching followed books:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
+  res.json(userBooks);
 };
 
+const getFollowedBooks = async (req, res) => {
+  const userId = parseId(req.params.userId, "user id");
 
+  const followedBooks = await prisma.user_books.findMany({
+    where: { user_id: userId, type: "FOLLOW" },
+    select: { id: true, created_at: true, book: { select: bookSelect } },
+    orderBy: { created_at: "desc" },
+  });
 
-export { getUser, getUserBooks, getFollowedBooks };
+  res.json(followedBooks);
+};
+
+export { getMe, getUser, getUserBooks, getFollowedBooks };

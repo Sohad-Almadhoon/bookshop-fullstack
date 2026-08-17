@@ -1,138 +1,125 @@
 import prisma from "../utils/db.js";
+import { notFound, parseId } from "../utils/httpError.js";
 
-// Create a chapter
+const chapterContentSelect = {
+  id: true,
+  chapter_id: true,
+  text: true,
+  audio: true,
+  created_at: true,
+};
+
+const chapterSelect = {
+  id: true,
+  title: true,
+  cover_image: true,
+  book_id: true,
+  created_at: true,
+  book: { select: { id: true, title: true, author: true } },
+  chapter_content: { select: chapterContentSelect },
+};
+
+// The public chapter list only needs covers and titles. It used to embed the
+// full text and audio of every chapter, handing the paid content to anyone.
+const chapterListSelect = {
+  id: true,
+  title: true,
+  cover_image: true,
+  book_id: true,
+  created_at: true,
+  book: { select: { id: true, title: true, author: true } },
+};
+
 const createChapter = async (req, res) => {
-  const { id: bookId } = req.params;
+  // req.bookId is set by requireContributor, which already validated it.
+  const bookId = req.bookId ?? parseId(req.params.id, "book id");
   const { title, cover_image } = req.body;
-  try {
-    const newChapter = await prisma.chapters.create({
-      data: {
-        title,
-        cover_image,
-        book: {
-          connect: {
-            id: parseInt(bookId),
-          },
-        },
-      },
-    });
-    res.status(201).json(newChapter);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+
+  const newChapter = await prisma.chapters.create({
+    data: { title, cover_image, book: { connect: { id: bookId } } },
+    select: chapterSelect,
+  });
+
+  res.status(201).json(newChapter);
 };
 
 const getBookChapters = async (req, res) => {
-  const { id: bookId } = req.params;
-  try {
-    const chapters = await prisma.chapters.findMany({
-      where: {
-        book_id: parseInt(bookId),
-      },
-      include: {
-        chapter_content: true,
-        book: {
-          select: {
-            title: true,
-            id: true,
-          },
-        },
-      },
-    });
+  const bookId = parseId(req.params.id, "book id");
 
-    res.status(200).json(chapters);
-  } catch (error) {
-    console.error("Error fetching chapters:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching the chapters." });
-  }
+  const chapters = await prisma.chapters.findMany({
+    where: { book_id: bookId },
+    select: chapterListSelect,
+    orderBy: { created_at: "asc" },
+  });
+
+  res.status(200).json(chapters);
+};
+
+/** Single chapter looked up by its own id - no book id needed by the client. */
+const getChapter = async (req, res) => {
+  const chapterId = parseId(req.params.chapterId, "chapter id");
+
+  const chapter = await prisma.chapters.findUnique({
+    where: { id: chapterId },
+    select: chapterSelect,
+  });
+  if (!chapter) throw notFound("Chapter not found.");
+
+  res.status(200).json(chapter);
+};
+
+const getBookChapter = async (req, res) => {
+  const bookId = parseId(req.params.id, "book id");
+  const chapterId = parseId(req.params.chapterId, "chapter id");
+
+  const chapter = await prisma.chapters.findFirst({
+    where: { id: chapterId, book_id: bookId },
+    select: chapterSelect,
+  });
+  if (!chapter) throw notFound("Chapter not found.");
+
+  res.status(200).json(chapter);
 };
 
 const getChapterContent = async (req, res) => {
-  const { chapterId } = req.params;
+  const chapterId = parseId(req.params.chapterId, "chapter id");
 
-  try {
-    const chapterContent = await prisma.chapter_content.findFirst({
-      where: { chapter_id: parseInt(chapterId) },
-    });
+  const chapterContent = await prisma.chapter_content.findUnique({
+    where: { chapter_id: chapterId },
+    select: chapterContentSelect,
+  });
+  if (!chapterContent) throw notFound("Chapter content not found.");
 
-    if (!chapterContent) {
-      return res.status(404).json({ error: "Chapter content not found" });
-    }
-
-    return res.status(200).json(chapterContent);
-  } catch (error) {
-    console.error("Error fetching chapter content:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
+  res.status(200).json(chapterContent);
 };
-
 
 const createChapterContent = async (req, res) => {
-  const { chapterId } = req.params;
+  const chapterId = req.chapterId ?? parseId(req.params.chapterId, "chapter id");
   const { text, audio } = req.body;
 
-  if (!text && !audio) {
-    return res
-      .status(400)
-      .json({ error: "Either text or audio must be provided" });
-  }
+  const updatedContent = await prisma.chapter_content.upsert({
+    where: { chapter_id: chapterId },
+    update: {
+      ...(text ? { text: { push: text } } : {}),
+      ...(audio ? { audio } : {}),
+    },
+    create: {
+      chapter_id: chapterId,
+      text: text ? [text] : [],
+      audio: audio || null,
+      user_id: req.user.id,
+    },
+    select: chapterContentSelect,
+  });
 
-  try {
-    const chapterIdInt = parseInt(chapterId);
-
-    const updatedContent = await prisma.chapter_content.upsert({
-      where: { chapter_id: chapterIdInt },
-      update: {
-        text: text ? { push: text } : undefined,
-        audio: audio || undefined,
-      },
-      create: {
-        chapter_id: chapterIdInt,
-        text: text ? [text] : [],
-        audio: audio || null,
-      },
-    });
-
-    return res.status(200).json(updatedContent);
-  } catch (error) {
-    console.error("Error posting chapter content:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
+  res.status(200).json(updatedContent);
 };
-const getBookChapter = async (req, res) => {
-  const { id, chapterId } = req.params; 
 
-  try {
-
-    const book = await prisma.books.findUnique({
-      where: { id: parseInt(id) },
-    });
-    if (!book) {
-      return res.status(404).json({ message: "Book not found" });
-    }
-
-  
-    const chapter = await prisma.chapters.findUnique({
-      where: { id: parseInt(chapterId), book_id: parseInt(id) },
-      include: { chapter_content: true }
-    });
-    if (!chapter) {
-      return res.status(404).json({ message: "Chapter not found" });
-    }
-
-    // Return the chapter details as the response
-    res.status(200).json(chapter);
-  } catch (error) {
-    console.error("Error fetching chapter:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
 export {
   createChapter,
   getBookChapters,
+  getChapter,
+  getBookChapter,
   getChapterContent,
   createChapterContent,
-  getBookChapter,
 };

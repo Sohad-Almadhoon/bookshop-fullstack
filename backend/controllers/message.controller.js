@@ -1,37 +1,44 @@
 import prisma from "../utils/db.js";
+import { publicUserSelect } from "../utils/selects.js";
 
+const messageSelect = {
+  id: true,
+  content: true,
+  senderId: true,
+  conversationId: true,
+  createdAt: true,
+  sender: { select: publicUserSelect },
+};
+
+// Both handlers run behind requireConversationParticipant, so req.conversationId
+// is already validated and the caller is known to be a member.
 const sendMessage = async (req, res) => {
-  try {
-    const { conversationId } = req.params;
-    const { id: senderId } = req.user;
-    const { content } = req.body;
-    console.log(content)
-    const message = await prisma.messages.create({
-      data: {
-        conversationId: parseInt(conversationId),
-        senderId,
-        content,
-      },
-    });
-    res.status(201).json(message);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Something went wrong" });
-  }
+  const conversationId = req.conversationId;
+  const { id: senderId } = req.user;
+  const { content } = req.body;
+
+  const message = await prisma.messages.create({
+    data: { conversationId, senderId, content },
+    select: messageSelect,
+  });
+
+  // Keeps conversation ordering meaningful in the inbox.
+  await prisma.conversation.update({
+    where: { id: conversationId },
+    data: { updatedAt: new Date() },
+  });
+
+  res.status(201).json(message);
 };
+
 const getAllMessages = async (req, res) => {
-  try {
-    const { conversationId } = req.params;
-    const messages = await prisma.messages.findMany({
-      where: { conversationId: parseInt(conversationId) },
-      include: {
-        sender: true,
-      },
-    });
-    res.status(200).json(messages);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Something went wrong" });
-  }
+  const messages = await prisma.messages.findMany({
+    where: { conversationId: req.conversationId },
+    select: messageSelect,
+    orderBy: { createdAt: "asc" },
+  });
+
+  res.status(200).json(messages);
 };
-export { sendMessage , getAllMessages};
+
+export { sendMessage, getAllMessages };

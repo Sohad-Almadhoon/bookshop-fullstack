@@ -1,53 +1,63 @@
 import express from "express";
-import Stripe from "stripe";
 import verifyToken from "../middlewares/verifyToken.js";
+import asyncHandler from "../middlewares/asyncHandler.js";
 import prisma from "../utils/db.js";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-11-20.acacia",
-});
+import env from "../utils/env.js";
+import { getStripe, requireStripe } from "../utils/stripe.js";
+import { notFound } from "../utils/httpError.js";
 
 const router = express.Router();
 
-// Payment creation route
-router.post("/", verifyToken, async (req, res) => {
-  const { id } = req.user;
-  if (!id) {
-    return res.status(400).json({ error: "User ID is required." });
-  }
-  try {
+const SUBSCRIPTION_AMOUNT_CENTS = 500;
+
+/** Only redirect back to origins we own. */
+const resolveClientUrl = (req) => {
+  const origin = req.headers.origin;
+  if (origin && env.clientUrls.includes(origin)) return origin;
+  return env.clientUrls[0];
+};
+
+router.post(
+  "/",
+  verifyToken,
+  requireStripe,
+  asyncHandler(async (req, res) => {
     const user = await prisma.users.findUnique({
-      where: { id },
+      where: { id: req.user.id },
+      select: { id: true, email: true, has_paid: true },
     });
-    if (!user) {
-      return res.status(404).json({ error: "User not found." });
+    if (!user) throw notFound("User not found.");
+
+    if (user.has_paid) {
+      return res.status(200).json({ alreadyPaid: true });
     }
 
-    const session = await stripe.checkout.sessions.create({
+    const clientUrl = resolveClientUrl(req);
+
+    const session = await getStripe().checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
         {
           price_data: {
             currency: "usd",
-            product_data: {
-              name: "Bookshop Subscription",
-            },
-            unit_amount: 500,
+            product_data: { name: "Bookshop Subscription" },
+            unit_amount: SUBSCRIPTION_AMOUNT_CENTS,
           },
           quantity: 1,
         },
       ],
       mode: "payment",
-      success_url: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: req.headers.referer,
+      success_url: `${clientUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${clientUrl}/tree`,
       customer_email: user.email,
+      // Bind the session to the account so the webhook and the success page
+      // can only ever unlock the user who actually paid.
+      client_reference_id: String(user.id),
+      metadata: { userId: String(user.id) },
     });
 
-    res.status(200).json({ id: session.id });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
-  }
-});
+    res.status(200).json({ id: session.id, url: session.url });
+  })
+);
 
 export default router;

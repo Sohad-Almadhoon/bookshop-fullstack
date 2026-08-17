@@ -1,5 +1,13 @@
 import express from "express";
 import verifyToken from "../middlewares/verifyToken.js";
+import asyncHandler from "../middlewares/asyncHandler.js";
+import validateRequest from "../middlewares/validateRequest.js";
+import { requireBookAccess } from "../middlewares/authorize.js";
+import {
+  createBookSchema,
+  createChapterSchema,
+  createCommentSchema,
+} from "../validations/content.validation.js";
 import {
   createBook,
   followBook,
@@ -24,29 +32,35 @@ import {
 
 const router = express.Router();
 
-router.post("/", verifyToken, createBook);
-router.get("/random-books", verifyToken, getRandomBooks);
-router.get("/:id", verifyToken, getBook);
+// Every book route requires a valid session.
+router.use(verifyToken);
 
-//Comments
-router.post("/:id/comments", verifyToken, createComment);
-router.get("/:id/comments", verifyToken, getComments);
-router.delete("/:id/comments/:commentId", verifyToken, deleteComment);
+router.post("/", validateRequest(createBookSchema), asyncHandler(createBook));
+router.get("/random-books", asyncHandler(getRandomBooks));
+router.get("/:id", asyncHandler(getBook));
 
-//Chapters
-router.get("/:id/chapters", verifyToken, getBookChapters);
-router.get("/:id/chapters/:chapterId", verifyToken, getBookChapter);
+// Comments
+router.post("/:id/comments", validateRequest(createCommentSchema), asyncHandler(createComment));
+router.get("/:id/comments", asyncHandler(getComments));
+router.delete("/:id/comments/:commentId", asyncHandler(deleteComment));
 
-router.post("/:id/chapters", verifyToken, createChapter);
+// Chapters - creating one requires ownership or an active subscription.
+router.get("/:id/chapters", asyncHandler(getBookChapters));
+router.get("/:id/chapters/:chapterId", requireBookAccess, asyncHandler(getBookChapter));
+router.post(
+  "/:id/chapters",
+  requireBookAccess,
+  validateRequest(createChapterSchema),
+  asyncHandler(createChapter)
+);
 
-router.post("/:id/follow", verifyToken, followBook);
+// Follow / like
+router.post("/:id/follow", asyncHandler(followBook));
+router.delete("/:id/follow", asyncHandler(unFollowBook));
+router.post("/:id/like", asyncHandler(likeBook));
+router.delete("/:id/like", asyncHandler(unLikeBook));
 
-router.delete("/:id/follow", verifyToken, unFollowBook);
-
-router.post("/:id/like", verifyToken, likeBook);
-router.delete("/:id/like", verifyToken, unLikeBook);
-router.get("/:id/book-states", verifyToken, getBookStates);
-router.get("/:id/stats", verifyToken, getBookStats);
+router.get("/:id/book-states", asyncHandler(getBookStates));
+router.get("/:id/stats", asyncHandler(getBookStats));
 
 export default router;
-

@@ -1,72 +1,62 @@
 import bcrypt from "bcrypt";
-import prisma from "../utils/db.js";
 import jwt from "jsonwebtoken";
+import prisma from "../utils/db.js";
+import env from "../utils/env.js";
+import { selfUserSelect } from "../utils/selects.js";
+import { unauthorized, HttpError } from "../utils/httpError.js";
+
+const signToken = (user) =>
+  jwt.sign({ id: user.id }, env.jwtSecret, { expiresIn: env.jwtExpiresIn });
+
+// Compared against when the email is unknown, so a failed login costs the same
+// time whether or not the account exists (timing based user enumeration).
+const DUMMY_HASH = bcrypt.hashSync("unknown-account-placeholder", 12);
+
 const register = async (req, res) => {
   const { name, email, password, role, generes } = req.body;
-  
-  try {
-    // Check if user already exists
-    const existingUser = await prisma.users.findUnique({
-      where: { email },
-    });
-    if (existingUser) {
-      return res
-        .status(400)
-        .json({ error: "User already exists with this email" });
-    }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create a new user
-    const user = await prisma.users.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role,
-        generes: generes || [], 
-      },
-    });
-
-    const { password: _, ...userWithoutPassword } = user;
-
-    res.status(201).json(userWithoutPassword);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error creating user. Please try again." });
+  const existingUser = await prisma.users.findUnique({
+    where: { email },
+    select: { id: true },
+  });
+  if (existingUser) {
+    throw new HttpError(409, "User already exists with this email");
   }
+
+  const hashedPassword = await bcrypt.hash(password, 12);
+
+  const user = await prisma.users.create({
+    data: { name, email, password: hashedPassword, role, generes },
+    select: selfUserSelect,
+  });
+
+  // Log the user straight in so they do not have to retype their credentials.
+  res.status(201).json({ token: signToken(user), user });
 };
+
 const login = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required." });
-  }
-  try {
-    const user = await prisma.users.findUnique({
-      where: { email },
-    });
-    if (!user) {
-      return res.status(404).json({ error: "User not found." });
-    }
-    // Check the password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: "Wrong Password" });
-    }
-    // Generate a JWT token
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
-    );
-    return res.status(200).json({ 
-      token, 
-      user
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error logging in" });
+  const user = await prisma.users.findUnique({ where: { email } });
+
+  // Same response for "unknown email" and "wrong password" so the endpoint
+  // cannot be used to discover which emails are registered.
+  if (!user) {
+    await bcrypt.compare(password, DUMMY_HASH);
+    throw unauthorized("Incorrect email or password.");
   }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    throw unauthorized("Incorrect email or password.");
+  }
+
+  const { password: _password, email: userEmail, ...rest } = user;
+
+  res.status(200).json({
+    token: signToken(user),
+    user: { ...rest, email: userEmail },
+  });
 };
-export { register, login  };
+
+export { register, login };

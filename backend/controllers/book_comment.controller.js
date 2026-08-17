@@ -1,61 +1,67 @@
 import prisma from "../utils/db.js";
+import { publicUserSelect } from "../utils/selects.js";
+import { forbidden, notFound, parseId } from "../utils/httpError.js";
+
+const commentSelect = {
+  id: true,
+  content: true,
+  created_at: true,
+  book_id: true,
+  user_id: true,
+  user: { select: publicUserSelect },
+};
 
 const createComment = async (req, res) => {
-  const { id:bookId } = req.params;
+  const bookId = parseId(req.params.id, "book id");
   const { id: userId } = req.user;
   const { content } = req.body;
-  try {
-    const newComment = await prisma.book_comments.create({
-      data: { book_id: parseInt(bookId), user_id: userId, content },
-      include: {
-        user: true, 
-      },
-    });
-    res.status(201).json(newComment);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+
+  const book = await prisma.books.findUnique({ where: { id: bookId }, select: { id: true } });
+  if (!book) throw notFound("Book not found.");
+
+  const newComment = await prisma.book_comments.create({
+    data: { book_id: bookId, user_id: userId, content },
+    select: commentSelect,
+  });
+
+  res.status(201).json(newComment);
 };
 
 const getComments = async (req, res) => {
-  const { id:bookId } = req.params; 
+  const bookId = parseId(req.params.id, "book id");
 
-  try {
-    const comments = await prisma.book_comments.findMany({
-      where: {
-        book_id: parseInt(bookId), 
-      },
-      include: {
-        user: true, 
-      },
-      orderBy: {
-        created_at: "desc", 
-      },
-    });
+  const comments = await prisma.book_comments.findMany({
+    where: { book_id: bookId },
+    select: commentSelect,
+    orderBy: { created_at: "desc" },
+  });
 
-    res.status(200).json(comments);
-  } catch (error) {
-    console.error("Error fetching comments:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching the comments." });
-  }
+  res.status(200).json(comments);
 };
 
 const deleteComment = async (req, res) => {
-  const { id: bookId, commentId } = req.params;
-try {
-  const deletedComment = await prisma.book_comments.delete({
-    where: {
-      id: parseInt(commentId),
-      book_id: parseInt(bookId),
-    },
-  });
+  const bookId = parseId(req.params.id, "book id");
+  const commentId = parseId(req.params.commentId, "comment id");
+  const { id: userId } = req.user;
 
-  res.status(200).json(deletedComment);
-} catch (error) {
-  console.error("Error deleting comment:", error);
-  res.status(500).json({ error: "An error occurred while deleting the comment." });
-}
+  const comment = await prisma.book_comments.findFirst({
+    where: { id: commentId, book_id: bookId },
+    select: { id: true, user_id: true },
+  });
+  if (!comment) throw notFound("Comment not found.");
+
+  // The author may delete their own comment; the book owner may moderate.
+  if (comment.user_id !== userId) {
+    const isOwner = await prisma.user_books.findFirst({
+      where: { user_id: userId, book_id: bookId, type: "ALL" },
+      select: { id: true },
+    });
+    if (!isOwner) throw forbidden("You can only delete your own comments.");
+  }
+
+  await prisma.book_comments.delete({ where: { id: commentId } });
+
+  res.status(200).json({ id: commentId, message: "Comment deleted successfully." });
 };
+
 export { createComment, getComments, deleteComment };
