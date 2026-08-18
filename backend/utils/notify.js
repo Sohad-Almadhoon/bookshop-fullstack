@@ -1,4 +1,5 @@
 import prisma from "./db.js";
+import { emitToUsers } from "./realtime.js";
 
 /**
  * Notifications are a side effect: a failed insert must never break the action
@@ -8,6 +9,10 @@ const create = async (rows) => {
   if (!rows.length) return;
   try {
     await prisma.notifications.createMany({ data: rows, skipDuplicates: true });
+    // nudge the bell without waiting for the next poll
+    emitToUsers([...new Set(rows.map((row) => row.user_id))], "notification:new", {
+      count: rows.length,
+    });
   } catch (error) {
     console.error("Failed to write notifications:", error.message);
   }

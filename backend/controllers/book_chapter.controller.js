@@ -200,6 +200,7 @@ const deleteChapter = async (req, res) => {
 
   await prisma.$transaction(async (tx) => {
     await tx.chapter_content.deleteMany({ where: { chapter_id: chapterId } });
+    await tx.notifications.deleteMany({ where: { chapter_id: chapterId } });
     await tx.chapters.delete({ where: { id: chapterId } });
   });
 

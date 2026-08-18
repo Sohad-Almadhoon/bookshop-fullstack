@@ -27,6 +27,7 @@ import Success from "./Success";
 import CreateBookPage from "./CeateBook";
 import PaymentRoute from "../components/route/PaymentRoute";
 import NotFound from "./NotFound";
+import PublicBookPage from "./PublicBook";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -98,6 +99,8 @@ const router = createBrowserRouter([
     ],
   },
   { path: "/", element: <LandingPage /> },
+  // shareable, works without an account
+  { path: "/read/:id", element: <PublicBookPage /> },
   // Catch-all: an unknown URL used to render a blank page.
   { path: "*", element: <NotFound /> },
 ]);

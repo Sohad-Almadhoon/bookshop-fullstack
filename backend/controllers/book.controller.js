@@ -94,6 +94,8 @@ const deleteBook = async (req, res) => {
 
     await tx.book_comments.deleteMany({ where: { book_id: bookId } });
     await tx.user_books.deleteMany({ where: { book_id: bookId } });
+    // otherwise the bell keeps pointing at a book that no longer exists
+    await tx.notifications.deleteMany({ where: { book_id: bookId } });
     await tx.books.delete({ where: { id: bookId } });
   });
 

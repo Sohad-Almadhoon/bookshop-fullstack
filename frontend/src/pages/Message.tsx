@@ -11,6 +11,7 @@ import MessageItem from "../components/messages/MessageItem";
 import newRequest, { getErrorMessage } from "../utils/newRequest";
 import Loader from "../components/shared/Loader";
 import { getCurrentUser } from "../utils/session";
+import { getSocket } from "../utils/socket";
 
 interface ChatMessage {
   id: number;
@@ -62,6 +63,32 @@ const Message: React.FC = () => {
   });
 
   const bookOwnerId = conversation?.book?.users?.[0]?.user?.id;
+
+  // Live thread: messages used to appear only when you sent one yourself or
+  // reloaded the page.
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket || !id) return;
+
+    const join = () => socket.emit("conversation:join", Number(id));
+    join();
+    socket.on("connect", join);
+
+    const onMessage = (incoming: ChatMessage) => {
+      queryClient.setQueryData<ChatMessage[]>(["messages", id], (old = []) =>
+        // the sender already has it from their own request
+        old.some((m) => m.id === incoming.id) ? old : [...old, incoming]
+      );
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    };
+    socket.on("message:new", onMessage);
+
+    return () => {
+      socket.emit("conversation:leave", Number(id));
+      socket.off("message:new", onMessage);
+      socket.off("connect", join);
+    };
+  }, [id, queryClient]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

@@ -1,5 +1,6 @@
 import prisma from "../utils/db.js";
 import { notifyNewMessage } from "../utils/notify.js";
+import { emitToConversation } from "../utils/realtime.js";
 import { publicUserSelect } from "../utils/selects.js";
 
 const messageSelect = {
@@ -28,6 +29,9 @@ const sendMessage = async (req, res) => {
     where: { id: conversationId },
     data: { updatedAt: new Date() },
   });
+
+  // everyone with the thread open sees it immediately
+  emitToConversation(conversationId, "message:new", message);
 
   notifyNewMessage({
     conversationId,

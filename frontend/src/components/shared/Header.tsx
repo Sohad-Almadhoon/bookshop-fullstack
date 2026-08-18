@@ -5,6 +5,7 @@ import { BsBook, BsChatDots, BsCompass, BsInfoCircle, BsPencilSquare, BsPersonFi
 import { twMerge } from "tailwind-merge";
 import { logout } from "../../actions/user.action";
 import { getStoredToken } from "../../utils/session";
+import Notifications from "./Notifications";
 
 interface HeaderProps {
   title?: ReactNode;
@@ -61,6 +62,8 @@ const Header: React.FC<HeaderProps> = () => {
       )}
 
       <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+        {isSignedIn && <Notifications />}
+
         {isSignedIn && (
           <NavLink
             to="/messages"

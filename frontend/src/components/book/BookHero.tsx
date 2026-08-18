@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { BsCalendar2, BsBook, BsTrash } from "react-icons/bs";
+import { BsCalendar2, BsBook, BsTrash, BsPencil, BsShare } from "react-icons/bs";
 import toast from "react-hot-toast";
 import Button from "../shared/Button";
 import ConfirmDialog from "../shared/ConfirmDialog";
+import EditBookModal from "./EditBookModal";
 import ActionButtons from "./ActionButtons";
 import newRequest, { getErrorMessage } from "../../utils/newRequest";
 import { formatDate } from "../../utils/helpers";
@@ -49,6 +50,7 @@ const BookHero: React.FC<BookHeroProps> = ({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   const canContribute = isOwner || hasPaid;
 
@@ -99,12 +101,20 @@ const BookHero: React.FC<BookHeroProps> = ({
           </div>
 
           {isOwner && (
+            <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              onClick={() => setEditOpen(true)}
+              className="flex items-center gap-2 rounded-md border border-black/30 px-3 py-2 text-sm transition-colors hover:bg-black hover:text-white">
+              <BsPencil /> Edit
+            </button>
             <button
               type="button"
               onClick={() => setConfirmOpen(true)}
               className="flex shrink-0 items-center gap-2 rounded-md border border-red-900/40 px-3 py-2 text-sm text-red-900 transition-colors hover:bg-red-900 hover:text-white">
               <BsTrash /> Delete book
             </button>
+            </div>
           )}
         </div>
 
@@ -144,6 +154,19 @@ const BookHero: React.FC<BookHeroProps> = ({
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
+          <Button
+            variant="outline"
+            className="flex w-full items-center justify-center gap-2 px-6 py-2 text-sm sm:w-fit"
+            onClick={() => {
+              // the public page needs no account, so this link works anywhere
+              const url = `${window.location.origin}/read/${bookId}`;
+              navigator.clipboard
+                ?.writeText(url)
+                .then(() => toast.success("Public link copied"))
+                .catch(() => toast.error(url));
+            }}>
+            <BsShare /> Share
+          </Button>
           {canContribute ? (
             <Button
               className="w-full px-6 py-2 text-sm sm:w-fit"
@@ -161,6 +184,14 @@ const BookHero: React.FC<BookHeroProps> = ({
           )}
         </div>
       </div>
+
+      {isOwner && (
+        <EditBookModal
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          book={{ id: bookId, title, author, description, generes: genres, main_cover: imgUrl }}
+        />
+      )}
 
       <ConfirmDialog
         open={confirmOpen}

@@ -1,6 +1,7 @@
 // MUST be first: loads and validates .env before any module reads process.env.
 import env, { isAllowedOrigin } from "./utils/env.js";
 
+import http from "http";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -18,6 +19,7 @@ import checkoutRouter from "./routes/checkout.route.js";
 import paymentRouter from "./routes/payment.route.js";
 import { errorHandler, notFoundHandler } from "./middlewares/errorMiddleware.js";
 import { apiLimiter, authLimiter } from "./middlewares/rateLimit.js";
+import { initRealtime } from "./utils/realtime.js";
 
 const app = express();
 
@@ -59,7 +61,11 @@ app.use("/api/payment", paymentRouter);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-app.listen(env.port, () => {
+// Socket.IO shares the HTTP server, so one port serves both.
+const server = http.createServer(app);
+initRealtime(server);
+
+server.listen(env.port, () => {
   console.log(`Backend server is running on port ${env.port}!`);
 });
 
