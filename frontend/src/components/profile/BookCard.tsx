@@ -5,15 +5,28 @@ import newRequest from "../../utils/newRequest";
 import usePrefetch from "../../hooks/usePrefetch";
 import { Book } from "../../actions/books.action";
 
-const BookCard = ({ book }: { book: Book }) => {
+interface BookCardProps {
+  book: Book;
+  /** Supplied by the library grid, which already has the counts. */
+  likes?: number;
+  follows?: number;
+}
+
+const BookCard = ({ book, likes, follows }: BookCardProps) => {
   const { title, author, main_cover, id } = book;
   const { prefetchBook } = usePrefetch();
 
+  // Only ask for the counts when the caller has not already got them: a grid of
+  // twenty cards used to fire twenty extra requests.
+  const hasCounts = likes !== undefined;
   const { data: stats } = useQuery<{ likes: number; follows: number }>({
     queryKey: ["bookStats", id],
     queryFn: async () => (await newRequest.get(`/api/books/${id}/stats`)).data,
-    enabled: Boolean(id),
+    enabled: Boolean(id) && !hasCounts,
   });
+
+  const likeCount = hasCounts ? likes : stats?.likes;
+  const followCount = follows ?? stats?.follows;
 
   return (
     <Link
@@ -36,11 +49,15 @@ const BookCard = ({ book }: { book: Book }) => {
           <div className="mt-2 flex items-center gap-4 text-xs">
             {/* icons used to be swapped: the heart showed follows */}
             <span className="flex items-center gap-1.5" title="Likes">
-              <BsHeartFill className="text-red-500" /> {stats?.likes ?? 0}
+              <BsHeartFill className="text-red-500" /> {likeCount ?? 0}
             </span>
-            <span className="flex items-center gap-1.5" title="Followers">
-              <BsPeopleFill /> {stats?.follows ?? 0}
-            </span>
+            {/* the library grid only ships like counts; showing a hard 0 for
+                followers there would be wrong rather than merely empty */}
+            {followCount !== undefined && (
+              <span className="flex items-center gap-1.5" title="Followers">
+                <BsPeopleFill /> {followCount}
+              </span>
+            )}
           </div>
         </div>
       </div>

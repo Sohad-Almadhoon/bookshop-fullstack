@@ -10,6 +10,8 @@ import {
 } from "../validations/content.validation.js";
 import {
   createBook,
+  searchBooks,
+  getGenres,
   deleteBook,
   followBook,
   getBook,
@@ -38,6 +40,9 @@ router.use(verifyToken);
 
 router.post("/", validateRequest(createBookSchema), asyncHandler(createBook));
 router.get("/random-books", asyncHandler(getRandomBooks));
+// the library: search, filter, sort, paginate
+router.get("/search", asyncHandler(searchBooks));
+router.get("/genres", asyncHandler(getGenres));
 router.get("/:id", asyncHandler(getBook));
 router.delete("/:id", requireBookOwner, asyncHandler(deleteBook));
 

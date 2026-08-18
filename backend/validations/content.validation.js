@@ -2,15 +2,21 @@ import { z } from "zod";
 
 const url = z.string().trim().url("Must be a valid URL").max(2048);
 
+// A genre has to contain an actual word: the comma-separated input happily
+// produced entries like "." before this.
+const genre = z
+  .string()
+  .trim()
+  .min(2, "A genre needs at least two characters")
+  .max(40)
+  .regex(/[a-zA-Z؀-ۿ]/, "A genre must contain letters");
+
 export const createBookSchema = z.object({
   body: z.object({
     title: z.string().trim().min(1, "Title is required").max(120),
     author: z.string().trim().min(1, "Author is required").max(120),
     description: z.string().trim().min(1, "Description is required").max(2000),
-    generes: z
-      .array(z.string().trim().min(1).max(40))
-      .min(1, "At least one genre is required")
-      .max(20),
+    generes: z.array(genre).min(1, "At least one genre is required").max(20),
     main_cover: url,
   }),
 });

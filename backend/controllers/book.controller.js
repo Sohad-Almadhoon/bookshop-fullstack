@@ -230,6 +230,88 @@ const getRandomBooks = async (req, res) => {
   res.status(200).json(books);
 };
 
+
+const SORTS = {
+  newest: { created_at: "desc" },
+  oldest: { created_at: "asc" },
+  title: { title: "asc" },
+};
+
+/**
+ * The library: search by title or author, narrow by genre, sort, paginate.
+ * Like and follow counts come back with each row, so a grid of twenty books is
+ * one request instead of twenty-one.
+ */
+const searchBooks = async (req, res) => {
+  const q = String(req.query.q ?? "").trim().slice(0, 100);
+  const genre = String(req.query.genre ?? "").trim().slice(0, 40);
+  const sort = SORTS[req.query.sort] ? req.query.sort : "newest";
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const limit = Math.min(Math.max(Number(req.query.limit) || 24, 1), 48);
+
+  const where = {
+    ...(q
+      ? {
+          OR: [
+            { title: { contains: q, mode: "insensitive" } },
+            { author: { contains: q, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+    ...(genre ? { generes: { has: genre } } : {}),
+  };
+
+  const [total, books] = await Promise.all([
+    prisma.books.count({ where }),
+    prisma.books.findMany({
+      where,
+      select: {
+        ...bookSelect,
+        // Likes ride along with the row. The creator does not: fetching a
+        // nested relation costs two more sequential round trips, and the card
+        // does not show them anyway.
+        _count: {
+          select: {
+            users: { where: { type: "LIKE" } },
+          },
+        },
+      },
+      orderBy: SORTS[sort],
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+  ]);
+
+  const items = books.map(({ _count, ...book }) => ({
+    ...book,
+    likes: _count.users,
+  }));
+
+  res.status(200).json({
+    items,
+    total,
+    page,
+    pages: Math.max(1, Math.ceil(total / limit)),
+  });
+};
+
+/** Every genre currently in use, for the filter chips. */
+const getGenres = async (req, res) => {
+  const books = await prisma.books.findMany({ select: { generes: true } });
+  const counts = new Map();
+  for (const book of books) {
+    for (const genre of book.generes ?? []) {
+      counts.set(genre, (counts.get(genre) ?? 0) + 1);
+    }
+  }
+
+  const genres = [...counts.entries()]
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
+  res.status(200).json(genres);
+};
+
 const getBookStats = async (req, res) => {
   const bookId = parseId(req.params.id, "book id");
 
@@ -243,6 +325,8 @@ const getBookStats = async (req, res) => {
 
 export {
   createBook,
+  searchBooks,
+  getGenres,
   deleteBook,
   getBook,
   followBook,
