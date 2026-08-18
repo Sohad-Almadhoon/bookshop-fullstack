@@ -16,7 +16,7 @@ const ProfileMenu = () => {
     <Menu as="div" className="relative">
       <div>
         <MenuButton>
-          <img src="/assets/menu-black.svg" alt="" />
+          <img src="/assets/menu-black.svg" alt="" width={77} height={58} />
         </MenuButton>
       </div>
       <Transition

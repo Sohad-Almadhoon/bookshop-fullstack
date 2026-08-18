@@ -8,7 +8,7 @@ const SideImage = () => (
         src="/assets/landing-pattern.svg"
         alt=""
         className="w-full h-full object-cover"
-      />
+       width={2641} height={1650} />
     </div>
   </div>
 );

@@ -32,7 +32,7 @@ const Messages = () => {
       <div className="border-black border flex-1 sm:mx-4 lg:mx-16 sm:my-4 lg:my-8">
         <div className="flex justify-between items-center p-4">
           <p className="text-2xl">Messages</p>
-          <img src="/assets/file-check.svg" alt="" />
+          <img src="/assets/file-check.svg" alt=""  width={24} height={24} />
         </div>
         <hr className="border-t-2 border-black" />
         <div>

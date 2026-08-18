@@ -38,14 +38,14 @@ const destinations: Destination[] = [
     icon: "/assets/bat.png",
     label: "How it works",
     ringText: "How it works  How it works",
-    href: "/coming-soon",
+    href: "/how-it-works",
     desktop: "right-[20%] bottom-[52%]",
   },
   {
     icon: "/assets/fish-2.png",
     label: "About",
     ringText: "About About About  About ",
-    href: "/coming-soon",
+    href: "/about",
     desktop: "right-[14%] bottom-[16%]",
   },
 ];
@@ -64,7 +64,7 @@ const Tree = () => (
         alt=""
         className="w-40 mx-auto mb-6 opacity-80"
         aria-hidden="true"
-      />
+       width={594} height={676} />
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-xl mx-auto">
         {destinations.map((item) => (
           <Link
@@ -100,7 +100,7 @@ const Tree = () => (
         src="/assets/tree.svg"
         alt="tree"
         className="mt-28 w-[35%] z-0 relative"
-      />
+       width={594} height={676} />
     </div>
   </div>
 );

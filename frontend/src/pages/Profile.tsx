@@ -11,7 +11,6 @@ import {
   UserBookRow,
 } from "../actions/books.action";
 import { getCurrentUser } from "../utils/session";
-import Loader from "../components/shared/Loader";
 
 const Profile: React.FC = () => {
   const [tab, setTab] = useState<number>(0);
@@ -61,15 +60,12 @@ const Profile: React.FC = () => {
         {profileId && <ProfileInfo id={profileId} />}
         <div className="flex-1">
           <ProfileActions tabs={tabs} tab={tab} setTab={setTab} />
-          {isLoading ? (
-            <Loader />
-          ) : (
-            <BookGrid
-              tab={tab}
-              books={tab === 0 ? books : followingBooks}
-              isOwnProfile={isOwnProfile}
-            />
-          )}
+          <BookGrid
+            tab={tab}
+            books={tab === 0 ? books : followingBooks}
+            isOwnProfile={isOwnProfile}
+            isLoading={isLoading}
+          />
         </div>
       </div>
     </div>

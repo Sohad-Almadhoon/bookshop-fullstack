@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import GenreTags from "./GenreTags";
 import newRequest, { getErrorMessage } from "../../utils/newRequest";
-import Loader from "../shared/Loader";
 
 interface ProfileInfoProps {
   id: number | string;
@@ -27,7 +26,26 @@ const ProfileInfo = ({ id }: ProfileInfoProps) => {
     retry: 1,
   });
 
-  if (isLoading) return <Loader />;
+  // A generic spinner is a different height from the real card, so the page
+  // jumped upwards once the profile arrived. Match the card's own shape.
+  if (isLoading) {
+    return (
+      <div className="border border-opacity-30 border-black rounded-xl p-4 sm:p-8 mt-5 flex lg:flex-row flex-col gap-4 animate-pulse">
+        <div className="flex justify-center lg:justify-start">
+          <span className="size-20 sm:size-24 rounded-full bg-black/10 shrink-0" />
+        </div>
+        <div className="flex-1 min-w-0 space-y-3">
+          <div className="h-8 sm:h-12 w-2/3 rounded bg-black/10" />
+          <div className="h-4 w-full rounded bg-black/10" />
+          <div className="h-4 w-4/5 rounded bg-black/10" />
+        </div>
+        <div className="flex flex-col gap-3 shrink-0">
+          <div className="h-[68px] w-64 rounded-md bg-black/10" />
+          <div className="h-8 w-56 rounded bg-black/10" />
+        </div>
+      </div>
+    );
+  }
 
   if (isError || !user) {
     return (
@@ -60,13 +78,13 @@ const ProfileInfo = ({ id }: ProfileInfoProps) => {
         <div className="relative mt-10 lg:mt-0">
           <div className="border border-black px-8 sm:px-16 border-opacity-30 rounded-md text-center text-2xl p-2 z-10 text-black">
             <div className="absolute -left-6 sm:-left-10 top-[-30px] sm:top-[-38px] hidden sm:block">
-              <img className="horn-left" src="/assets/horn-left.png" alt="" />
+              <img className="horn-left" src="/assets/horn-left.png" alt=""  width={99} height={69} />
             </div>
             <p className="text-opacity-70 text-black font-cardinal text-3xl sm:text-4xl">
               {user.role}
             </p>
             <div className="absolute -right-6 sm:-right-10 top-[-30px] sm:top-[-38px] hidden sm:block">
-              <img className="horn-right" src="/assets/horn-right.png" alt="" />
+              <img className="horn-right" src="/assets/horn-right.png" alt=""  width={99} height={69} />
             </div>
           </div>
         </div>

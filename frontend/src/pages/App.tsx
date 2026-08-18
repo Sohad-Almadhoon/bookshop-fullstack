@@ -12,7 +12,8 @@ import Welcome from "./Welcome";
 import Tree from "./Tree";
 import ModalProvider from "../providers/ModalProvider";
 import Questionnaire from "./Questionnaire";
-import ComingSoon from "./ComingSoon";
+import About from "./About";
+import HowItWorks from "./HowItWorks";
 import Discover from "./Discover";
 import ProtectedRoute from "../components/route/ProtectedRoute";
 import Chapter from "./Chapter";
@@ -56,7 +57,10 @@ const router = createBrowserRouter([
       { path: "/books/:id", element: <Book /> },
       { path: "/welcome", element: <Welcome /> },
       { path: "/tree", element: <Tree /> },
-      { path: "/coming-soon", element: <ComingSoon /> },
+      { path: "/about", element: <About /> },
+      { path: "/how-it-works", element: <HowItWorks /> },
+      // the tree used to send both of these to a placeholder page
+      { path: "/coming-soon", element: <About /> },
       { path: "/discover", element: <Discover /> },
       {
         path: "/chapters/:id",

@@ -29,7 +29,7 @@ const LandingPage = () => {
     <div className="w-full flex flex-col items-center justify-center min-h-screen bg-[#ddd1bb] font-romie">
       <div className="max-w-3xl py-5 flex justify-center items-center md:flex-1 w-full">
         <div className="relative">
-          <img src="/assets/home-circle.svg" alt="" />
+          <img src="/assets/home-circle.svg" alt="" width={1070} height={802} className="w-full" />
           <div className="absolute flex flex-col items-center gap-3 top-1/2 md:top-1/4 inset-0">
             <h1 className="text-5xl sm:text-7xl lg:text-9xl mb-2 font-voyage">
               Block{" "}

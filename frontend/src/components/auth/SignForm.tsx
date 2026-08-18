@@ -25,7 +25,9 @@ const SignForm: React.FC<SignFormProps> = ({
       <div className="border border-black w-fit h-fit mx-auto rounded-full p-1 mt-5">
         <img
           src="/assets/mask-dark.svg"
-          alt="Login or Register Icon"
+          alt=""
+          width={164}
+          height={164}
           className="border rounded-full border-black"
         />
       </div>

@@ -100,8 +100,8 @@ const Discover: FC = () => {
               ))}
           </div>
           <div className="flex z-20">
-            <img src="/assets/wolf-left.png" alt="" className="absolute bottom-0 left-0" />
-            <img src="/assets/wolf-right.png" alt="" className="absolute bottom-0 right-0" />
+            <img src="/assets/wolf-left.png" alt="" className="absolute bottom-0 left-0"  width={388} height={399} />
+            <img src="/assets/wolf-right.png" alt="" className="absolute bottom-0 right-0"  width={404} height={415} />
           </div>
         </div>
       </div>
