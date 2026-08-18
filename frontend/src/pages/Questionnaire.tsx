@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -32,14 +32,17 @@ const Questionnaire: React.FC = () => {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
 
   const hasAccountDetails = Boolean(formData.name && formData.email && formData.password);
+  // Registering clears the store on purpose, which would otherwise look exactly
+  // like "arrived here without filling the form" and bounce the new user back
+  // to /register right after their account was created.
+  const registeredRef = useRef(false);
 
   // The store lives in memory only, so a refresh here would post an incomplete
   // payload and fail with a confusing validation error.
   useEffect(() => {
-    if (!hasAccountDetails) {
-      toast.error("Please fill in your account details first.");
-      navigate("/register", { replace: true });
-    }
+    if (registeredRef.current || hasAccountDetails) return;
+    toast.error("Please fill in your account details first.");
+    navigate("/register", { replace: true });
   }, [hasAccountDetails, navigate]);
 
   const handleGenreChange = (genre: string) => {
@@ -61,6 +64,7 @@ const Questionnaire: React.FC = () => {
     },
     onSuccess: (session) => {
       // The API signs the user in directly - no second login round trip.
+      registeredRef.current = true;
       setSession(session);
       resetFormData();
       toast.success("Account created successfully. Welcome!");
@@ -83,7 +87,9 @@ const Questionnaire: React.FC = () => {
     mutation.mutate();
   };
 
-  if (!hasAccountDetails) return null;
+  // Keep rendering while the redirect to /welcome commits, otherwise the page
+  // blanks out for a frame after the store is cleared.
+  if (!hasAccountDetails && !registeredRef.current) return null;
 
   return (
     <div className="flex flex-col min-h-screen">
