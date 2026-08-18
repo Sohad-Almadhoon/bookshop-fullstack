@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import Loader from "../shared/Loader";
 import ConfirmDialog from "../shared/ConfirmDialog";
 import newRequest, { getErrorMessage } from "../../utils/newRequest";
+import usePrefetch from "../../hooks/usePrefetch";
 
 export interface Chapter {
   id: number;
@@ -32,6 +33,7 @@ const ChaptersArea: React.FC<ChaptersAreaProps> = ({
   isOwner,
 }) => {
   const queryClient = useQueryClient();
+  const { prefetchChapter } = usePrefetch();
   const [pendingDelete, setPendingDelete] = useState<Chapter | null>(null);
 
   const deleteChapter = useMutation({
@@ -70,6 +72,8 @@ const ChaptersArea: React.FC<ChaptersAreaProps> = ({
             <li key={chapter.id} className="group relative">
               <Link
                 to={`/chapters/${chapter.id}`}
+                onMouseEnter={() => prefetchChapter(chapter.id)}
+                onFocus={() => prefetchChapter(chapter.id)}
                 className="block overflow-hidden rounded-lg border-2 border-black transition-transform hover:-translate-y-1">
                 <div className="aspect-[3/4] w-full bg-black/5">
                   <img

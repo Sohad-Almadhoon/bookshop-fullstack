@@ -2,10 +2,12 @@ import { Link } from "react-router-dom";
 import { BsHeartFill, BsPeopleFill } from "react-icons/bs";
 import { useQuery } from "@tanstack/react-query";
 import newRequest from "../../utils/newRequest";
+import usePrefetch from "../../hooks/usePrefetch";
 import { Book } from "../../actions/books.action";
 
 const BookCard = ({ book }: { book: Book }) => {
   const { title, author, main_cover, id } = book;
+  const { prefetchBook } = usePrefetch();
 
   const { data: stats } = useQuery<{ likes: number; follows: number }>({
     queryKey: ["bookStats", id],
@@ -16,6 +18,9 @@ const BookCard = ({ book }: { book: Book }) => {
   return (
     <Link
       to={`/books/${id}`}
+      // start loading the book while the pointer is still on the card
+      onMouseEnter={() => prefetchBook(id)}
+      onFocus={() => prefetchBook(id)}
       className="group block overflow-hidden rounded-lg border-2 border-black transition-transform hover:-translate-y-1">
       {/* same 3:4 box as the chapter cards, so no cover is ever squashed */}
       <div className="relative aspect-[3/4] w-full bg-black/5">

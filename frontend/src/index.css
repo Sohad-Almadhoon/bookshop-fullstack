@@ -103,3 +103,26 @@ input[type="range"]::-webkit-slider-thumb {
    background: #000;
 
 }
+
+/* A short fade so a route change reads as a transition rather than a hard cut.
+   Disabled for anyone who asked for reduced motion. */
+@keyframes route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.route-transition {
+  animation: route-enter 220ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-transition {
+    animation: none;
+  }
+}

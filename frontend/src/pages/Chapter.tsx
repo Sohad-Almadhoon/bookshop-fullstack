@@ -76,13 +76,7 @@ const ChapterPage: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header
-        title={
-          <span className="truncate text-2xl uppercase font-romieMedium">
-            {chapter.book?.title}
-          </span>
-        }
-      />
+      <Header />
 
       <main className="flex-1 border border-black p-4 sm:p-6 lg:p-10">
         <Link

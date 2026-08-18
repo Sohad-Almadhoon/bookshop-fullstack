@@ -1,4 +1,9 @@
-import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Outlet,
+  useLocation,
+} from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Register from "./Register";
 import Login from "./Login";
@@ -26,6 +31,10 @@ import NotFound from "./NotFound";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      // A minute of freshness turns a revisit into an instant render instead of
+      // another spinner: navigation used to refetch everything on every mount.
+      staleTime: 60 * 1000,
+      gcTime: 10 * 60 * 1000,
       refetchOnWindowFocus: false,
       // Never retry auth failures: the interceptor already logged the user out.
       retry: (failureCount, error: any) => {
@@ -38,14 +47,20 @@ const queryClient = new QueryClient({
 });
 
 // Layout for protected routes
-const Layout = () => (
-  <ProtectedRoute>
-    <div className="bg-[#DDD1BB] min-h-screen p-2 relative font-romie">
-      <ModalProvider />
-      <Outlet />
-    </div>
-  </ProtectedRoute>
-);
+const Layout = () => {
+  const location = useLocation();
+  return (
+    <ProtectedRoute>
+      <div className="bg-[#DDD1BB] min-h-screen p-2 relative font-romie">
+        <ModalProvider />
+        {/* keyed on the path so the fade replays on every route change */}
+        <div key={location.pathname} className="route-transition">
+          <Outlet />
+        </div>
+      </div>
+    </ProtectedRoute>
+  );
+};
 
 const router = createBrowserRouter([
   {

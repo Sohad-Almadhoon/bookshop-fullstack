@@ -57,8 +57,11 @@ const getBookChapters = async (req, res) => {
 
 /** Single chapter looked up by its own id - no book id needed by the client. */
 const getChapter = async (req, res) => {
-  const chapterId = parseId(req.params.chapterId, "chapter id");
+  // requireChapterAccess already loaded the whole chapter to decide access,
+  // so this is a hand-off rather than a second identical query.
+  if (req.chapter) return res.status(200).json(req.chapter);
 
+  const chapterId = parseId(req.params.chapterId, "chapter id");
   const chapter = await prisma.chapters.findUnique({
     where: { id: chapterId },
     select: chapterSelect,

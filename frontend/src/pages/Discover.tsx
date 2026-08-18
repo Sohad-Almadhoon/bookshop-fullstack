@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Header from "../components/shared/Header";
 import newRequest, { getErrorMessage } from "../utils/newRequest";
 import Loader from "../components/shared/Loader";
+import usePrefetch from "../hooks/usePrefetch";
 
 interface Book {
   id: number;
@@ -37,6 +38,7 @@ const Discover: FC = () => {
   });
 
   const [activeCard, setActiveCard] = useState<number | null>(null);
+  const { prefetchBook } = usePrefetch();
 
   const status = isLoading ? (
     <Loader />
@@ -48,7 +50,7 @@ const Discover: FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header title={<h3 className="text-3xl uppercase">Explore Books</h3>} />
+      <Header />
       <div className="border border-black flex-1 relative">
         {/* Phones and tablets get a real grid: the fanned stack below relies on
             hover, which does not exist on touch, and the cards overlapped each
@@ -91,7 +93,10 @@ const Discover: FC = () => {
                           ? "scale-75 opacity-50"
                           : fanStyles[index % fanStyles.length]
                       }`}
-                  onMouseEnter={() => setActiveCard(index)}
+                  onMouseEnter={() => {
+                    setActiveCard(index);
+                    prefetchBook(book.id);
+                  }}
                   onMouseLeave={() => setActiveCard(null)}
                   onFocus={() => setActiveCard(index)}
                   onBlur={() => setActiveCard(null)}>

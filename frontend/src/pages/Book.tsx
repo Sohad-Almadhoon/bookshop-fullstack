@@ -57,7 +57,7 @@ const Book = () => {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header title={book.title} className="text-2xl uppercase truncate max-w-[40vw]" />
+      <Header />
       <main className="flex flex-1 flex-col gap-10 border border-black p-4 sm:p-6 lg:p-10">
         <BookHero
           bookId={book.id}
