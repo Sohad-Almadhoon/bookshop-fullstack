@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import GenreTags from "./GenreTags";
+import UserBadges from "../shared/UserBadges";
 import newRequest, { getErrorMessage } from "../../utils/newRequest";
 
 interface ProfileInfoProps {
@@ -65,6 +66,9 @@ const ProfileInfo = ({ id }: ProfileInfoProps) => {
       <div className="flex-1 min-w-0 text-center lg:text-start">
         <h1 className="uppercase text-2xl sm:text-3xl lg:text-5xl text-black font-romieMedium mb-3 break-words">
           {user.name} <sub className="text-lg sm:text-2xl">nox</sub>
+          <span className="ml-3 align-middle">
+            <UserBadges role={user.role} />
+          </span>
         </h1>
         <p className="max-w-[640px] mb-3 text-sm font-baskervville">
           I am a dedicated <b className="underline">{user.role}</b> that aspires to be the

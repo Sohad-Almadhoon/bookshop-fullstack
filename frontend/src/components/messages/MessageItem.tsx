@@ -1,14 +1,24 @@
 import { twMerge } from "tailwind-merge";
 import { formatClock } from "../../utils/helpers";
+import UserBadges from "../shared/UserBadges";
 
 interface MessageItemProps {
   text: string;
   isMe: boolean;
   senderName: string;
   time: string;
+  role?: string;
+  isBookOwner?: boolean;
 }
 
-const MessageItem: React.FC<MessageItemProps> = ({ text, isMe, senderName, time }) => (
+const MessageItem: React.FC<MessageItemProps> = ({
+  text,
+  isMe,
+  senderName,
+  time,
+  role,
+  isBookOwner,
+}) => (
   <div className={`flex mt-4 ${isMe ? "flex-row-reverse" : ""}`}>
     <div className="flex items-end">
       <span
@@ -24,7 +34,11 @@ const MessageItem: React.FC<MessageItemProps> = ({ text, isMe, senderName, time 
         isMe ? "bg-black text-gray-300" : "bg-white"
       } rounded-md`}>
       <div className="flex justify-between gap-3">
-        <span className="font-bold">{senderName || "~Anonymous"}</span>
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="font-bold">{senderName || "~Anonymous"}</span>
+          {/* own messages sit on a black bubble, where the badges would vanish */}
+          {!isMe && <UserBadges role={role} isOwner={isBookOwner} />}
+        </span>
         {/* text-white on a white bubble made this invisible for other people */}
         <span className={`text-sm ${isMe ? "text-gray-300" : "text-gray-500"}`}>
           {formatClock(time)}

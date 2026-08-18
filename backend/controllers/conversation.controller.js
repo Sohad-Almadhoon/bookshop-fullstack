@@ -1,5 +1,5 @@
 import prisma from "../utils/db.js";
-import { publicUserSelect } from "../utils/selects.js";
+import { publicUserSelect, bookOwnerSelect } from "../utils/selects.js";
 import { notFound } from "../utils/httpError.js";
 
 const conversationSelect = {
@@ -10,7 +10,15 @@ const conversationSelect = {
   participants: {
     select: { id: true, userId: true, user: { select: publicUserSelect } },
   },
-  book: { select: { id: true, title: true, author: true, main_cover: true } },
+  book: {
+    select: {
+      id: true,
+      title: true,
+      author: true,
+      main_cover: true,
+      users: bookOwnerSelect,
+    },
+  },
 };
 
 const getUserConversations = async (req, res) => {

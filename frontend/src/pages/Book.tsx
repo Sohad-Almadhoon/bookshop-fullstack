@@ -15,6 +15,7 @@ interface BookData {
   main_cover: string;
   generes: string[];
   created_at: string;
+  owner?: { id: number; name: string; role?: string } | null;
 }
 
 const Book = () => {
@@ -69,6 +70,7 @@ const Book = () => {
           createdAt={book.created_at}
           chapterCount={chaptersQuery.data?.length ?? 0}
           isOwner={Boolean(states?.isOwner)}
+          owner={book.owner}
         />
 
         <ChaptersArea

@@ -1,5 +1,5 @@
 import prisma from "../utils/db.js";
-import { bookSelect } from "../utils/selects.js";
+import { bookSelect, bookOwnerSelect } from "../utils/selects.js";
 import { notFound, parseId, HttpError } from "../utils/httpError.js";
 
 const createBook = async (req, res) => {
@@ -35,10 +35,15 @@ const createBook = async (req, res) => {
 const getBook = async (req, res) => {
   const id = parseId(req.params.id, "book id");
 
-  const book = await prisma.books.findUnique({ where: { id }, select: bookSelect });
+  const book = await prisma.books.findUnique({
+    where: { id },
+    // the creator travels with the book, so the page can mark their comments
+    select: { ...bookSelect, users: bookOwnerSelect },
+  });
   if (!book) throw notFound("Book not found.");
 
-  res.status(200).json(book);
+  const { users, ...rest } = book;
+  res.status(200).json({ ...rest, owner: users[0]?.user ?? null });
 };
 
 /**

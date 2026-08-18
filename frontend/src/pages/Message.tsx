@@ -17,12 +17,19 @@ interface ChatMessage {
   content: string;
   senderId: number;
   createdAt: string;
-  sender: { id: number; name: string };
+  sender: { id: number; name: string; role?: string };
 }
 
 interface ConversationData {
   id: number;
-  book: { id: number; title: string; author: string; main_cover: string } | null;
+  book: {
+    id: number;
+    title: string;
+    author: string;
+    main_cover: string;
+    // the book's creator, so their messages can be marked in the thread
+    users?: { user: { id: number; name: string; role: string } }[];
+  } | null;
 }
 
 const Message: React.FC = () => {
@@ -53,6 +60,8 @@ const Message: React.FC = () => {
     },
     enabled: Boolean(id),
   });
+
+  const bookOwnerId = conversation?.book?.users?.[0]?.user?.id;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -99,6 +108,8 @@ const Message: React.FC = () => {
                 text={msg.content}
                 isMe={msg.senderId === currentUser?.id}
                 senderName={msg.sender?.name || "Anonymous"}
+                role={msg.sender?.role}
+                isBookOwner={Boolean(bookOwnerId) && msg.senderId === bookOwnerId}
                 // was msg.sender.created_at: the sender's signup date
                 time={msg.createdAt}
               />

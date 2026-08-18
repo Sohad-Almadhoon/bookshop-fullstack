@@ -25,3 +25,13 @@ export const bookSelect = {
   main_cover: true,
   created_at: true,
 };
+
+/**
+ * The creator of a book, as shown next to their name in comments and chat.
+ * Ownership lives in user_books with type "ALL".
+ */
+export const bookOwnerSelect = {
+  where: { type: "ALL" },
+  select: { user: { select: { id: true, name: true, role: true } } },
+  take: 1,
+};

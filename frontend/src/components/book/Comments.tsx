@@ -8,10 +8,12 @@ import newRequest, { getErrorMessage } from "../../utils/newRequest";
 import Loader from "../shared/Loader";
 import { formatDateTime } from "../../utils/helpers";
 import { getCurrentUser } from "../../utils/session";
+import UserBadges from "../shared/UserBadges";
 
 interface User {
   name: string;
   id: number;
+  role?: string;
 }
 
 interface CommentType {
@@ -27,6 +29,10 @@ const Comments = () => {
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
   const currentUserId = getCurrentUser()?.id;
+  // The book already carries its creator, so marking their comments costs
+  // nothing extra: this reads the cache the book page just filled.
+  const book = queryClient.getQueryData<{ owner?: { id: number } }>(["book", id]);
+  const ownerId = book?.owner?.id;
 
   const {
     data: comments = [],
@@ -100,6 +106,7 @@ const Comments = () => {
               bookId={id}
               comment={comment}
               canDelete={comment.user?.id === currentUserId}
+              isBookOwner={Boolean(ownerId) && comment.user?.id === ownerId}
             />
           ))}
         </div>
@@ -114,9 +121,10 @@ interface CommentProps {
   comment: CommentType;
   bookId?: string;
   canDelete: boolean;
+  isBookOwner?: boolean;
 }
 
-const Comment: FC<CommentProps> = ({ comment, bookId, canDelete }) => {
+const Comment: FC<CommentProps> = ({ comment, bookId, canDelete, isBookOwner }) => {
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
@@ -140,6 +148,7 @@ const Comment: FC<CommentProps> = ({ comment, bookId, canDelete }) => {
             {comment.user.name.charAt(0)}
           </Link>
           <p className="font-bold">{comment.user.name}</p>
+          <UserBadges role={comment.user.role} isOwner={isBookOwner} />
         </div>
         <span className="text-sm">{formatDateTime(comment.created_at)}</span>
       </div>

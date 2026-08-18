@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BsCalendar2, BsBook, BsTrash } from "react-icons/bs";
 import toast from "react-hot-toast";
@@ -8,6 +8,7 @@ import ConfirmDialog from "../shared/ConfirmDialog";
 import ActionButtons from "./ActionButtons";
 import newRequest, { getErrorMessage } from "../../utils/newRequest";
 import { formatDate } from "../../utils/helpers";
+import UserBadges from "../shared/UserBadges";
 import useAccount from "../../hooks/useAccount";
 import useCheckout from "../../hooks/useCheckout";
 import { useNovelModal } from "../../hooks/useNovelModal";
@@ -22,6 +23,7 @@ interface BookHeroProps {
   createdAt: string;
   chapterCount: number;
   isOwner: boolean;
+  owner?: { id: number; name: string; role?: string } | null;
 }
 
 /**
@@ -39,6 +41,7 @@ const BookHero: React.FC<BookHeroProps> = ({
   createdAt,
   chapterCount,
   isOwner,
+  owner,
 }) => {
   const { openModal } = useNovelModal();
   const { hasPaid, isChecking } = useAccount();
@@ -81,6 +84,18 @@ const BookHero: React.FC<BookHeroProps> = ({
               {title}
             </h1>
             <p className="mt-1 font-baskervville text-sm text-black/60">by {author}</p>
+            {owner && (
+              <p className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                <span className="text-black/50">Created by</span>
+                <Link
+                  to="/profile"
+                  state={{ userId: owner.id }}
+                  className="font-romieMedium underline underline-offset-4">
+                  {owner.name}
+                </Link>
+                <UserBadges role={owner.role} isOwner />
+              </p>
+            )}
           </div>
 
           {isOwner && (
