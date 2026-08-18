@@ -12,6 +12,8 @@ import chapterRoutes from "./routes/chapters.route.js";
 import conversationRoutes from "./routes/conversation.route.js";
 import messageRoutes from "./routes/message.route.js";
 import uploadRoutes from "./routes/upload.route.js";
+import notificationRoutes from "./routes/notification.route.js";
+import publicRoutes from "./routes/public.route.js";
 import checkoutRouter from "./routes/checkout.route.js";
 import paymentRouter from "./routes/payment.route.js";
 import { errorHandler, notFoundHandler } from "./middlewares/errorMiddleware.js";
@@ -48,6 +50,9 @@ app.use("/api/chapters", chapterRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/notifications", notificationRoutes);
+// unauthenticated, read-only, no chapter content
+app.use("/api/public", publicRoutes);
 app.use("/api/create-checkout-session", checkoutRouter);
 app.use("/api/payment", paymentRouter);
 

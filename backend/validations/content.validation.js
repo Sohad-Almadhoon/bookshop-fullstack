@@ -21,6 +21,37 @@ export const createBookSchema = z.object({
   }),
 });
 
+export const updateBookSchema = z.object({
+  body: z
+    .object({
+      title: z.string().trim().min(1, "Title is required").max(120).optional(),
+      author: z.string().trim().min(1, "Author is required").max(120).optional(),
+      description: z.string().trim().min(1, "Description is required").max(2000).optional(),
+      generes: z.array(genre).min(1, "At least one genre is required").max(20).optional(),
+      main_cover: url.optional(),
+    })
+    .refine((data) => Object.keys(data).length > 0, {
+      message: "Nothing to update",
+    }),
+});
+
+export const updateChapterSchema = z.object({
+  body: z
+    .object({
+      title: z.string().trim().min(1, "Chapter title is required").max(120).optional(),
+      cover_image: url.optional(),
+      published: z.boolean().optional(),
+    })
+    .refine((data) => Object.keys(data).length > 0, { message: "Nothing to update" }),
+});
+
+export const reorderChaptersSchema = z.object({
+  body: z.object({
+    // the chapter ids in their new order
+    order: z.array(z.number().int().positive()).min(1).max(200),
+  }),
+});
+
 export const createChapterSchema = z.object({
   body: z.object({
     title: z.string().trim().min(1, "Chapter title is required").max(120),

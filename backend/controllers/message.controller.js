@@ -1,4 +1,5 @@
 import prisma from "../utils/db.js";
+import { notifyNewMessage } from "../utils/notify.js";
 import { publicUserSelect } from "../utils/selects.js";
 
 const messageSelect = {
@@ -26,6 +27,13 @@ const sendMessage = async (req, res) => {
   await prisma.conversation.update({
     where: { id: conversationId },
     data: { updatedAt: new Date() },
+  });
+
+  notifyNewMessage({
+    conversationId,
+    actorId: senderId,
+    actorName: message.sender?.name ?? "Someone",
+    bookTitle: req.conversationBookTitle,
   });
 
   res.status(201).json(message);

@@ -22,6 +22,8 @@ model users {
   conversations    Participant[]
   messages         messages[]
   chapter_blocks   chapter_content[]
+  notifications    notifications[] @relation("NotificationRecipient")
+  actions          notifications[] @relation("NotificationActor")
 }
 
 model user_books {
@@ -32,7 +34,9 @@ model user_books {
   type        UserBookRelationType
   user        users @relation(fields: [user_id], references: [id]) 
   book        books @relation(fields: [book_id], references: [id])
- @@unique([user_id, book_id ,type]) 
+ @@unique([user_id, book_id ,type])
+  @@index([book_id, type])
+
 }
 
 model books {
@@ -58,7 +62,14 @@ model chapters {
   created_at  DateTime @default(now())
   chapter_content chapter_content?
 
+  // Explicit ordering: chapters used to come back in creation order only.
+  position    Int      @default(0)
+  // New chapters start visible; drafts are opt-in.
+  published   Boolean  @default(true)
+
   book        books @relation(fields: [book_id], references: [id])
+
+  @@index([book_id, position])
 }
 
 model chapter_content {
@@ -83,6 +94,7 @@ model book_comments {
 
   user        users @relation(fields: [user_id], references: [id])
   book        books @relation(fields: [book_id], references: [id])
+  @@index([book_id, created_at])
 }
 
 model Conversation {
@@ -114,10 +126,31 @@ model messages {
 
   conversation    Conversation  @relation(fields: [conversationId], references: [id])
   sender          users         @relation(fields: [senderId], references: [id])
+  @@index([conversationId, createdAt])
 }
 
 enum UserBookRelationType {
   LIKE
   FOLLOW
   ALL
+}
+
+
+/// One row per thing a user should know about: a new chapter in a book they
+/// follow, a comment on their book, a reply in a conversation.
+model notifications {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  actor_id   Int?
+  type       String
+  message    String
+  book_id    Int?
+  chapter_id Int?
+  read       Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  user  users  @relation("NotificationRecipient", fields: [user_id], references: [id])
+  actor users? @relation("NotificationActor", fields: [actor_id], references: [id])
+
+  @@index([user_id, read, created_at])
 }

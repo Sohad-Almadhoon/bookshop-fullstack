@@ -1,4 +1,5 @@
 import prisma from "../utils/db.js";
+import { notifyNewFollower } from "../utils/notify.js";
 import { bookSelect, bookOwnerSelect } from "../utils/selects.js";
 import { notFound, parseId, HttpError } from "../utils/httpError.js";
 
@@ -41,6 +42,20 @@ const getBook = async (req, res) => {
     select: { ...bookSelect, users: bookOwnerSelect },
   });
   if (!book) throw notFound("Book not found.");
+
+  const { users, ...rest } = book;
+  res.status(200).json({ ...rest, owner: users[0]?.user ?? null });
+};
+
+/** Owner-only. Only the fields actually sent are touched. */
+const updateBook = async (req, res) => {
+  const bookId = req.bookId; // validated by requireBookOwner
+
+  const book = await prisma.books.update({
+    where: { id: bookId },
+    data: req.body,
+    select: { ...bookSelect, users: bookOwnerSelect },
+  });
 
   const { users, ...rest } = book;
   res.status(200).json({ ...rest, owner: users[0]?.user ?? null });
@@ -89,7 +104,10 @@ const followBook = async (req, res) => {
   const { id: userId } = req.user;
   const bookId = parseId(req.params.id, "book id");
 
-  const book = await prisma.books.findUnique({ where: { id: bookId }, select: { id: true } });
+  const book = await prisma.books.findUnique({
+    where: { id: bookId },
+    select: { id: true, title: true },
+  });
   if (!book) throw notFound("Book not found.");
 
   const isOwner = await prisma.user_books.findFirst({
@@ -123,6 +141,17 @@ const followBook = async (req, res) => {
       create: { userId, conversationId: conversation.id },
     });
   }
+
+  const actor = await prisma.users.findUnique({
+    where: { id: userId },
+    select: { name: true },
+  });
+  notifyNewFollower({
+    bookId,
+    actorId: userId,
+    actorName: actor?.name ?? "Someone",
+    bookTitle: book.title,
+  });
 
   res.status(201).json(follow);
 };
@@ -325,6 +354,7 @@ const getBookStats = async (req, res) => {
 
 export {
   createBook,
+  updateBook,
   searchBooks,
   getGenres,
   deleteBook,

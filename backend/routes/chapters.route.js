@@ -5,10 +5,12 @@ import validateRequest from "../middlewares/validateRequest.js";
 import { requireChapterAccess, requireChapterOwner } from "../middlewares/authorize.js";
 import {
   chapterContentSchema,
+  updateChapterSchema,
   updateTextBlockSchema,
 } from "../validations/content.validation.js";
 import {
   getChapter,
+  updateChapter,
   getChapterContent,
   createChapterContent,
   updateTextBlock,
@@ -48,6 +50,12 @@ router.delete(
   "/:chapterId/content/audio",
   requireChapterOwner,
   asyncHandler(deleteChapterAudio)
+);
+router.patch(
+  "/:chapterId",
+  requireChapterOwner,
+  validateRequest(updateChapterSchema),
+  asyncHandler(updateChapter)
 );
 router.delete("/:chapterId", requireChapterOwner, asyncHandler(deleteChapter));
 

@@ -1,4 +1,5 @@
 import prisma from "../utils/db.js";
+import { notifyNewChapter } from "../utils/notify.js";
 import { badRequest, notFound, parseId } from "../utils/httpError.js";
 
 const chapterContentSelect = {
@@ -15,6 +16,8 @@ const chapterSelect = {
   cover_image: true,
   book_id: true,
   created_at: true,
+  position: true,
+  published: true,
   book: { select: { id: true, title: true, author: true } },
   chapter_content: { select: chapterContentSelect },
 };
@@ -27,6 +30,8 @@ const chapterListSelect = {
   cover_image: true,
   book_id: true,
   created_at: true,
+  position: true,
+  published: true,
   book: { select: { id: true, title: true, author: true } },
 };
 
@@ -35,9 +40,30 @@ const createChapter = async (req, res) => {
   const bookId = req.bookId ?? parseId(req.params.id, "book id");
   const { title, cover_image } = req.body;
 
+  // Append to the end of the book rather than landing at position 0.
+  const last = await prisma.chapters.findFirst({
+    where: { book_id: bookId },
+    orderBy: { position: "desc" },
+    select: { position: true },
+  });
+
   const newChapter = await prisma.chapters.create({
-    data: { title, cover_image, book: { connect: { id: bookId } } },
+    data: {
+      title,
+      cover_image,
+      position: (last?.position ?? 0) + 1,
+      book: { connect: { id: bookId } },
+    },
     select: chapterSelect,
+  });
+
+  // fire and forget: the chapter is already saved
+  notifyNewChapter({
+    bookId,
+    chapterId: newChapter.id,
+    actorId: req.user.id,
+    bookTitle: newChapter.book?.title ?? "a book",
+    chapterTitle: newChapter.title,
   });
 
   res.status(201).json(newChapter);
@@ -46,10 +72,16 @@ const createChapter = async (req, res) => {
 const getBookChapters = async (req, res) => {
   const bookId = parseId(req.params.id, "book id");
 
+  // Drafts stay with the book owner until they publish them.
+  const isOwner = await prisma.user_books.findFirst({
+    where: { user_id: req.user.id, book_id: bookId, type: "ALL" },
+    select: { id: true },
+  });
+
   const chapters = await prisma.chapters.findMany({
-    where: { book_id: bookId },
+    where: { book_id: bookId, ...(isOwner ? {} : { published: true }) },
     select: chapterListSelect,
-    orderBy: { created_at: "asc" },
+    orderBy: [{ position: "asc" }, { created_at: "asc" }],
   });
 
   res.status(200).json(chapters);
@@ -116,6 +148,50 @@ const createChapterContent = async (req, res) => {
   });
 
   res.status(200).json(updatedContent);
+};
+
+/** Owner-only: rename, re-cover, or move between draft and published. */
+const updateChapter = async (req, res) => {
+  const chapter = await prisma.chapters.update({
+    where: { id: req.chapterId },
+    data: req.body,
+    select: chapterSelect,
+  });
+
+  res.status(200).json(chapter);
+};
+
+/**
+ * Owner-only. Takes the chapter ids in their new order and writes the
+ * positions in one transaction, so the book is never half-reordered.
+ */
+const reorderChapters = async (req, res) => {
+  const bookId = req.bookId;
+  const { order } = req.body;
+
+  const chapters = await prisma.chapters.findMany({
+    where: { book_id: bookId },
+    select: { id: true },
+  });
+  const known = new Set(chapters.map((chapter) => chapter.id));
+
+  if (order.length !== known.size || order.some((id) => !known.has(id))) {
+    throw badRequest("The order must list every chapter of this book exactly once.");
+  }
+
+  await prisma.$transaction(
+    order.map((id, index) =>
+      prisma.chapters.update({ where: { id }, data: { position: index + 1 } })
+    )
+  );
+
+  const updated = await prisma.chapters.findMany({
+    where: { book_id: bookId },
+    select: chapterListSelect,
+    orderBy: { position: "asc" },
+  });
+
+  res.status(200).json(updated);
 };
 
 /** Owner-only. Takes the chapter's content with it. */
@@ -200,6 +276,8 @@ const deleteChapterAudio = async (req, res) => {
 
 export {
   createChapter,
+  updateChapter,
+  reorderChapters,
   deleteChapter,
   getBookChapters,
   getChapter,

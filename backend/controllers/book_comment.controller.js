@@ -1,4 +1,5 @@
 import prisma from "../utils/db.js";
+import { notifyNewComment } from "../utils/notify.js";
 import { publicUserSelect } from "../utils/selects.js";
 import { forbidden, notFound, parseId } from "../utils/httpError.js";
 
@@ -16,12 +17,22 @@ const createComment = async (req, res) => {
   const { id: userId } = req.user;
   const { content } = req.body;
 
-  const book = await prisma.books.findUnique({ where: { id: bookId }, select: { id: true } });
+  const book = await prisma.books.findUnique({
+    where: { id: bookId },
+    select: { id: true, title: true },
+  });
   if (!book) throw notFound("Book not found.");
 
   const newComment = await prisma.book_comments.create({
     data: { book_id: bookId, user_id: userId, content },
     select: commentSelect,
+  });
+
+  notifyNewComment({
+    bookId,
+    actorId: userId,
+    actorName: newComment.user?.name ?? "Someone",
+    bookTitle: book.title,
   });
 
   res.status(201).json(newComment);

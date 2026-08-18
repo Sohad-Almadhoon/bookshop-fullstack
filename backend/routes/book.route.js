@@ -5,11 +5,14 @@ import validateRequest from "../middlewares/validateRequest.js";
 import { requireBookAccess, requireBookOwner } from "../middlewares/authorize.js";
 import {
   createBookSchema,
+  updateBookSchema,
   createChapterSchema,
+  reorderChaptersSchema,
   createCommentSchema,
 } from "../validations/content.validation.js";
 import {
   createBook,
+  updateBook,
   searchBooks,
   getGenres,
   deleteBook,
@@ -31,6 +34,7 @@ import {
   createChapter,
   getBookChapter,
   getBookChapters,
+  reorderChapters,
 } from "../controllers/book_chapter.controller.js";
 
 const router = express.Router();
@@ -44,6 +48,12 @@ router.get("/random-books", asyncHandler(getRandomBooks));
 router.get("/search", asyncHandler(searchBooks));
 router.get("/genres", asyncHandler(getGenres));
 router.get("/:id", asyncHandler(getBook));
+router.patch(
+  "/:id",
+  requireBookOwner,
+  validateRequest(updateBookSchema),
+  asyncHandler(updateBook)
+);
 router.delete("/:id", requireBookOwner, asyncHandler(deleteBook));
 
 // Comments
@@ -59,6 +69,13 @@ router.post(
   requireBookAccess,
   validateRequest(createChapterSchema),
   asyncHandler(createChapter)
+);
+
+router.patch(
+  "/:id/chapters/order",
+  requireBookOwner,
+  validateRequest(reorderChaptersSchema),
+  asyncHandler(reorderChapters)
 );
 
 // Follow / like
