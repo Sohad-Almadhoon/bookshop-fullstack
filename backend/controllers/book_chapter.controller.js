@@ -1,5 +1,5 @@
 import prisma from "../utils/db.js";
-import { notFound, parseId } from "../utils/httpError.js";
+import { badRequest, notFound, parseId } from "../utils/httpError.js";
 
 const chapterContentSelect = {
   id: true,
@@ -115,11 +115,95 @@ const createChapterContent = async (req, res) => {
   res.status(200).json(updatedContent);
 };
 
+/** Owner-only. Takes the chapter's content with it. */
+const deleteChapter = async (req, res) => {
+  const chapterId = req.chapterId; // validated by requireChapterOwner
+
+  await prisma.$transaction(async (tx) => {
+    await tx.chapter_content.deleteMany({ where: { chapter_id: chapterId } });
+    await tx.chapters.delete({ where: { id: chapterId } });
+  });
+
+  res.status(200).json({ id: chapterId, message: "Chapter deleted successfully." });
+};
+
+/**
+ * Text is stored as a plain String[], so a single paragraph is addressed by its
+ * position. Read, splice, write - guarded by the row's current length so an
+ * index from a stale page cannot overwrite the wrong paragraph.
+ */
+const readTextBlocks = async (chapterId, index) => {
+  const content = await prisma.chapter_content.findUnique({
+    where: { chapter_id: chapterId },
+    select: { text: true },
+  });
+  if (!content) throw notFound("Chapter content not found.");
+  if (index < 0 || index >= content.text.length) {
+    throw badRequest("That paragraph no longer exists. Refresh the page and try again.");
+  }
+  return content.text;
+};
+
+const updateTextBlock = async (req, res) => {
+  const chapterId = req.chapterId;
+  const index = Number(req.params.index);
+  const { text } = req.body;
+
+  const blocks = await readTextBlocks(chapterId, index);
+  blocks[index] = text;
+
+  const updated = await prisma.chapter_content.update({
+    where: { chapter_id: chapterId },
+    data: { text: blocks },
+    select: chapterContentSelect,
+  });
+
+  res.status(200).json(updated);
+};
+
+const deleteTextBlock = async (req, res) => {
+  const chapterId = req.chapterId;
+  const index = Number(req.params.index);
+
+  const blocks = await readTextBlocks(chapterId, index);
+  blocks.splice(index, 1);
+
+  const updated = await prisma.chapter_content.update({
+    where: { chapter_id: chapterId },
+    data: { text: blocks },
+    select: chapterContentSelect,
+  });
+
+  res.status(200).json(updated);
+};
+
+const deleteChapterAudio = async (req, res) => {
+  const chapterId = req.chapterId;
+
+  const content = await prisma.chapter_content.findUnique({
+    where: { chapter_id: chapterId },
+    select: { audio: true },
+  });
+  if (!content?.audio) throw notFound("This chapter has no audio.");
+
+  const updated = await prisma.chapter_content.update({
+    where: { chapter_id: chapterId },
+    data: { audio: null },
+    select: chapterContentSelect,
+  });
+
+  res.status(200).json(updated);
+};
+
 export {
   createChapter,
+  deleteChapter,
   getBookChapters,
   getChapter,
   getBookChapter,
   getChapterContent,
   createChapterContent,
+  updateTextBlock,
+  deleteTextBlock,
+  deleteChapterAudio,
 };

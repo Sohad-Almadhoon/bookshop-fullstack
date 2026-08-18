@@ -22,15 +22,27 @@ export const createChapterSchema = z.object({
   }),
 });
 
+// A paragraph of a chapter. The old 400 character cap forced authors to split
+// a single thought across several blocks.
+const paragraph = z
+  .string()
+  .trim()
+  .min(1, "Write something first")
+  .max(2000, "A paragraph can be at most 2000 characters");
+
 export const chapterContentSchema = z.object({
   body: z
     .object({
-      text: z.string().trim().min(1).max(400).optional(),
+      text: paragraph.optional(),
       audio: url.optional(),
     })
     .refine((data) => data.text || data.audio, {
       message: "Either text or audio must be provided",
     }),
+});
+
+export const updateTextBlockSchema = z.object({
+  body: z.object({ text: paragraph }),
 });
 
 export const createCommentSchema = z.object({

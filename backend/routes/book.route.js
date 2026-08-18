@@ -2,7 +2,7 @@ import express from "express";
 import verifyToken from "../middlewares/verifyToken.js";
 import asyncHandler from "../middlewares/asyncHandler.js";
 import validateRequest from "../middlewares/validateRequest.js";
-import { requireBookAccess } from "../middlewares/authorize.js";
+import { requireBookAccess, requireBookOwner } from "../middlewares/authorize.js";
 import {
   createBookSchema,
   createChapterSchema,
@@ -10,6 +10,7 @@ import {
 } from "../validations/content.validation.js";
 import {
   createBook,
+  deleteBook,
   followBook,
   getBook,
   getBookStates,
@@ -38,6 +39,7 @@ router.use(verifyToken);
 router.post("/", validateRequest(createBookSchema), asyncHandler(createBook));
 router.get("/random-books", asyncHandler(getRandomBooks));
 router.get("/:id", asyncHandler(getBook));
+router.delete("/:id", requireBookOwner, asyncHandler(deleteBook));
 
 // Comments
 router.post("/:id/comments", validateRequest(createCommentSchema), asyncHandler(createComment));

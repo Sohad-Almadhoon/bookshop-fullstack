@@ -41,6 +41,45 @@ const getBook = async (req, res) => {
   res.status(200).json(book);
 };
 
+/**
+ * Owner-only. The schema has no cascading deletes, so every dependent row has
+ * to go first, in foreign-key order, inside one transaction.
+ */
+const deleteBook = async (req, res) => {
+  const bookId = req.bookId; // validated by requireBookOwner
+
+  await prisma.$transaction(async (tx) => {
+    const chapters = await tx.chapters.findMany({
+      where: { book_id: bookId },
+      select: { id: true },
+    });
+    const chapterIds = chapters.map((chapter) => chapter.id);
+
+    if (chapterIds.length) {
+      await tx.chapter_content.deleteMany({ where: { chapter_id: { in: chapterIds } } });
+      await tx.chapters.deleteMany({ where: { id: { in: chapterIds } } });
+    }
+
+    const conversations = await tx.conversation.findMany({
+      where: { bookId },
+      select: { id: true },
+    });
+    const conversationIds = conversations.map((conversation) => conversation.id);
+
+    if (conversationIds.length) {
+      await tx.messages.deleteMany({ where: { conversationId: { in: conversationIds } } });
+      await tx.participant.deleteMany({ where: { conversationId: { in: conversationIds } } });
+      await tx.conversation.deleteMany({ where: { id: { in: conversationIds } } });
+    }
+
+    await tx.book_comments.deleteMany({ where: { book_id: bookId } });
+    await tx.user_books.deleteMany({ where: { book_id: bookId } });
+    await tx.books.delete({ where: { id: bookId } });
+  });
+
+  res.status(200).json({ id: bookId, message: "Book deleted successfully." });
+};
+
 const followBook = async (req, res) => {
   const { id: userId } = req.user;
   const bookId = parseId(req.params.id, "book id");
@@ -199,6 +238,7 @@ const getBookStats = async (req, res) => {
 
 export {
   createBook,
+  deleteBook,
   getBook,
   followBook,
   unFollowBook,

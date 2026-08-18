@@ -1,28 +1,19 @@
 import { useParams } from "react-router-dom";
 import { BsChatFill, BsHeartFill, BsPeopleFill } from "react-icons/bs";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { twMerge } from "tailwind-merge";
 import { useCommentModal } from "../../hooks/useCommentModal";
 import newRequest, { getErrorMessage } from "../../utils/newRequest";
 import Button from "../shared/Button";
-
-interface BookStates {
-  liked: boolean;
-  followed: boolean;
-  isOwner: boolean;
-}
+import useBookStates from "../../hooks/useBookStates";
 
 const ActionButtons = () => {
   const { openModal } = useCommentModal();
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
 
-  const { data, isError, error } = useQuery<BookStates>({
-    queryKey: ["bookStates", id],
-    queryFn: async () => (await newRequest.get(`/api/books/${id}/book-states`)).data,
-    enabled: Boolean(id),
-  });
+  const { data, isError, error } = useBookStates(id);
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["bookStates", id] });
@@ -66,10 +57,10 @@ const ActionButtons = () => {
   const isBusy = followMutation.isPending || likeMutation.isPending;
 
   return (
-    <div className="flex gap-3 mt-2 items-center">
+    <div className="flex flex-wrap gap-2 items-center">
       <Button
         variant="outline"
-        className="flex gap-1 p-1 text-xs justify-center"
+        className="flex w-fit items-center gap-2 rounded-md px-4 py-2 text-xs justify-center"
         onClick={openModal}>
         <BsChatFill className="text-black text-sm" /> comments
       </Button>
@@ -78,7 +69,7 @@ const ActionButtons = () => {
         <Button
           variant={data?.followed ? "" : "outline"}
           disabled={isBusy}
-          className="flex gap-1 p-1 text-xs justify-center"
+          className="flex w-fit items-center gap-2 rounded-md px-4 py-2 text-xs justify-center"
           onClick={() => followMutation.mutate()}>
           <BsPeopleFill
             className={twMerge(`text-sm ${data?.followed ? "text-white" : "text-black"}`)}
@@ -91,7 +82,7 @@ const ActionButtons = () => {
         <Button
           variant={data?.liked ? "" : "outline"}
           disabled={isBusy}
-          className="flex gap-1 p-1 px-2 text-xs justify-center"
+          className="flex w-fit items-center gap-2 rounded-md px-4 py-2 text-xs justify-center"
           onClick={() => likeMutation.mutate()}>
           <BsHeartFill
             className={twMerge(`text-sm ${data?.liked ? "text-white" : "text-black"}`)}

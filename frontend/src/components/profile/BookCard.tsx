@@ -16,18 +16,24 @@ const BookCard = ({ book }: { book: Book }) => {
   return (
     <Link
       to={`/books/${id}`}
-      className="border border-black border-opacity-30 rounded-md p-3 sm:p-5">
-      <div className="relative">
-        <img src={main_cover} alt={title} className="w-full h-72 sm:h-96 object-cover" />
-        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-          <h1 className="text-2xl font-semibold truncate">{title}</h1>
-          <p className="text-sm">{author}</p>
-          <div className="flex items-center gap-4 justify-end p-1">
-            {/* icons were swapped: the heart showed follows and vice versa */}
-            <span className="flex gap-2 items-center" title="Likes">
-              <BsHeartFill className="text-red-700" /> {stats?.likes ?? 0}
+      className="group block overflow-hidden rounded-lg border-2 border-black transition-transform hover:-translate-y-1">
+      {/* same 3:4 box as the chapter cards, so no cover is ever squashed */}
+      <div className="relative aspect-[3/4] w-full bg-black/5">
+        <img
+          src={main_cover}
+          alt=""
+          loading="lazy"
+          className="h-full w-full object-cover"
+        />
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/60 to-transparent p-3 pt-8 text-white">
+          <h3 className="truncate text-base font-semibold leading-tight">{title}</h3>
+          <p className="truncate text-xs text-white/70">{author}</p>
+          <div className="mt-2 flex items-center gap-4 text-xs">
+            {/* icons used to be swapped: the heart showed follows */}
+            <span className="flex items-center gap-1.5" title="Likes">
+              <BsHeartFill className="text-red-500" /> {stats?.likes ?? 0}
             </span>
-            <span className="flex gap-2 items-center" title="Followers">
+            <span className="flex items-center gap-1.5" title="Followers">
               <BsPeopleFill /> {stats?.follows ?? 0}
             </span>
           </div>

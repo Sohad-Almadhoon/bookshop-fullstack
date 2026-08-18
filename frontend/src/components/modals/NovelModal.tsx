@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BsFileTextFill, BsImageFill, BsMusicNote } from "react-icons/bs";
+import { BsImageFill, BsMusicNote } from "react-icons/bs";
 import { useMatch } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -9,21 +9,20 @@ import { useNovelModal } from "../../hooks/useNovelModal";
 import TabButton from "./components/TabButton";
 import Loader from "../shared/Loader";
 import newRequest, { getErrorMessage } from "../../utils/newRequest";
-import TextUploader from "./components/TextUploader";
 import FileUploader from "./components/FileUploader";
 import CustomInput from "../shared/CustomInput";
 import uploadFile from "../../utils/upload";
 
-type ContentType = "visual" | "audio" | "text";
+// Text is written straight into the chapter page now, so this modal only
+// handles the two things that need a file upload.
+type ContentType = "visual" | "audio";
 
-const tabs: { title: ContentType; icon: React.ComponentType }[] = [
-  { title: "visual", icon: BsImageFill },
-  { title: "audio", icon: BsMusicNote },
-  { title: "text", icon: BsFileTextFill },
+const tabs: { title: ContentType; label: string; icon: React.ComponentType }[] = [
+  { title: "visual", label: "New chapter", icon: BsImageFill },
+  { title: "audio", label: "Audio", icon: BsMusicNote },
 ];
 
 const NovelModal = () => {
-  const [textInput, setTextInput] = useState("");
   const [file, setFile] = useState<string>("");
   const [title, setTitle] = useState("");
   const { isOpen, closeModal, contentType } = useNovelModal();
@@ -45,16 +44,17 @@ const NovelModal = () => {
 
   const bookId = bookIdFromRoute ?? (chapter?.book_id ? String(chapter.book_id) : undefined);
   const canCreateChapter = Boolean(bookId);
-  const canAddContent = Boolean(chapterId);
+  const canAddAudio = Boolean(chapterId);
 
   useEffect(() => {
-    if (isOpen && contentType) {
-      setActiveTab(contentType);
-      setFile("");
-      setTextInput("");
-      setTitle("");
-    }
-  }, [contentType, isOpen]);
+    if (!isOpen) return;
+    // "text" can still arrive from an old link; fall back to the sensible tab.
+    const requested: ContentType =
+      contentType === "audio" && canAddAudio ? "audio" : "visual";
+    setActiveTab(requested);
+    setFile("");
+    setTitle("");
+  }, [contentType, isOpen, canAddAudio]);
 
   const { mutate: uploadMutate, isPending: isFileUploading } = useMutation({
     mutationFn: (uploaded: File) => {
@@ -98,25 +98,23 @@ const NovelModal = () => {
     onError: (error) => toast.error(getErrorMessage(error, "Error creating chapter!")),
   });
 
-  const createContentMutation = useMutation({
+  const addAudioMutation = useMutation({
     mutationFn: async () => {
-      const payload =
-        activeTab === "audio" ? { audio: file } : { text: textInput.trim() };
-      const response = await newRequest.post(`/api/chapters/${chapterId}/content`, payload);
+      const response = await newRequest.post(`/api/chapters/${chapterId}/content`, {
+        audio: file,
+      });
       return response.data;
     },
     onSuccess: () => {
-      toast.success("Content uploaded successfully!");
-      // Refetch instead of a full page reload.
+      toast.success("Audio added!");
       queryClient.invalidateQueries({ queryKey: ["chapter", chapterId] });
-      setTextInput("");
       setFile("");
       closeModal();
     },
-    onError: (error) => toast.error(getErrorMessage(error, "Failed to upload content!")),
+    onError: (error) => toast.error(getErrorMessage(error, "Failed to upload audio!")),
   });
 
-  const isSubmitting = createChapterMutation.isPending || createContentMutation.isPending;
+  const isSubmitting = createChapterMutation.isPending || addAudioMutation.isPending;
 
   const handleSubmit = () => {
     if (activeTab === "visual") {
@@ -126,35 +124,45 @@ const NovelModal = () => {
       return createChapterMutation.mutate();
     }
 
-    if (!canAddContent) {
-      return toast.error("Open a chapter first to add content to it.");
-    }
-    if (activeTab === "audio" && !file) return toast.error("Please upload an audio file.");
-    if (activeTab === "text" && !textInput.trim()) {
-      return toast.error("Please write some text first.");
-    }
-    createContentMutation.mutate();
+    if (!canAddAudio) return toast.error("Open a chapter first to add audio.");
+    if (!file) return toast.error("Please upload an audio file.");
+    addAudioMutation.mutate();
   };
 
   const handleTabClick = (tab: ContentType) => {
     if (tab === "visual" && !canCreateChapter) {
       return toast.error("Chapters can only be created from a book page.");
     }
-    if (tab !== "visual" && !canAddContent) {
-      return toast.error("Open a chapter to add audio or text.");
+    if (tab === "audio" && !canAddAudio) {
+      return toast.error("Open a chapter to add audio.");
     }
     setActiveTab(tab);
     setFile("");
   };
 
-  const renderTabContent = () => {
-    if (isFileUploading) return <Loader />;
+  return (
+    <Modal
+      open={isOpen}
+      onClose={closeModal}
+      modalLogo="/assets/modal-icon.svg"
+      title={activeTab === "visual" ? "Create a chapter" : "Add audio"}>
+      <div className="w-full max-w-md">
+        <div className="grid grid-cols-2">
+          {tabs.map((tab, index) => (
+            <TabButton
+              key={tab.title}
+              title={tab.label}
+              Icon={tab.icon}
+              active={tab.title === activeTab}
+              index={index === 0 ? 0 : 2}
+              onClick={() => handleTabClick(tab.title)}
+            />
+          ))}
+        </div>
 
-    switch (activeTab) {
-      case "text":
-        return <TextUploader setTextInput={setTextInput} text={textInput} />;
-      case "visual":
-        return (
+        {isFileUploading ? (
+          <Loader />
+        ) : activeTab === "visual" ? (
           <div>
             <FileUploader
               file={file}
@@ -163,19 +171,17 @@ const NovelModal = () => {
               onFileChange={handleFileChange}
               label="Click to upload"
               accept="image/*"
-              description="SVG, PNG, JPG, or GIF (max 5MB)"
+              description="PNG, JPG, or WEBP (max 5MB)"
             />
             <CustomInput
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full mt-4"
+              className="mt-4 w-full"
               value={title}
               maxLength={120}
               placeholder="Enter the chapter title..."
             />
           </div>
-        );
-      case "audio":
-        return (
+        ) : (
           <FileUploader
             file={file}
             setFile={setFile}
@@ -185,42 +191,18 @@ const NovelModal = () => {
             accept="audio/*"
             description="MP3 or WAV (max 20MB)"
           />
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <Modal open={isOpen} onClose={closeModal} modalLogo="/assets/modal-icon.svg">
-      <div>
-        <div className="grid grid-cols-3 max-w-md w-full mx-auto">
-          {tabs.map((tab, index) => (
-            <TabButton
-              key={tab.title}
-              title={tab.title}
-              Icon={tab.icon}
-              active={tab.title === activeTab}
-              index={index}
-              onClick={() => handleTabClick(tab.title)}
-            />
-          ))}
-        </div>
-
-        {renderTabContent()}
+        )}
 
         <Button
           onClick={handleSubmit}
           disabled={isFileUploading || isSubmitting}
-          className="w-full max-w-[250px] mx-auto mt-5 border-none font-baskervville font-bold">
+          className="mx-auto mt-5 w-full max-w-[250px] border-none font-baskervville font-bold">
           {isSubmitting ? (
             <Loader />
           ) : activeTab === "visual" ? (
-            "Create Chapter"
-          ) : activeTab === "audio" ? (
-            "Upload Audio"
+            "Create chapter"
           ) : (
-            "Add Text"
+            "Add audio"
           )}
         </Button>
       </div>

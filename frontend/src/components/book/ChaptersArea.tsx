@@ -1,102 +1,113 @@
-import {
-  BsBook,
-  BsCalendar2,
-  BsLayoutSidebarInsetReverse,
-  BsLink,
-} from "react-icons/bs";
-import { Link, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import newRequest, { getErrorMessage } from "../../utils/newRequest";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { BsLayoutSidebarInsetReverse, BsTrash } from "react-icons/bs";
+import toast from "react-hot-toast";
 import Loader from "../shared/Loader";
-import { formatDate } from "../../utils/helpers";
+import ConfirmDialog from "../shared/ConfirmDialog";
+import newRequest, { getErrorMessage } from "../../utils/newRequest";
 
 export interface Chapter {
   id: number;
   title: string;
   cover_image: string;
-  book: {
-    title: string;
-    id: number;
-  };
+  book: { title: string; id: number };
 }
 
-const ChaptersArea = ({ date, genres }: { date: string; genres: string[] }) => {
-  const { id } = useParams();
+interface ChaptersAreaProps {
+  bookId: string;
+  chapters: Chapter[];
+  isLoading: boolean;
+  isError: boolean;
+  error: unknown;
+  isOwner: boolean;
+}
 
-  const {
-    data: chapters = [],
-    isLoading,
-    isError,
-    error,
-  } = useQuery<Chapter[]>({
-    queryKey: ["chapters", id],
-    queryFn: async () => {
-      const response = await newRequest.get(`/api/books/${id}/chapters`);
-      return Array.isArray(response.data) ? response.data : [];
+const ChaptersArea: React.FC<ChaptersAreaProps> = ({
+  bookId,
+  chapters,
+  isLoading,
+  isError,
+  error,
+  isOwner,
+}) => {
+  const queryClient = useQueryClient();
+  const [pendingDelete, setPendingDelete] = useState<Chapter | null>(null);
+
+  const deleteChapter = useMutation({
+    mutationFn: (chapterId: number) => newRequest.delete(`/api/chapters/${chapterId}`),
+    onSuccess: () => {
+      toast.success("Chapter deleted");
+      queryClient.invalidateQueries({ queryKey: ["chapters", bookId] });
+      setPendingDelete(null);
     },
-    enabled: Boolean(id),
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "Could not delete this chapter."));
+      setPendingDelete(null);
+    },
   });
 
   return (
-    <div className="p-4 sm:p-8 flex-col flex lg:p-12 lg:px-20">
-      <div className="flex gap-2 flex-col items-start">
-        <div className="flex lg:justify-end w-full gap-2 flex-wrap">
-          {genres.map((genre: string) => (
-            <span key={genre} className="text-sm rounded-md p-1 bg-black text-white">
-              #{genre}
-            </span>
-          ))}
-        </div>
-        <div className="flex items-center text-base sm:text-xl gap-2 font-semibold flex-wrap">
-          <BsCalendar2 className="text-xl sm:text-2xl" />
-          Created Date:
-          {/* used to render a clock time under a "date" label */}
-          <div className="text-lg text-gray-700 underline">{formatDate(date)}</div>
-        </div>
-        <div className="flex items-center text-base sm:text-xl gap-2 font-semibold">
-          <BsBook className="text-xl sm:text-2xl" /> CHAPTERS:
-          <span className="underline flex justify-center items-center">
-            {isLoading ? "…" : chapters.length}
-          </span>
-        </div>
-      </div>
-      <Link
-        to="/create-book"
-        className="text-sm text-gray-800 underline flex items-center gap-2 justify-end">
-        CREATE MORE BOOKS <BsLink className="text-lg" />
-      </Link>
-      <div className="w-full my-3 flex gap-3 items-center justify-center bg-black text-white uppercase px-4 py-3 text-xl sm:text-2xl lg:text-3xl font-voyage rounded-lg">
-        <BsLayoutSidebarInsetReverse /> chapters
-      </div>
+    <section>
+      <h2 className="flex items-center gap-3 rounded-lg bg-black px-5 py-3 font-voyage text-xl uppercase text-white sm:text-2xl">
+        <BsLayoutSidebarInsetReverse className="shrink-0" /> Chapters
+      </h2>
 
       {isLoading ? (
         <Loader />
       ) : isError ? (
-        <p className="text-red-600">{getErrorMessage(error, "Could not load chapters.")}</p>
+        <p className="mt-5 text-red-600">
+          {getErrorMessage(error, "Could not load chapters.")}
+        </p>
+      ) : chapters.length === 0 ? (
+        <p className="mt-5 text-center font-baskervville text-black/60">
+          No chapters yet.
+        </p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 gap-3 sm:gap-5">
-          {chapters.length > 0 ? (
-            chapters.map((chapter) => (
+        // auto-fit + a fixed ratio keeps every card identical at any width
+        <ul className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {chapters.map((chapter) => (
+            <li key={chapter.id} className="group relative">
               <Link
-                key={chapter.id}
-                className="border-black border-2 w-full relative"
-                to={`/chapters/${chapter.id}`}>
-                <img
-                  src={chapter.cover_image}
-                  alt={chapter.title}
-                  className="h-full w-full object-cover aspect-[2/3]"
-                />
-                <span className="bg-slate-100 h-fit w-full text-center absolute bottom-0 truncate px-1">
+                to={`/chapters/${chapter.id}`}
+                className="block overflow-hidden rounded-lg border-2 border-black transition-transform hover:-translate-y-1">
+                <div className="aspect-[3/4] w-full bg-black/5">
+                  <img
+                    src={chapter.cover_image}
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <p className="truncate border-t-2 border-black bg-[#cfc5b0] px-2 py-1.5 text-center text-sm">
                   {chapter.title}
-                </span>
+                </p>
               </Link>
-            ))
-          ) : (
-            <div>No chapters available</div>
-          )}
-        </div>
+
+              {isOwner && (
+                <button
+                  type="button"
+                  aria-label={`Delete ${chapter.title}`}
+                  onClick={() => setPendingDelete(chapter)}
+                  className="absolute right-2 top-2 rounded-full border border-black bg-[#DDD1BB] p-2 text-black opacity-0 transition-opacity hover:bg-red-800 hover:text-white focus:opacity-100 group-hover:opacity-100 max-lg:opacity-100">
+                  <BsTrash />
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
       )}
-    </div>
+
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        loading={deleteChapter.isPending}
+        title="Delete this chapter?"
+        description={`"${pendingDelete?.title}" and its text and audio will be permanently removed.`}
+        confirmLabel="Delete chapter"
+        onConfirm={() => pendingDelete && deleteChapter.mutate(pendingDelete.id)}
+        onClose={() => setPendingDelete(null)}
+      />
+    </section>
   );
 };
 

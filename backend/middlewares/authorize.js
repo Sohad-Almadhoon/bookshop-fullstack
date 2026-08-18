@@ -18,6 +18,41 @@ const isBookOwner = async (userId, bookId) => {
 };
 
 /**
+ * Destructive actions are owner-only. Contributions are shared, but removing
+ * something permanently stays with whoever created the book.
+ */
+const requireBookOwner = asyncHandler(async (req, res, next) => {
+  const bookId = parseId(req.params.id, "book id");
+  const book = await prisma.books.findUnique({ where: { id: bookId }, select: { id: true } });
+  if (!book) throw notFound("Book not found.");
+
+  if (!(await isBookOwner(req.user.id, bookId))) {
+    throw forbidden("Only the owner of this book can do that.");
+  }
+
+  req.bookId = bookId;
+  next();
+});
+
+/** Same rule, for routes keyed by :chapterId. */
+const requireChapterOwner = asyncHandler(async (req, res, next) => {
+  const chapterId = parseId(req.params.chapterId, "chapter id");
+  const chapter = await prisma.chapters.findUnique({
+    where: { id: chapterId },
+    select: { id: true, book_id: true },
+  });
+  if (!chapter) throw notFound("Chapter not found.");
+
+  if (!(await isBookOwner(req.user.id, chapter.book_id))) {
+    throw forbidden("Only the owner of this book can do that.");
+  }
+
+  req.chapterId = chapterId;
+  req.bookId = chapter.book_id;
+  next();
+});
+
+/**
  * Chapter content is the paid feature: owners always reach their own books,
  * everybody else needs an active subscription. Used for both reading and
  * writing, replacing the paywall that used to live only in localStorage.
@@ -87,6 +122,8 @@ const requireConversationParticipant = asyncHandler(async (req, res, next) => {
 
 export {
   isBookOwner,
+  requireBookOwner,
+  requireChapterOwner,
   requireBookAccess,
   requireChapterAccess,
   requireConversationParticipant,
