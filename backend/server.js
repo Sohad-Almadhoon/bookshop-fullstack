@@ -1,5 +1,5 @@
 // MUST be first: loads and validates .env before any module reads process.env.
-import env from "./utils/env.js";
+import env, { isAllowedOrigin } from "./utils/env.js";
 
 import express from "express";
 import cors from "cors";
@@ -25,8 +25,7 @@ app.use(helmet());
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow same-origin/server-to-server calls (no Origin header).
-      if (!origin || env.clientUrls.includes(origin)) return callback(null, true);
+      if (isAllowedOrigin(origin)) return callback(null, true);
       return callback(new Error(`Origin ${origin} is not allowed by CORS`));
     },
     credentials: true,
