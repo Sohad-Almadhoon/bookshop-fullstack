@@ -5,7 +5,6 @@ import { BsCalendar2, BsBook, BsTrash, BsPencil, BsShare } from "react-icons/bs"
 import toast from "react-hot-toast";
 import Button from "../shared/Button";
 import ConfirmDialog from "../shared/ConfirmDialog";
-import EditBookModal from "./EditBookModal";
 import ActionButtons from "./ActionButtons";
 import newRequest, { getErrorMessage } from "../../utils/newRequest";
 import { formatDate } from "../../utils/helpers";
@@ -50,7 +49,6 @@ const BookHero: React.FC<BookHeroProps> = ({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
 
   const canContribute = isOwner || hasPaid;
 
@@ -102,12 +100,11 @@ const BookHero: React.FC<BookHeroProps> = ({
 
           {isOwner && (
             <div className="flex shrink-0 gap-2">
-            <button
-              type="button"
-              onClick={() => setEditOpen(true)}
+            <Link
+              to={`/books/${bookId}/edit`}
               className="flex items-center gap-2 rounded-md border border-black/30 px-3 py-2 text-sm transition-colors hover:bg-black hover:text-white">
               <BsPencil /> Edit
-            </button>
+            </Link>
             <button
               type="button"
               onClick={() => setConfirmOpen(true)}
@@ -184,14 +181,6 @@ const BookHero: React.FC<BookHeroProps> = ({
           )}
         </div>
       </div>
-
-      {isOwner && (
-        <EditBookModal
-          open={editOpen}
-          onClose={() => setEditOpen(false)}
-          book={{ id: bookId, title, author, description, generes: genres, main_cover: imgUrl }}
-        />
-      )}
 
       <ConfirmDialog
         open={confirmOpen}

@@ -28,6 +28,7 @@ import CreateBookPage from "./CeateBook";
 import PaymentRoute from "../components/route/PaymentRoute";
 import NotFound from "./NotFound";
 import PublicBookPage from "./PublicBook";
+import EditBookPage from "./EditBook";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,6 +72,7 @@ const router = createBrowserRouter([
       { path: "/messages/:id", element: <Message /> },
       { path: "/profile", element: <Profile /> },
       { path: "/books/:id", element: <Book /> },
+      { path: "/books/:id/edit", element: <EditBookPage /> },
       { path: "/welcome", element: <Welcome /> },
       { path: "/tree", element: <Tree /> },
       { path: "/about", element: <About /> },
