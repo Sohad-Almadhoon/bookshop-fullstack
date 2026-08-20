@@ -1,311 +1,395 @@
-# دليل المزايا الجديدة — شرح للمبتدئين
+# شرح الكود الجديد
 
-هذا الملف يشرح **كل ميزة أضفتها**، بلغة بسيطة، مع الكود وسبب كتابته بهذه الطريقة.
-اقرئيه بالترتيب: القسم صفر يشرح الأساسيات التي تتكرر في كل ميزة بعده.
+مرجع لكل ملف أضفته أو غيّرته جوهرياً: ماذا يفعل، كيف يُستعمل، ولماذا كُتب بهذا الشكل تحديداً.
+مرتّب حسب الملفات لا حسب المزايا، حتى تجدي ما تريدينه بسرعة.
+
+**اصطلاح:** 🆕 ملف جديد · ✏️ ملف عُدّل جوهرياً
 
 ---
 
-## 0. الأساسيات التي ستتكرر معك
+# الجزء الأول: الخادم
 
-### 0.1 كيف يتكلّم المشروع مع نفسه؟
-
-```
-المتصفح (React)  →  الخادم (Express)  →  قاعدة البيانات (PostgreSQL)
-   frontend/            backend/              عبر Prisma
-```
-
-1. أنت تضغطين زراً في **React**.
-2. React يرسل طلب HTTP إلى **Express** (مثلاً `GET /api/books/1`).
-3. Express يسأل **قاعدة البيانات** عبر **Prisma**.
-4. الجواب يعود بصيغة JSON إلى React، فيعرضه على الشاشة.
-
-### 0.2 ما هو Prisma؟
-
-مترجم بينك وبين قاعدة البيانات. بدل أن تكتبي SQL:
-
-```sql
-SELECT * FROM books WHERE id = 1;
-```
-
-تكتبين جافاسكربت:
+## 🆕 `utils/env.js` — تحميل البيئة والتحقق منها
 
 ```js
-await prisma.books.findUnique({ where: { id: 1 } });
+import "dotenv/config";   // أول سطر، وله سبب
+
+const REQUIRED = ["DATABASE_URL", "JWT_SECRET"];
+const missing = REQUIRED.filter((key) => !process.env[key]);
+if (missing.length) {
+  console.error(`Missing required environment variables: ${missing.join(", ")}…`);
+  process.exit(1);
+}
+
+export const env = {
+  port: Number(process.env.PORT) || 5000,
+  jwtSecret: process.env.JWT_SECRET,
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  clientUrls: (process.env.CLIENT_URLS || DEFAULT_CLIENT_URLS.join(","))
+    .split(",").map((url) => url.trim().replace(/\/$/, "")).filter(Boolean),
+  // …
+};
 ```
 
-وملف `backend/prisma/schema.prisma` هو **خريطة** الجداول: كل `model` = جدول، وكل سطر داخله = عمود.
+**لماذا ملف مستقل بدل `dotenv.config()` في `server.js`؟**
 
-### 0.3 ما هو الـ middleware؟
-
-دالة تعمل **قبل** أن يصل الطلب إلى وجهته. تخيّليها حارس باب:
+في ESM كل الـ `import` تُنفَّذ **قبل** أي سطر في جسم الملف. فكتابة:
 
 ```js
-router.delete("/:id", requireBookOwner, deleteBook);
-//                    └─ الحارس ─┘      └─ العمل ─┘
+import Stripe from "stripe";
+import checkoutRouter from "./routes/checkout.route.js";  // ينفّذ new Stripe(...) الآن
+dotenv.config();                                          // متأخر جداً
 ```
 
-الحارس إما يمرّر الطلب بـ `next()`، أو يوقفه برسالة خطأ. فلا يصل `deleteBook` إلا لصاحب الكتاب.
+تعني أن `checkout.route.js` أنشأ عميل Stripe بمفتاح `undefined`. الحل أن يكون التحميل نفسه داخل ملف **يُستورد أولاً**، فيصير جزءاً من سلسلة الـ imports لا من جسم الملف.
 
-### 0.4 ما هو React Query؟
+`process.exit(1)` عند نقص متغيّر أساسي: الفشل السريع الواضح أفضل من خادم يعمل ثم ينهار عند أول طلب.
 
-مكتبة تدير **البيانات القادمة من الخادم**. تستخدم شيئين:
+### مطابقة الأصول للـ CORS
 
-| الأداة | متى | مثال |
+```js
+const originMatchers = env.clientUrls.map((pattern) => {
+  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`^${escaped.replace(/\*/g, "[a-zA-Z0-9-]+")}$`);
+});
+
+export const isAllowedOrigin = (origin) => {
+  if (!origin) return true;                    // طلب من خادم لآخر، بلا Origin
+  const normalized = origin.replace(/\/$/, "");
+  return originMatchers.some((matcher) => matcher.test(normalized));
+};
+```
+
+الخطوتان مقصودتان:
+1. **تهريب** كل رموز الـ regex الخاصة (خصوصاً `.`) وإلا لطابق `vercelXapp` النمط `vercel.app`.
+2. ثم تحويل `*` فقط إلى `[a-zA-Z0-9-]+` — **بلا نقطة**، فيطابق `https://*.vercel.app` نطاقاً فرعياً واحداً لا `sub.domain.vercel.app` ولا `evil.com`.
+
+اختبرتها على 10 حالات منها محاولات انتحال.
+
+---
+
+## 🆕 `utils/httpError.js` — أخطاء بحالة HTTP
+
+```js
+export class HttpError extends Error {
+  constructor(status, message) { super(message); this.status = status; }
+}
+export const badRequest = (m = "Bad request") => new HttpError(400, m);
+export const forbidden  = (m = "Forbidden")   => new HttpError(403, m);
+export const notFound   = (m = "Not found")   => new HttpError(404, m);
+
+export const parseId = (value, label = "id") => {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) throw badRequest(`Invalid ${label}.`);
+  return parsed;
+};
+```
+
+الفكرة: المتحكّم يرمي `throw notFound("Book not found.")` ويكمل، والـ error middleware يحوّلها لرد. لا حاجة لتمرير `res` أو تكرار `return res.status(404)...`.
+
+**`parseId`:** كان الكود القديم يمرّر `parseInt(id)` لـ Prisma مباشرة. `parseInt("abc")` = `NaN`، وPrisma ترمي استثناءً غامضاً → 500. الآن أي معرّف غير رقمي = 400 برسالة واضحة.
+
+---
+
+## 🆕 `middlewares/asyncHandler.js`
+
+```js
+const asyncHandler = (handler) => (req, res, next) =>
+  Promise.resolve(handler(req, res, next)).catch(next);
+```
+
+Express 4 **لا يلتقط** الأخطاء من الدوال غير المتزامنة. بدون هذا الغلاف، أي `throw` داخل `async` يصبح رفضاً غير معالَج والطلب يتجمّد حتى انتهاء المهلة. الغلاف يوصّل الخطأ إلى `next()` أي إلى المعالج المركزي.
+
+الاستعمال: `router.get("/:id", asyncHandler(getBook))`.
+
+---
+
+## 🆕 `utils/selects.js` — الأعمدة المسموح خروجها
+
+```js
+export const publicUserSelect = { id: true, name: true, role: true, generes: true, created_at: true };
+export const selfUserSelect   = { ...publicUserSelect, email: true, has_paid: true };
+export const bookSelect       = { id: true, title: true, /* … */ };
+
+export const bookOwnerSelect = {
+  where: { type: "ALL" },
+  select: { user: { select: { id: true, name: true, role: true } } },
+  take: 1,
+};
+```
+
+القاعدة التي فرضتها: **ممنوع `include: { user: true }`**. الـ `include` يعني "كل الأعمدة"، وعمود `password` من ضمنها — وهكذا كانت هاشات كلمات المرور تخرج مع كل تعليق ورسالة.
+
+`bookOwnerSelect` علاقة مُفلترة قابلة لإعادة الاستخدام: `user_books` حيث `type = "ALL"`. تُستعمل هكذا:
+
+```js
+select: { ...bookSelect, users: bookOwnerSelect }
+// ثم في الرد:
+const { users, ...rest } = book;
+res.json({ ...rest, owner: users[0]?.user ?? null });
+```
+
+نُسطّحها إلى `owner` بدل ترك الواجهة تكتب `users[0].user`.
+
+---
+
+## 🆕 `middlewares/authorize.js` — كل قواعد الصلاحيات
+
+ستة حرّاس مُصدّرين:
+
+| الحارس | القاعدة | يُستعمل في |
 |---|---|---|
-| `useQuery` | لـ **قراءة** بيانات | اجلب الكتاب |
-| `useMutation` | لـ **تغيير** بيانات | احذف الكتاب |
+| `requireBookOwner` | مالك الكتاب فقط | حذف/تعديل الكتاب، إعادة الترتيب |
+| `requireChapterOwner` | مالك الكتاب (بمسار `:chapterId`) | حذف/تعديل الفصل، تعديل الفقرات |
+| `requireBookAccess` | مالك **أو** مشترك | إنشاء فصل، قراءة فصل بمسار الكتاب |
+| `requireChapterAccess` | مالك **أو** مشترك | قراءة/كتابة محتوى الفصل |
+| `requireConversationParticipant` | مشارك في المحادثة | الرسائل |
+| `isBookOwner` | دالة مساعدة | داخلياً |
 
-ولكل `useQuery` **مفتاح** (`queryKey`) مثل `["book", "1"]` تستخدمه المكتبة كعنوان في الذاكرة. وعندما تتغيّر البيانات نقول لها "هذا المفتاح لم يعد صالحاً":
+### الفرق بين `Owner` و`Access`
+
+منتجك تعاوني: المشترك يضيف فصولاً لأي كتاب. لكن **الحذف والتعديل** يبقيان للمالك، لأن الفقرات مصفوفة نصوص بلا كاتب لكل فقرة — فلا يمكن معرفة من كتب ماذا.
+
+### أهم جزء تقنياً: `requireChapterAccess`
 
 ```js
-queryClient.invalidateQueries({ queryKey: ["chapters", bookId] });
-// ترجمتها: أعد جلب قائمة الفصول لأنني غيّرت شيئاً فيها
+const [chapter, content, book, ownership, user] = await Promise.all([
+  prisma.chapters.findUnique({ where: { id: chapterId }, select: { /* حقول مسطّحة */ } }),
+  prisma.chapter_content.findUnique({ where: { chapter_id: chapterId }, select: { /* … */ } }),
+  prisma.books.findFirst({
+    where: { chapters: { some: { id: chapterId } } },     // استعلام فرعي
+    select: { id: true, title: true, author: true },
+  }),
+  prisma.user_books.findFirst({
+    where: { user_id: req.user.id, type: "ALL",
+             book: { chapters: { some: { id: chapterId } } } },   // استعلام فرعي
+  }),
+  prisma.users.findUnique({ where: { id: req.user.id }, select: { has_paid: true } }),
+]);
+
+req.chapter = { ...chapter, book, chapter_content: content };
 ```
 
-### 0.5 ما هو الـ hook؟
+**القصة:** كانت النسخة الأولى أربعة استعلامات **متتالية** (الفصل ← الملكية ← الاشتراك ← ثم المتحكّم يجلب الفصل ثانية). قست: **850ms** مقابل 160–370ms لباقي النقاط.
 
-دالة تبدأ بـ `use` تجمع منطقاً قابلاً لإعادة الاستخدام. بدل تكرار نفس الكود في خمس صفحات، تكتبينه مرة في hook وتستدعينه.
+جرّبت `Promise.all` مع `select` متداخل — لم ينفع، لأن **Prisma يحلّ العلاقات المتداخلة استعلاماً بعد آخر**. سجل الاستعلامات أثبتها:
+
+```
+q1 COUNT       531ms
+q2 books       700ms
+q3 user_books  337ms  ← متتالية
+q4 users       375ms  ← متتالية
+```
+
+الحل: خمسة استعلامات **مستقلة تماماً**. الوصول للكتاب والملكية عبر **استعلام فرعي على رقم الفصل** (`chapters: { some: { id } }`) بدل انتظار وصول `book_id` أولاً. النتيجة **370ms**.
+
+والسطر الأخير `req.chapter = …` يمرّر الفصل المُحمَّل للمتحكّم:
+
+```js
+const getChapter = async (req, res) => {
+  if (req.chapter) return res.status(200).json(req.chapter);   // بلا استعلام سادس
+  // …
+};
+```
 
 ---
 
-## 1. الحذف (كتاب / فصل / فقرة / صوت)
+## 🆕 `utils/notify.js` — الإشعارات
 
-### المشكلة
-
-لم يكن في المشروع **أي** طريقة لحذف شيء. تنشئين كتاباً بالخطأ؟ يبقى للأبد.
-
-### القاعدة التي اخترتها
-
-الحذف **لصاحب الكتاب فقط**. السبب تقني: الفقرات مخزّنة كمصفوفة نصوص:
-
-```prisma
-model chapter_content {
-  text  String[]   // ["الفقرة الأولى", "الفقرة الثانية"]
-}
-```
-
-مصفوفة نصوص لا تحمل معلومة "من كتب كل فقرة". فلو سمحت لأي مشترك بالحذف، لصار بإمكانه مسح كتابة غيره بلا أي طريقة لمعرفة ذلك.
-
-### الكود: حذف الكتاب
-
-`backend/controllers/book.controller.js`
+أربع دوال عامة: `notifyNewChapter` · `notifyNewComment` · `notifyNewMessage` · `notifyNewFollower`، وكلها تمرّ عبر:
 
 ```js
-const deleteBook = async (req, res) => {
-  const bookId = req.bookId; // الحارس تحقق منه مسبقاً
+const create = async (rows) => {
+  if (!rows.length) return;
+  try {
+    await prisma.notifications.createMany({ data: rows, skipDuplicates: true });
+    emitToUsers([...new Set(rows.map((r) => r.user_id))], "notification:new", { count: rows.length });
+  } catch (error) {
+    console.error("Failed to write notifications:", error.message);
+  }
+};
+```
 
-  await prisma.$transaction(async (tx) => {
-    // ١) الفصول ومحتواها
-    const chapters = await tx.chapters.findMany({
-      where: { book_id: bookId },
-      select: { id: true },
+ثلاثة قرارات مقصودة:
+
+1. **`try/catch` يبتلع الخطأ.** الإشعار أثر جانبي؛ فشله يجب ألا يُفشل العملية التي سبّبته. الفصل حُفظ فعلاً — لا يصح أن ترى المستخدمة خطأ بسبب صف إشعار.
+
+2. **تُستدعى بلا `await`:**
+   ```js
+   notifyNewChapter({ … });          // لا await
+   res.status(201).json(newChapter); // الرد يخرج فوراً
+   ```
+   وهذا آمن تحديداً **لأنها لا ترمي أبداً** (النقطة 1). لولا ذلك لصار وعداً مرفوضاً بلا معالج.
+
+3. **`new Set`** لمنع التكرار: من هو متابع ومالك في آن لا يستحق إشعارين.
+
+ودالة `followersOf` تستخدم `distinct: ["user_id"]` للسبب نفسه على مستوى قاعدة البيانات.
+
+---
+
+## 🆕 `utils/realtime.js` — Socket.IO
+
+```js
+export const initRealtime = (httpServer) => {
+  io = new Server(httpServer, { cors: { origin: (o, cb) => isAllowedOrigin(o) ? cb(null, true) : cb(new Error(…)) } });
+
+  io.use((socket, next) => {                       // مصادقة عند المصافحة
+    const token = socket.handshake.auth?.token;
+    if (!token) return next(new Error("No token provided"));
+    try {
+      socket.userId = jwt.verify(token, env.jwtSecret).id;
+      next();
+    } catch { next(new Error("Invalid token")); }
+  });
+
+  io.on("connection", (socket) => {
+    socket.join(`user:${socket.userId}`);           // غرفة خاصة لكل مستخدم
+
+    socket.on("conversation:join", async (conversationId) => {
+      const id = Number(conversationId);
+      if (!Number.isInteger(id)) return;
+      const participant = await prisma.participant.findFirst({
+        where: { conversationId: id, userId: socket.userId },
+        select: { id: true },
+      });
+      if (participant) socket.join(`conversation:${id}`);   // ← الفحص الحاسم
     });
-    const chapterIds = chapters.map((chapter) => chapter.id);
-
-    if (chapterIds.length) {
-      await tx.chapter_content.deleteMany({ where: { chapter_id: { in: chapterIds } } });
-      await tx.chapters.deleteMany({ where: { id: { in: chapterIds } } });
-    }
-
-    // ٢) المحادثة ورسائلها ومشاركيها
-    // ٣) التعليقات وعلاقات المتابعة/الإعجاب والإشعارات
-    // ٤) الكتاب نفسه في النهاية
-    await tx.books.delete({ where: { id: bookId } });
   });
-
-  res.status(200).json({ id: bookId, message: "Book deleted successfully." });
 };
 ```
 
-**لماذا كل هذا الترتيب؟** قاعدة البيانات فيها **مفاتيح أجنبية** (foreign keys): جدول الفصول يقول "أنا أنتمي للكتاب رقم 1". فلو حذفتِ الكتاب أولاً، تصرخ قاعدة البيانات: "لا أستطيع، هناك فصول تشير إليه!". لذلك نحذف **من الأصغر إلى الأكبر**.
+**نوعا الغرف:**
+- `user:<id>` — ينضم لها تلقائياً عند الاتصال، لتنبيه الجرس.
+- `conversation:<id>` — بطلب صريح، **وبعد التحقق من جدول المشاركين**.
 
-**ما هي `$transaction`؟** صندوق يقول: *نفّذ كل هذا، وإن فشل أي سطر فألغِ كل شيء*. بدونها قد ينقطع الاتصال في المنتصف فتبقى فصول يتيمة بلا كتاب.
+معرّفات المحادثات متسلسلة (1، 2، 3…). لولا الفحص لأمكن لأي متصل أن يطلب الانضمام للمحادثة رقم 7 ويقرأ محادثات غيره. اختبرته: غير المشارك **لم يصله شيء**.
 
-### الكود: حذف فقرة واحدة
+**ملاحظة `io = null` الابتدائية:** الدوال المُصدَّرة تستخدم `io?.to(...)` — أي أنها لا تفعل شيئاً بأمان في بيئة لا يعمل فيها الـ realtime (مثل سكربتات الاختبار).
 
-الفقرات مصفوفة، فالفقرة تُعرَّف بـ **موقعها** (`index`):
+**في `server.js`:**
 
 ```js
-const deleteTextBlock = async (req, res) => {
-  const index = Number(req.params.index);
+const server = http.createServer(app);   // بدل app.listen
+initRealtime(server);
+server.listen(env.port, …);
+```
 
-  const blocks = await readTextBlocks(chapterId, index); // يقرأ + يتحقق
-  blocks.splice(index, 1);                               // احذف عنصراً واحداً
+Socket.IO يحتاج خادم HTTP خاماً ليُركّب نفسه عليه، فيتشارك المنفذ مع Express.
 
-  const updated = await prisma.chapter_content.update({
-    where: { chapter_id: chapterId },
-    data: { text: blocks },
+---
+
+## 🆕 `routes/public.route.js` — الوصول بلا حساب
+
+```js
+router.get("/books/:id", asyncHandler(async (req, res) => {
+  const [chapters, likes, follows] = await Promise.all([
+    prisma.chapters.findMany({
+      where: { book_id: id, published: true },
+      select: { id: true, title: true, cover_image: true, position: true },
+    }),
+    prisma.user_books.count({ where: { book_id: id, type: "LIKE" } }),
+    prisma.user_books.count({ where: { book_id: id, type: "FOLLOW" } }),
+  ]);
+  // …
+}));
+```
+
+المسار الوحيد بلا `verifyToken`. الأمان هنا ليس شرطاً بل **بنية**: `chapter_content` غير مذكور في الـ `select` إطلاقاً، فلا يمكن تسريبه مهما تغيّر الكود لاحقاً. و`published: true` يضمن أن المسودّات لا تظهر للعامة.
+
+مُثبّت في `server.js` تحت `/api/public`.
+
+---
+
+## 🆕 `controllers/notification.controller.js`
+
+```js
+const markAsRead = async (req, res) => {
+  const id = parseId(req.params.id, "notification id");
+  const result = await prisma.notifications.updateMany({
+    where: { id, user_id: req.user.id },   // ← مقيّد بالمستخدم
+    data: { read: true },
   });
-  res.status(200).json(updated);
+  res.status(200).json({ updated: result.count });
 };
 ```
 
-وداخل `readTextBlocks` حماية مهمة:
+استعملت `updateMany` لا `update` عمداً: `update` مع `where: { id }` كان سيسمح بتعليم إشعار شخص آخر كمقروء. مع `updateMany` يصبح `user_id` جزءاً من الشرط، فمحاولة العبث تُرجع `count: 0` بلا خطأ ولا تسريب.
+
+و`getNotifications` تُرجع القائمة وعدد غير المقروء في طلب واحد عبر `Promise.all`.
+
+---
+
+## ✏️ `controllers/book.controller.js`
+
+### `searchBooks` — البحث
 
 ```js
-if (index < 0 || index >= content.text.length) {
-  throw badRequest("That paragraph no longer exists. Refresh the page and try again.");
-}
+const where = {
+  ...(q ? { OR: [
+      { title:  { contains: q, mode: "insensitive" } },
+      { author: { contains: q, mode: "insensitive" } },
+  ] } : {}),
+  ...(genre ? { generes: { has: genre } } : {}),
+};
+
+const [total, books] = await Promise.all([
+  prisma.books.count({ where }),
+  prisma.books.findMany({
+    where,
+    select: { ...bookSelect, _count: { select: { users: { where: { type: "LIKE" } } } } },
+    orderBy: SORTS[sort],
+    skip: (page - 1) * limit,
+    take: limit,
+  }),
+]);
 ```
 
-**لماذا؟** تخيّلي أن الصفحة مفتوحة عندك في تبويبين. حذفتِ فقرة في التبويب الأول، ثم ضغطتِ حذف في التبويب الثاني وهو ما زال يعرض الترقيم القديم — بلا هذا الفحص ستُحذف **الفقرة الخطأ**.
+- بناء `where` بالنشر الشرطي: الشرط يدخل فقط إن وُجدت قيمته.
+- `generes: { has: genre }` — عامل المصفوفات في Postgres.
+- `SORTS` كائن ثابت (`newest`/`oldest`/`title`) وليس قيمة من المستخدم مباشرة: تمرير `req.query.sort` إلى `orderBy` بلا قائمة بيضاء يفتح باب حقن حقول.
+- **`_count` المُفلتر** يجلب عدد الإعجابات مع كل صف في نفس الاستعلام. بدونه كانت كل بطاقة تطلب عدّادها: 24 كتاباً = 25 طلباً.
 
-### الكود: نافذة التأكيد
+**ما حذفته عمداً:** كانت النسخة الأولى تجلب صاحب الكتاب مع كل نتيجة، فأضاف ذلك رحلتين متتاليتين (`user_books` ثم `users`) ورفع الزمن إلى 1.5–3.5 ثانية. البطاقة لا تعرض المالك أصلاً، فأزلته → **~600ms**.
 
-`frontend/src/components/shared/ConfirmDialog.tsx` — مكوّن واحد مشترك يُستخدم في كل عمليات الحذف:
-
-```tsx
-<ConfirmDialog
-  open={confirmOpen}
-  loading={deleteBook.isPending}
-  title="Delete this book?"
-  description="…This cannot be undone."
-  onConfirm={() => deleteBook.mutate()}
-  onClose={() => setConfirmOpen(false)}
-/>
-```
-
-`loading` مهم: أثناء الحذف يتحوّل الزر إلى "Deleting…" ويُعطَّل، فلا تضغطين مرتين.
-
----
-
-## 2. الكتابة داخل صفحة الفصل
-
-### قبل وبعد
-
-| قبل | بعد |
-|---|---|
-| نافذة منبثقة | الكتابة في مكان النص نفسه |
-| 400 حرف | 2000 حرف |
-| لا تعديل ولا حذف | زر ✎ وزر 🗑 على كل فقرة |
-
-الملف: `frontend/src/components/chapter/TextBlocks.tsx`
-
-### فكرة الحالة (state)
-
-المكوّن يحتاج أن يتذكّر أربعة أشياء:
-
-```tsx
-const [draft, setDraft] = useState("");              // ما تكتبينه الآن
-const [editingIndex, setEditingIndex] = useState(null); // أي فقرة تُعدَّل (أو لا شيء)
-const [editingValue, setEditingValue] = useState("");   // النص أثناء التعديل
-const [pendingDelete, setPendingDelete] = useState(null); // أي فقرة تنتظر التأكيد
-```
-
-ثم في العرض: إذا كان رقم الفقرة الحالية يساوي `editingIndex` نعرض محرّراً، وإلا نعرض النص:
-
-```tsx
-{blocks.map((block, index) =>
-  editingIndex === index ? <محرر /> : <فقرة عادية />
-)}
-```
-
-### مربّع نص يكبر مع الكتابة
-
-```tsx
-useEffect(() => {
-  const el = ref.current;
-  if (!el) return;
-  el.style.height = "auto";                                  // صفّر الارتفاع
-  el.style.height = `${Math.min(el.scrollHeight, 520)}px`;    // ثم اجعله بحجم المحتوى
-}, [value]);
-```
-
-`scrollHeight` = الارتفاع الحقيقي للنص لو ظهر كاملاً. نضبط الارتفاع عليه بعد كل تغيير، مع حدّ أقصى 520px حتى لا يبتلع المربّع الشاشة. وسطر `"auto"` ضروري وإلا لن يصغر المربع أبداً عند حذف نص.
-
-### اختصار Ctrl+Enter
-
-```tsx
-onKeyDown={(e) => {
-  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitDraft();
-}}
-```
-
-`metaKey` = زر Command على الماك، `ctrlKey` = Ctrl على ويندوز.
-
-### إخفاء الأزرار حتى المرور بالفأرة
-
-```tsx
-className="… sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100"
-```
-
-اقرئيها هكذا: **على الشاشات المتوسطة فأكبر** (`sm:`) الأزرار شفافة، وتظهر عند المرور على العنصر الأب الذي يحمل `group`. أما على الجوال (لا يوجد فيه "مرور فأرة") فتبقى ظاهرة دائماً.
-
----
-
-## 3. تعديل الكتاب — وصفحة مستقلة له
-
-### لماذا صفحة وليست نافذة؟
-
-النافذة المشتركة في المشروع **دائرية** على الشاشات الكبيرة (`rounded-full`)، والدائرة تأكل الزوايا. قِست العرض المتاح لحقل الوصف:
-
-| | العرض |
-|---|---|
-| داخل النافذة الدائرية | 468px |
-| في صفحة مستقلة | **756px** |
-
-الملف: `frontend/src/pages/EditBook.tsx`، والمسار `/books/:id/edit`.
-
-### تعبئة النموذج من الخادم
-
-```tsx
-useEffect(() => {
-  if (!book) return;
-  setForm({ title: book.title, author: book.author, /* … */ });
-  setGenresInput((book.generes ?? []).join(", "));
-}, [book]);
-```
-
-`useEffect` يعمل **بعد** كل رسم. هنا نقول: كلما وصل الكتاب من الخادم، انسخي قيمه في النموذج. والشرط `if (!book) return;` يمنع الانهيار في أول رسم قبل وصول البيانات.
-
-`.join(", ")` يحوّل `["Fiction","Drama"]` إلى `"Fiction, Drama"` لأن حقل الإدخال يقبل نصاً واحداً فقط.
-
-### أهم درس في هذه الميزة: أرسلي المتغيّر فقط
-
-```tsx
-const changed = {};
-if (form.title !== book?.title) changed.title = form.title;
-if (form.author !== book?.author) changed.author = form.author;
-// …
-if (Object.keys(changed).length === 0) return null; // لم يتغير شيء أصلاً
-
-await newRequest.patch(`/api/books/${id}`, changed);
-```
-
-**القصة الحقيقية:** أول نسخة كانت ترسل كل الحقول. الاختبار فشل بـ 400. السبب أن بعض الأغلفة القديمة مخزّنة كـ **data URI** (صورة محوّلة إلى نص بيس64 بطول آلاف الأحرف)، وقاعدة التحقق تحدّد 2048 حرفاً. فالمستخدمة لم تلمس الغلاف أصلاً، لكن الصفحة كانت تعيد إرساله فيُرفض الطلب كله.
-
-وهذا هو **المعنى الأصلي لـ PATCH**: "غيّري هذه الحقول فقط"، مقابل PUT التي تعني "استبدلي كل شيء".
-
----
-
-## 4. ترتيب الفصول بالسحب
-
-### التغيير في قاعدة البيانات
-
-```prisma
-model chapters {
-  position    Int      @default(0)
-  @@index([book_id, position])
-}
-```
-
-- `position` = رقم ترتيب الفصل.
-- `@default(0)` ضروري: الجدول فيه صفوف قديمة، والعمود الجديد يحتاج قيمة لها.
-- `@@index` = فهرس، أي "فهرس الكتاب" في آخر الكتاب. بدونه تقرأ قاعدة البيانات كل الصفوف لتجد فصول كتاب معيّن.
-
-وأضفت في ملف الهجرة أمر SQL يعطي الفصول الموجودة ترتيبها حسب تاريخ إنشائها، وإلا لبدأت كلها بالرقم 0:
-
-```sql
-UPDATE "chapters" AS c SET "position" = ordered.rn
-FROM (SELECT "id", ROW_NUMBER() OVER (PARTITION BY "book_id" ORDER BY "created_at") AS rn
-      FROM "chapters") AS ordered
-WHERE c."id" = ordered."id";
-```
-
-### الخادم: كتابة الترتيب الجديد
+### `updateBook` — التعديل
 
 ```js
-const known = new Set(chapters.map((chapter) => chapter.id));
+const book = await prisma.books.update({
+  where: { id: bookId },
+  data: req.body,          // آمن، والسبب أدناه
+  select: { ...bookSelect, users: bookOwnerSelect },
+});
+```
+
+تمرير `req.body` مباشرة إلى Prisma يبدو خطراً، لكنه آمن هنا لأن `validateRequest` **يستبدل `req.body` بمخرَج zod**:
+
+```js
+if (result.data.body) req.body = result.data.body;
+```
+
+وzod يحذف أي مفتاح غير معرّف في المخطط. فلو أرسل أحد `has_paid: true` مع تعديل الكتاب، لا يصل إلى Prisma إطلاقاً.
+
+### `deleteBook` — الحذف المتسلسل
+
+```js
+await prisma.$transaction(async (tx) => {
+  // الفصول ← محتواها ← المحادثات ← الرسائل والمشاركون ← التعليقات
+  // ← علاقات المتابعة/الإعجاب ← الإشعارات ← الكتاب
+});
+```
+
+المخطط بلا `onDelete: Cascade`، فالترتيب يدوي من الأصغر إلى الأكبر (اتجاه المفاتيح الأجنبية). و`$transaction` تمنع بقاء كتاب نصف محذوف لو انقطع الاتصال.
+
+`notifications.deleteMany({ where: { book_id } })` أضفتها لاحقاً: اكتشف الاختبار أن إشعارات تبقى تشير لكتاب محذوف.
+
+---
+
+## ✏️ `controllers/book_chapter.controller.js`
+
+### `reorderChapters`
+
+```js
+const known = new Set(chapters.map((c) => c.id));
 
 if (order.length !== known.size || order.some((id) => !known.has(id))) {
   throw badRequest("The order must list every chapter of this book exactly once.");
@@ -318,75 +402,11 @@ await prisma.$transaction(
 );
 ```
 
-**الفحص:** الواجهة ترسل مصفوفة أرقام مثل `[5, 3, 9]`. نتأكد أنها تحتوي كل فصول الكتاب ولا شيء غريب. بدونه ترسل صفحة قديمة ترتيباً ناقصاً فيبقى الكتاب نصف مرتّب.
+الفحص يمنع حالتين: ترتيباً ناقصاً من صفحة قديمة (فيبقى الكتاب نصف مرتّب)، وتمرير معرّف فصل من كتاب آخر.
 
-**لماذا `$transaction` هنا؟** `order.map(...)` يبني **قائمة** أوامر تحديث، والـ transaction تنفّذها كلها أو لا شيء.
+`order.map(...)` تبني **مصفوفة عمليات**، و`$transaction` تنفّذها ذرّياً — هذه صيغة Prisma للمصفوفة لا للدالة.
 
-### الواجهة: السحب والإفلات
-
-هذه مزايا مدمجة في المتصفح — لا تحتاج مكتبة:
-
-```tsx
-<li
-  draggable={isOwner}                                   // يمكن سحبه
-  onDragStart={() => setDragId(chapter.id)}             // بدأ السحب: تذكّر مَن
-  onDragOver={(e) => isOwner && e.preventDefault()}     // اسمح بالإفلات هنا
-  onDrop={() => dragId && move(dragId, chapter.id)}     // أُفلت: نفّذ النقل
-  onDragEnd={() => setDragId(null)}                     // انتهى: انسَ
->
-```
-
-⚠️ `e.preventDefault()` في `onDragOver` **إلزامي**. سلوك المتصفح الافتراضي هو *رفض* الإفلات، وهذا السطر يلغي الرفض. بدونه لن يعمل الإفلات إطلاقاً — وهو أكثر خطأ شائع في drag & drop.
-
-ودالة النقل:
-
-```tsx
-const move = (fromId, toId) => {
-  const next = [...order];                       // نسخة (لا نعدّل الأصل مباشرة)
-  const from = next.findIndex((c) => c.id === fromId);
-  const to = next.findIndex((c) => c.id === toId);
-  next.splice(to, 0, next.splice(from, 1)[0]);   // اقتطع من مكانه وألصقه في الجديد
-  setOrder(next);                                // اعرضي الترتيب الجديد فوراً
-  reorder.mutate(next.map((c) => c.id));         // ثم احفظيه على الخادم
-};
-```
-
-`next.splice(from, 1)` تقتطع العنصر وتعيده داخل مصفوفة، و`[0]` يأخذه منها، ثم `splice(to, 0, …)` تُدخله في موضعه الجديد.
-
-**لماذا نعرض التغيير قبل أن يردّ الخادم؟** ليشعر التطبيق بالفورية. وإن فشل الحفظ نتراجع:
-
-```tsx
-onError: (error) => {
-  toast.error("Could not save the new order.");
-  setOrder(chapters); // أعيدي ما كان
-}
-```
-
-### زرّا ← و →
-
-السحب لا يعمل بلوحة المفاتيح ولا مع قارئات الشاشة، فأضفت بديلاً:
-
-```tsx
-const nudge = (index, direction) => {
-  const target = index + direction;
-  if (target < 0 || target >= order.length) return; // لا تخرجي عن الحدود
-  move(order[index].id, order[target].id);
-};
-```
-
----
-
-## 5. المسودّات
-
-### العمود
-
-```prisma
-published   Boolean  @default(true)
-```
-
-`@default(true)` قرار مهم: كل الفصول الموجودة تبقى **منشورة** كما كانت. لو جعلته `false` لاختفت كل فصول الموقع فجأة.
-
-### الفلترة على الخادم
+### `getBookChapters` — فلترة المسودّات
 
 ```js
 const isOwner = await prisma.user_books.findFirst({
@@ -395,360 +415,448 @@ const isOwner = await prisma.user_books.findFirst({
 
 const chapters = await prisma.chapters.findMany({
   where: { book_id: bookId, ...(isOwner ? {} : { published: true }) },
+  select: chapterListSelect,
   orderBy: [{ position: "asc" }, { created_at: "asc" }],
 });
 ```
 
-اقرئي `...(isOwner ? {} : { published: true })` هكذا:
-- صاحب الكتاب → `{}` → **بلا شرط إضافي** → يرى كل شيء.
-- غيره → `{ published: true }` → المنشور فقط.
+المالك يرى كل شيء؛ غيره يرى المنشور فقط. والفلترة في الخادم لا في الواجهة — إخفاء بـ CSS ليس إخفاءً.
 
-و`...` هي عملية النشر (spread) التي تدمج كائناً داخل كائن.
+`orderBy` كمصفوفة: بالموضع، وعند التساوي بتاريخ الإنشاء (يهمّ للصفوف القديمة).
 
-**النقطة الأهم:** الإخفاء يحدث في **الخادم** لا في الواجهة. لو أخفيتِ المسودّة بـ CSS فقط، لرآها أي شخص يفتح أدوات المطوّر.
-
-`orderBy` بمصفوفة = رتّبي بالموضع، وعند التساوي رتّبي بتاريخ الإنشاء.
-
----
-
-## 6. الصفحة العامة القابلة للمشاركة
-
-### المشكلة
-
-كل شيء في الموقع خلف تسجيل الدخول. لا تستطيعين إرسال رابط كتابك لأحد.
-
-### الحل مع الحفاظ على الاشتراك المدفوع
-
-`backend/routes/public.route.js` — **بلا `verifyToken`**، أي بلا مصادقة:
+### `chapterListSelect` مقابل `chapterSelect`
 
 ```js
-const [chapters, likes, follows] = await Promise.all([
-  prisma.chapters.findMany({
-    where: { book_id: id, published: true },
-    // عناوين وأغلفة فقط: لا يوجد chapter_content في هذا الـ select إطلاقاً
-    select: { id: true, title: true, cover_image: true, position: true },
-  }),
-  prisma.user_books.count({ where: { book_id: id, type: "LIKE" } }),
-  prisma.user_books.count({ where: { book_id: id, type: "FOLLOW" } }),
-]);
+const chapterListSelect = { id, title, cover_image, book_id, created_at, position, published, book };
+// ولا يحتوي chapter_content
 ```
 
-**السطر الحاسم هو الـ `select`.** الأمان هنا ليس شرطاً نكتبه، بل **بيانات لا نطلبها أصلاً**. لا يمكن تسريب `chapter_content` لأنه غير مذكور.
+القائمة كانت تُرجع `chapter_content` لكل فصل — أي أن نص المحتوى المدفوع كان يخرج مع قائمة الأغلفة.
 
-**ما هي `Promise.all`؟** تنفّذ الطلبات الثلاثة **بالتوازي** بدل الانتظار واحداً تلو الآخر. ثلاثة طلبات × 160ms = 480ms متتالية، مقابل ~160ms متوازية.
+### `readTextBlocks` — حماية الفهرس
 
-### زر المشاركة
-
-```tsx
-const url = `${window.location.origin}/read/${bookId}`;
-navigator.clipboard
-  ?.writeText(url)
-  .then(() => toast.success("Public link copied"))
-  .catch(() => toast.error(url)); // إن مُنع النسخ، أظهري الرابط ليُنسخ يدوياً
-```
-
-`window.location.origin` = `https://موقعك.com` — فيعمل الرابط في التطوير والإنتاج بلا تعديل.
-
----
-
-## 7. الإشعارات
-
-### الجدول الجديد
-
-```prisma
-model notifications {
-  id         Int      @id @default(autoincrement())
-  user_id    Int      // لمن هذا الإشعار
-  actor_id   Int?     // من تسبّب به
-  type       String   // NEW_CHAPTER, NEW_COMMENT, …
-  message    String
-  book_id    Int?
-  chapter_id Int?
-  read       Boolean  @default(false)
-  created_at DateTime @default(now())
-
-  @@index([user_id, read, created_at])
+```js
+if (index < 0 || index >= content.text.length) {
+  throw badRequest("That paragraph no longer exists. Refresh the page and try again.");
 }
 ```
 
-علامة `?` تعني "قد يكون فارغاً". `book_id` اختياري لأن ليس كل إشعار متعلقاً بكتاب.
+النص مصفوفة، والفقرة تُعرَّف بموقعها. لو حُذفت فقرة من تبويب آخر، لصار الترقيم القديم يشير لفقرة مختلفة — فتُحذف الخطأ. الفحص يقطع هذا.
 
-### الملف المركزي `backend/utils/notify.js`
+---
+
+## ✏️ `middlewares/errorMiddleware.js`
 
 ```js
-const create = async (rows) => {
-  if (!rows.length) return;
+if (err instanceof Prisma.PrismaClientKnownRequestError) {
+  if (err.code === "P2002") { status = 409; message = "This record already exists."; }
+  else if (err.code === "P2025") { status = 404; message = "Record not found."; }
+  else if (err.code === "P2003") { status = 400; message = "Related record does not exist."; }
+} else if (err instanceof multer.MulterError) {
+  status = 400;
+  message = err.code === "LIMIT_FILE_SIZE" ? "File is too large." : /* … */;
+}
+
+if (status >= 500) {
+  console.error(err);
+  if (env.isProduction) message = "Internal server error.";   // لا تسريب تفاصيل
+}
+res.status(status).json({ error: message });
+```
+
+ترجمة أكواد Prisma إلى حالات HTTP مفهومة، وإخفاء تفاصيل أخطاء 500 في الإنتاج (قد تحوي أسماء جداول أو أجزاء استعلامات). والرد دائماً JSON بشكل `{ error }` واحد تعتمد عليه الواجهة.
+
+---
+
+## 🆕 الهجرة `20260818184226_…`
+
+```sql
+ALTER TABLE "chapters" ADD COLUMN "position" INTEGER NOT NULL DEFAULT 0,
+                       ADD COLUMN "published" BOOLEAN NOT NULL DEFAULT true;
+CREATE TABLE "notifications" ( … );
+CREATE INDEX "user_books_book_id_type_idx" ON "user_books"("book_id", "type");
+CREATE INDEX "messages_conversationId_createdAt_idx" ON "messages"("conversationId", "createdAt");
+-- …
+```
+
+**كلها إضافات: لا `DROP` ولا تعديل نوع.** راجعت الـ SQL قبل التطبيق على قاعدة الإنتاج.
+
+`published DEFAULT true` مقصود: لو كان `false` لاختفت كل فصول الموقع فجأة.
+
+وأضفت يدوياً تعبئة أولية، وإلا لبدأت كل الفصول بالموضع 0:
+
+```sql
+UPDATE "chapters" AS c SET "position" = ordered.rn
+FROM (SELECT "id", ROW_NUMBER() OVER (PARTITION BY "book_id" ORDER BY "created_at", "id") AS rn
+      FROM "chapters") AS ordered
+WHERE c."id" = ordered."id";
+```
+
+`ROW_NUMBER() OVER (PARTITION BY book_id ORDER BY created_at)` = رقّم داخل كل كتاب على حدة حسب تاريخ الإنشاء.
+
+---
+
+# الجزء الثاني: الواجهة
+
+## 🆕 `utils/session.ts` — القارئ الوحيد للجلسة
+
+```ts
+export const getSession = (): Session | null => {
   try {
-    await prisma.notifications.createMany({ data: rows, skipDuplicates: true });
-    emitToUsers([...new Set(rows.map((row) => row.user_id))], "notification:new", { … });
-  } catch (error) {
-    console.error("Failed to write notifications:", error.message);
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.token || !parsed?.user) return null;
+    return parsed as Session;
+  } catch {
+    localStorage.removeItem(STORAGE_KEY);   // تالف: نظّفه بدل تكرار الانهيار
+    return null;
   }
 };
 ```
 
-**أهم فكرة هنا: `try/catch` يبتلع الخطأ عمداً.**
+كان كل مكوّن يكتب `JSON.parse(localStorage.getItem("currentUser")!)` بنفسه — وعلامة `!` تعني "ثقي أنه ليس null"، فينهار المكوّن كله إن كان فارغاً أو تالفاً. الآن نقطة دخول واحدة، وكل شيء يمرّ بها.
 
-الإشعار **أثر جانبي**. تخيّلي أن كتابة الإشعار فشلت أثناء إضافة فصل: هل يجب أن تفشل إضافة الفصل؟ قطعاً لا. الفصل حُفظ فعلاً؛ فمن غير المقبول أن يرى المستخدم رسالة خطأ بسبب إشعار.
+`patchSessionUser` تدمج حقولاً جديدة (مثل `has_paid`) في المستخدم المخزّن بلا مسح التوكن.
 
-ولهذا أيضاً نستدعيها **بلا `await`**:
+---
 
-```js
-notifyNewChapter({ bookId, chapterId, actorId, … });  // لا await
-res.status(201).json(newChapter);                      // الرد يخرج فوراً
+## 🆕 `utils/socket.ts` — اتصال واحد مشترك
+
+```ts
+let socket: Socket | null = null;
+
+export const getSocket = (): Socket | null => {
+  const token = getStoredToken();
+  if (!token) return null;
+  if (!socket) {
+    socket = io(baseURL, { auth: { token }, transports: ["websocket", "polling"] });
+  }
+  return socket;
+};
+
+export const closeSocket = () => { socket?.close(); socket = null; };
 ```
 
-`await` تعني "انتظري" — ولا داعي لتأخير المستخدم ريثما تُكتب الإشعارات.
+نمط singleton: صفحة المحادثة والجرس يتشاركان **اتصالاً واحداً**، لا اثنين. `auth: { token }` هو ما يقرأه الخادم في `socket.handshake.auth`.
 
-و`new Set(...)` تحذف التكرار: لو كان الشخص متابعاً ومالكاً في آن، لا نرسل له إشعارين.
+و`closeSocket()` تُستدعى في `logout` — وإلا بقي الاتصال حاملاً توكن المستخدم السابق.
 
-### hook الواجهة
+---
 
-`frontend/src/hooks/useNotifications.ts`
+## 🆕 `hooks/useNotifications.ts`
 
-```tsx
+```ts
 const query = useQuery({
   queryKey: ["notifications"],
   queryFn: async () => (await newRequest.get("/api/notifications")).data,
-  refetchInterval: 2 * 60 * 1000,   // شبكة أمان كل دقيقتين
+  enabled: isSignedIn,
+  refetchInterval: 2 * 60 * 1000,
 });
 
 useEffect(() => {
+  if (!isSignedIn) return;
   const socket = getSocket();
+  if (!socket) return;
   const onNew = () => queryClient.invalidateQueries({ queryKey: ["notifications"] });
   socket.on("notification:new", onNew);
-  return () => { socket.off("notification:new", onNew); };  // تنظيف
+  return () => { socket.off("notification:new", onNew); };
 }, [isSignedIn, queryClient]);
 ```
 
-طبقتان: **السوكِت** يعطي التنبيه الفوري، و`refetchInterval` احتياط لو انقطع الاتصال.
+طبقتان مقصودتان: السوكِت للتنبيه الفوري، و`refetchInterval` شبكة أمان لو انقطع.
 
-⚠️ سطر `return () => socket.off(...)` اسمه **دالة التنظيف**. تعمل عند اختفاء المكوّن. بدونها يتراكم مستمع جديد كل مرة، فيصل الإشعار الواحد خمس مرات.
+الحدث لا يحمل بيانات الإشعار، بل **يُبطل الاستعلام** فقط. أبسط وأصح: القائمة تُعاد من مصدر واحد بدل محاولة دمج حدث في ذاكرة قد تكون قديمة.
 
----
-
-## 8. الرسائل اللحظية (WebSocket)
-
-### الفرق عن HTTP
-
-| HTTP | WebSocket |
-|---|---|
-| أنت تسألين، الخادم يجيب | قناة مفتوحة في الاتجاهين |
-| لا يستطيع الخادم مبادرتك | يستطيع أن يدفع لك شيئاً في أي لحظة |
-| مثل رسالة نصية | مثل مكالمة هاتفية مفتوحة |
-
-### الخادم `backend/utils/realtime.js`
-
-```js
-io.use((socket, next) => {
-  const token = socket.handshake.auth?.token;
-  if (!token) return next(new Error("No token provided"));
-  try {
-    const decoded = jwt.verify(token, env.jwtSecret);
-    socket.userId = decoded.id;
-    next();
-  } catch {
-    next(new Error("Invalid token"));
-  }
-});
-```
-
-نفس التوكن المستخدم في REST. اتصال بلا توكن **يُرفض من البداية**.
-
-### الغرف — وأهم فحص أمني
-
-```js
-socket.on("conversation:join", async (conversationId) => {
-  const participant = await prisma.participant.findFirst({
-    where: { conversationId: id, userId: socket.userId },
-  });
-  if (participant) socket.join(`conversation:${id}`);   // فقط إن كان مشاركاً فعلاً
-});
-```
-
-**لماذا هذا مهم جداً؟** الأرقام متسلسلة (1، 2، 3…). لولا هذا الفحص لاستطاع أي شخص أن يقول "ضمّني للمحادثة رقم 7" ويقرأ محادثات غيره. الفحص يسأل جدول المشاركين قبل الضمّ.
-
-اختبرت هذا فعلياً: شخص غير مشارك **لم يصله أي شيء**.
-
-### الواجهة
-
-```tsx
-const onMessage = (incoming) => {
-  queryClient.setQueryData(["messages", id], (old = []) =>
-    old.some((m) => m.id === incoming.id) ? old : [...old, incoming]
-  );
-};
-```
-
-`setQueryData` تضيف الرسالة للذاكرة مباشرة بلا طلب جديد. وفحص `old.some(...)` يمنع التكرار: المرسل لديه الرسالة أصلاً من ردّ طلبه، فلا نضيفها مرتين.
+⚠️ دالة التنظيف `socket.off(...)` ضرورية: بدونها يتراكم مستمع مع كل mount ويصل الإشعار عدة مرات.
 
 ---
 
-## 9. البحث والتصفية
+## 🆕 `hooks/usePrefetch.ts`
 
-### الخادم
+```ts
+const prefetch = (key: unknown[], url: string) =>
+  queryClient.prefetchQuery({ queryKey: key, queryFn: …, staleTime: 60 * 1000 });
 
-```js
-const where = {
-  ...(q ? {
-    OR: [
-      { title:  { contains: q, mode: "insensitive" } },
-      { author: { contains: q, mode: "insensitive" } },
-    ],
-  } : {}),
-  ...(genre ? { generes: { has: genre } } : {}),
+const prefetchBook = (id: number | string) => {
+  const bookId = String(id);                       // ← أهم سطر
+  prefetch(["book", bookId], `/api/books/${bookId}`);
+  prefetch(["chapters", bookId], `/api/books/${bookId}/chapters`);
+  prefetch(["bookStates", bookId], `/api/books/${bookId}/book-states`);
 };
 ```
 
-- `OR` = العنوان **أو** المؤلف.
-- `contains` = يحتوي (بحث جزئي).
-- `mode: "insensitive"` = لا فرق بين كبير وصغير الأحرف.
-- `has` للمصفوفات = "هل يحتوي هذا التصنيف؟".
-- والـ `...(شرط ? {…} : {})` تعني: أضيفي هذا الشرط **فقط إن كانت القيمة موجودة**.
+**المصيدة:** الصفحة تقرأ المعرّف من الرابط عبر `useParams` فيكون **نصاً**، والبطاقة تحمله **رقماً**. و`["book", 1]` مفتاح مختلف عن `["book", "1"]` — فلو لم نُوحّدهما لملأنا الذاكرة بمفاتيح لا يقرأها أحد، والجلب المسبق بلا أثر.
 
-### الترقيم
+يُستدعى على `onMouseEnter` و`onFocus` معاً (الثاني لمستخدمي لوحة المفاتيح).
 
-```js
-skip: (page - 1) * limit,   // كم صفاً نتخطى
-take: limit,                // كم صفاً نأخذ
+**القياس:** كتاب ← فصل من 1966ms إلى **26ms بلا وميض تحميل** بعد مرور 300ms بالمؤشر.
+
+---
+
+## 🆕 `hooks/useAccount.ts` و `useBookStates.ts`
+
+```ts
+export const useAccount = () => {
+  const cached = getCurrentUser();
+  const query = useQuery({ queryKey: ["me"], queryFn: fetchMe, enabled: Boolean(cached), staleTime: 60_000 });
+
+  useEffect(() => { if (query.data) patchSessionUser(query.data); }, [query.data]);
+
+  return { …query, user: query.data ?? cached ?? null,
+           hasPaid: Boolean(query.data?.has_paid),   // من الخادم فقط
+           isChecking: query.isLoading };
+};
 ```
 
-صفحة 1 → تخطَّ 0. صفحة 2 (بحدّ 24) → تخطَّ 24.
+`hasPaid` تُقرأ من **رد الخادم لا من الذاكرة المخزّنة**. سابقاً كان الاشتراك يُقرأ من `localStorage`، أي أن تعديل قيمة واحدة في أدوات المطوّر يفتح كل المزايا المدفوعة.
 
-### حيلة مهمة في الأداء
+`useBookStates` تمركز مفتاح `["bookStates", String(bookId)]` في مكان واحد — كان مكرراً بصيغ مختلفة فلا يتطابق الإبطال مع الجلب.
 
-```js
-_count: { select: { users: { where: { type: "LIKE" } } } }
-```
+---
 
-تجلب **عدد الإعجابات مع كل كتاب في نفس الاستعلام**. بدونها كانت كل بطاقة تطلب عدّادها بنفسها: 24 كتاباً = 25 طلباً. الآن **طلب واحد**.
+## 🆕 `components/chapter/TextBlocks.tsx`
 
-### الواجهة: تأخير الكتابة (debounce)
+قلب تجربة الكتابة الجديدة. ثلاث نقاط تستحق الانتباه:
+
+### 1. مربّع يكبر مع النص
 
 ```tsx
 useEffect(() => {
-  const id = setTimeout(() => { /* نفّذ البحث */ }, 350);
-  return () => clearTimeout(id);
-}, [term]);
+  const el = ref.current;
+  if (!el) return;
+  el.style.height = "auto";                                // صفّر أولاً
+  el.style.height = `${Math.min(el.scrollHeight, 520)}px`;
+}, [value]);
 ```
 
-بدونها: كلمة "midnight" = 8 أحرف = 8 طلبات. معها: تنتظر 350ms من التوقف عن الكتابة، فتصير **طلباً واحداً**.
+سطر `"auto"` ليس زائداً: بدونه يقيس `scrollHeight` بالنسبة للارتفاع الحالي فلا يصغر المربّع أبداً عند حذف نص.
 
-كيف؟ كل حرف يُشغّل `useEffect` من جديد، ودالة التنظيف تُلغي المؤقّت السابق. فلا ينجو إلا آخر مؤقّت.
+### 2. التعديل داخل القائمة نفسها
 
-### الحالة في الرابط
+```tsx
+{blocks.map((block, index) =>
+  editingIndex === index ? <محرر … /> : <فقرة … />
+)}
+```
+
+حالة واحدة (`editingIndex`) تحدد أي فقرة في وضع التحرير. لا حاجة لمكوّن منفصل ولا لحالة لكل فقرة.
+
+### 3. مفاتيح الاختصار
+
+```tsx
+onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitDraft(); }}
+// وفي المحرّر:
+onKeyDown={(e) => { if (e.key === "Escape") setEditingIndex(null); }}
+```
+
+---
+
+## ✏️ `components/book/ChaptersArea.tsx` — السحب والإفلات
+
+```tsx
+const [order, setOrder] = useState<Chapter[]>(chapters);
+useEffect(() => setOrder(chapters), [chapters]);
+```
+
+نسخة محلية للترتيب حتى يستجيب السحب فوراً، مع مزامنتها كلما وصل ترتيب جديد من الخادم.
+
+```tsx
+<li
+  draggable={isOwner}
+  onDragStart={() => setDragId(chapter.id)}
+  onDragOver={(e) => isOwner && e.preventDefault()}    // ← إلزامي
+  onDrop={() => dragId && move(dragId, chapter.id)}
+  onDragEnd={() => setDragId(null)}
+>
+```
+
+`e.preventDefault()` في `onDragOver` هو ما يجعل العنصر **هدفاً صالحاً للإفلات**؛ سلوك المتصفح الافتراضي هو الرفض. حذفه = لا يعمل الإفلات إطلاقاً.
+
+```tsx
+const move = (fromId, toId) => {
+  const next = [...order];
+  const from = next.findIndex((c) => c.id === fromId);
+  const to   = next.findIndex((c) => c.id === toId);
+  next.splice(to, 0, next.splice(from, 1)[0]);
+  setOrder(next);                              // تفاؤلي
+  reorder.mutate(next.map((c) => c.id));
+};
+```
+
+تحديث تفاؤلي: نعرض النتيجة قبل رد الخادم. وعند الفشل نتراجع:
+
+```tsx
+onError: () => { toast.error(…); setOrder(chapters); }
+```
+
+وأضفت `nudge(index, ±1)` لزرّي ← و→ لأن السحب لا يعمل بلوحة المفاتيح ولا مع قارئات الشاشة.
+
+---
+
+## 🆕 `pages/EditBook.tsx` — أهم درس
+
+```tsx
+const changed: Record<string, unknown> = {};
+if (form.title !== book?.title) changed.title = form.title;
+if (form.author !== book?.author) changed.author = form.author;
+if (form.description !== book?.description) changed.description = form.description;
+if (form.main_cover !== book?.main_cover) changed.main_cover = form.main_cover;
+if (generes.join(",") !== (book?.generes ?? []).join(",")) changed.generes = generes;
+
+if (Object.keys(changed).length === 0) return null;
+await newRequest.patch(`/api/books/${id}`, changed);
+```
+
+**ما حدث فعلاً:** أول نسخة أرسلت كل الحقول، ففشلت بـ 400 على الكتب القديمة. السبب أن بعض الأغلفة مخزّنة كـ **data URI** بالبيس64 يتجاوز حد 2048 حرفاً في المخطط — والمستخدمة لم تلمس الغلاف أصلاً، لكن النموذج كان يعيد إرساله.
+
+إرسال المتغيّر فقط هو **دلالة PATCH الأصلية** (مقابل PUT التي تستبدل كل شيء)، وقد أصلح المشكلة مجاناً.
+
+باقي الصفحة: `useEffect` لتعبئة النموذج عند وصول الكتاب، وحاجز `isOwner` يعرض صفحة "Not your book" (الخادم يرفض على أي حال، لكن الجدار الواضح أفضل من توست 403).
+
+---
+
+## 🆕 `pages/PublicBook.tsx` و `pages/Discover.tsx`
+
+### الصفحة العامة
+
+صفحة قائمة بذاتها — **لا تستخدم `Header` المشترك** لأنه يفترض وجود جلسة. لها هيدر مصغّر بشعار وزر "Join to read". وتعمل تحت مسار `/read/:id` **خارج** `<ProtectedRoute>`.
+
+### المكتبة
 
 ```tsx
 const [params, setParams] = useSearchParams();
 const q = params.get("q") ?? "";
+
+useEffect(() => {
+  const id = setTimeout(() => {
+    if (term === q) return;
+    const next = new URLSearchParams(params);
+    term ? next.set("q", term) : next.delete("q");
+    next.delete("page");                       // بحث جديد يعود للصفحة الأولى
+    setParams(next, { replace: true });        // بلا تلويث تاريخ التصفح
+  }, 350);
+  return () => clearTimeout(id);
+}, [term]);
 ```
 
-البحث مخزّن في الرابط نفسه: `/discover?q=midnight&genre=Fiction`. فيمكن مشاركته، ويبقى بعد تحديث الصفحة، وزر الرجوع يعمل معه.
+- **الحالة في الرابط لا في `useState`**: البحث قابل للمشاركة، يصمد أمام التحديث، وزر الرجوع يعمل معه.
+- **debounce بالتنظيف**: كل حرف يُلغي مؤقّت الحرف السابق، فلا ينجو إلا الأخير. "midnight" = طلب واحد بدل ثمانية.
+- `replace: true` أثناء الكتابة حتى لا يمتلئ تاريخ المتصفح بحالة لكل حرف.
+
+```tsx
+placeholderData: keepPreviousData,
+```
+
+تُبقي نتائج الصفحة السابقة معروضة أثناء تحميل التالية بدل وميض فارغ.
 
 ---
 
-## 10. البادجات
+## ✏️ `pages/App.tsx`
 
-### ملاحظة قبل الكود
+```tsx
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: (failureCount, error: any) => {
+        const status = error?.response?.status;
+        if (status === 401 || status === 403 || status === 404) return false;
+        return failureCount < 2;
+      },
+    },
+  },
+});
+```
 
-`role` يختاره المستخدم عند التسجيل ولا يُتحقّق منه — فهو **زينة**. أما بادج `Owner` فمشتقّ من البيانات الحقيقية (من يملك علاقة `ALL` للكتاب) — وهذا ما يجعله ذا معنى.
+- `staleTime: 60s` — العودة لصفحة زرتِها قبل ثوانٍ تُرسم من الذاكرة فوراً بلا وميض. كان كل mount يعيد الجلب من الصفر.
+- `retry` لا يعيد المحاولة على 401/403/404: لا معنى لإعادة طلب مرفوض ثلاث مرات، وقد اعترضت الجلسةُ المنتهيةَ أصلاً.
 
-### إحضار صاحب الكتاب
-
-```js
-export const bookOwnerSelect = {
-  where: { type: "ALL" },
-  select: { user: { select: { id: true, name: true, role: true } } },
-  take: 1,
+```tsx
+const Layout = () => {
+  const location = useLocation();
+  return (
+    <ProtectedRoute>
+      <div className="…">
+        <ModalProvider />
+        <div key={location.pathname} className="route-transition">
+          <Outlet />
+        </div>
+      </div>
+    </ProtectedRoute>
+  );
 };
 ```
 
-ثم في المتحكّم نُخرجه من العلاقة إلى حقل مباشر:
-
-```js
-const { users, ...rest } = book;
-res.status(200).json({ ...rest, owner: users[0]?.user ?? null });
-```
-
-هذا `destructuring`: خذي `users` في متغيّر، وكل الباقي في `rest`. فتصل الواجهة `owner` جاهزاً بدل `users[0].user`.
-
-### التمييز في الواجهة
-
-```tsx
-const book = queryClient.getQueryData(["book", id]);
-const ownerId = book?.owner?.id;
-// …
-isBookOwner={Boolean(ownerId) && comment.user?.id === ownerId}
-```
-
-`getQueryData` تقرأ من **ذاكرة React Query** بلا طلب جديد — صفحة الكتاب جلبت البيانات قبل قليل، فنستفيد منها مجاناً.
+`key={location.pathname}` يجبر React على إنشاء عنصر جديد عند تغيّر المسار، فتُعاد حركة التلاشي في CSS. بدون `key` يبقى العنصر نفسه ولا تُعاد الحركة.
 
 ---
 
-## 11. التنقّل الفوري (prefetch)
+## ✏️ `index.css` و `public/fonts.css`
 
-### الفكرة
-
-المؤشّر يبقى على البطاقة جزءاً من الثانية قبل النقر. نستغل هذا الوقت.
-
-`frontend/src/hooks/usePrefetch.ts`
-
-```tsx
-const prefetchBook = (id) => {
-  const bookId = String(id);
-  prefetch(["book", bookId], `/api/books/${bookId}`);
-  prefetch(["chapters", bookId], `/api/books/${bookId}/chapters`);
-};
+```css
+html { scrollbar-gutter: stable; }
 ```
 
-```tsx
-<Link onMouseEnter={() => prefetchBook(id)} onFocus={() => prefetchBook(id)}>
+سطر واحد يمنع قفز الإطار أفقياً عند انتقال صفحة من "بلا تمرير" إلى "فيها تمرير".
+
+ونقلت تعريفات `@font-face` إلى `public/fonts.css` لأن webpack كان يضيف بصمة لأسماء ملفات الخطوط، فتصير الروابط غير معروفة وقت كتابة `index.html` ولا يمكن تحميلها مسبقاً. بروابط ثابتة صار ممكناً:
+
+```html
+<link rel="preload" as="font" type="font/woff" crossorigin href="%PUBLIC_URL%/assets/fonts/Romie-Regular.woff" />
 ```
 
-`onFocus` ضروري لمستخدمي لوحة المفاتيح الذين لا يمرّرون فأرة.
+**النتيجة المقيسة:** مجموع CLS عبر الصفحات من **0.593 إلى 0.022**.
 
-⚠️ **مصيدة انتبهي لها:** المفاتيح لا بد أن تتطابق حرفياً. الصفحة تقرأ الرقم من الرابط فيكون **نصاً** `"1"`، والبطاقة تحمله **رقماً** `1`. و`["book", 1]` ليس نفسه `["book", "1"]`! لهذا `String(id)`.
+---
 
-### النتيجة المقيسة
+# مرجع سريع: النقاط الجديدة
 
-| الانتقال | قبل | بعد (مع مرور 300ms) |
+| Method | Endpoint | الحارس |
 |---|---|---|
-| كتاب ← فصل | 1966ms + وميض تحميل | **26ms بلا وميض** |
+| `GET` | `/api/books/search` | verifyToken |
+| `GET` | `/api/books/genres` | verifyToken |
+| `PATCH` | `/api/books/:id` | requireBookOwner |
+| `DELETE` | `/api/books/:id` | requireBookOwner |
+| `PATCH` | `/api/books/:id/chapters/order` | requireBookOwner |
+| `GET` | `/api/chapters/:id` | requireChapterAccess |
+| `PATCH` | `/api/chapters/:id` | requireChapterOwner |
+| `DELETE` | `/api/chapters/:id` | requireChapterOwner |
+| `PATCH` | `/api/chapters/:id/content/text/:index` | requireChapterOwner |
+| `DELETE` | `/api/chapters/:id/content/text/:index` | requireChapterOwner |
+| `DELETE` | `/api/chapters/:id/content/audio` | requireChapterOwner |
+| `GET` | `/api/users/me` | verifyToken |
+| `GET` | `/api/conversations/:id` | requireConversationParticipant |
+| `GET` | `/api/notifications` | verifyToken |
+| `PATCH` | `/api/notifications/:id/read` | verifyToken |
+| `PATCH` | `/api/notifications/read-all` | verifyToken |
+| `GET` | `/api/public/books/:id` | **بلا مصادقة** |
+| `POST` | `/api/payment/webhook` | توقيع Stripe |
+
+**أحداث Socket.IO**
+
+| الحدث | الاتجاه | المعنى |
+|---|---|---|
+| `conversation:join` | العميل ← الخادم | ضمّني (بعد التحقق) |
+| `conversation:leave` | العميل ← الخادم | أخرجني |
+| `message:new` | الخادم ← العميل | رسالة جديدة في الغرفة |
+| `notification:new` | الخادم ← العميل | أبطِل استعلام الإشعارات |
 
 ---
 
-## 12. مصطلحات سريعة
+# ثلاثة أنماط تتكرر في كل الكود أعلاه
 
-| المصطلح | المعنى |
-|---|---|
-| **Endpoint** | عنوان في الـ API مثل `/api/books/1` |
-| **GET / POST / PATCH / DELETE** | اقرأ / أنشئ / عدّل جزئياً / احذف |
-| **Middleware** | حارس يعمل قبل وصول الطلب لوجهته |
-| **Migration** | ملف يصف تغييراً في بنية قاعدة البيانات |
-| **Index (فهرس)** | يسرّع البحث في عمود، كفهرس آخر الكتاب |
-| **Transaction** | مجموعة أوامر تنجح كلها أو تُلغى كلها |
-| **Foreign key** | عمود يشير إلى صف في جدول آخر |
-| **Hook** | دالة React تبدأ بـ `use` |
-| **State** | ذاكرة المكوّن؛ تغييرها يعيد الرسم |
-| **Toast** | رسالة صغيرة تظهر وتختفي |
-| **Debounce** | تأخير التنفيذ حتى يتوقف المستخدم |
-| **Prefetch** | جلب البيانات قبل طلبها |
-| **CLS** | مقياس اهتزاز العناصر أثناء التحميل |
-| **WebSocket** | قناة مفتوحة في الاتجاهين |
+**١. الحماية بالبنية لا بالشرط.**
+الصفحة العامة لا تسرّب النص لأنها لا تطلبه في الـ `select`. أقوى من `if` قد ينساه أحدهم لاحقاً.
+
+**٢. الأثر الجانبي لا يُفشل العملية الأصلية.**
+الإشعارات تبتلع أخطاءها وتُستدعى بلا `await`. الفصل حُفظ — لا يصح أن يفشل الطلب بسبب صف إشعار.
+
+**٣. كل تحسين أداء بدأ بقياس.**
+لم أخمّن أن `/api/chapters/:id` بطيء — قسته (850ms مقابل 160ms لغيره)، ثم فتحت سجل استعلامات Prisma فوجدت أربع رحلات متتالية، ثم قست بعد الإصلاح (370ms). ونفس الشيء مع CLS والتنقّل.
 
 ---
 
-## 13. ثلاثة دروس تتكرر في كل ما سبق
-
-**١. الأمان في الخادم، لا في الواجهة.**
-إخفاء زر لا يحمي شيئاً — أدوات المطوّر تكشف كل شيء. كل قاعدة (المالك فقط، المشترك فقط، المشارك فقط) مكتوبة في الخادم، والواجهة تخفي الأزرار **للراحة فقط**.
-
-**٢. لا تطلبي بيانات لا تحتاجينها.**
-الصفحة العامة لا تسرّب النص لأنها **لا تطلبه أصلاً**. هذا أقوى من أي شرط `if`.
-
-**٣. قيسي قبل أن تُصلحي.**
-"الموقع بطيء" ليست معلومة. أما "هذه النقطة تستغرق 850ms لأن فحص الصلاحية ينفّذ 4 استعلامات متتالية" فهي معلومة تقود إلى حل. كل تحسين هنا بدأ بقياس وانتهى بقياس.
-
----
-
-للتفاصيل التقنية الكاملة والأرقام: [FIXES.md](FIXES.md)
+للأرقام والقياسات الكاملة: [FIXES.md](FIXES.md)
